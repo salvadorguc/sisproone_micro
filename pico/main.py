@@ -80,6 +80,12 @@ _last_ms = 0
 _estado_anterior = None
 log_contador = 0  # Contador total que no se reinicia
 
+# --- Variables de Heartbeat ---
+heartbeat_interval = 30  # Enviar heartbeat cada 30 segundos
+last_heartbeat = 0  # Timestamp del último heartbeat
+tiempo_inactivo = 0  # Tiempo en segundos sin actividad
+last_activity = 0  # Timestamp de la última actividad
+
 # --- Instancias ---
 teclado = Teclado4x4()
 
@@ -187,6 +193,39 @@ def send_rs485(tag: str, value: int):
     time.sleep_ms(50)
     dere.value(0)
 
+def enviar_heartbeat():
+    """Envía heartbeat con estado completo del sistema"""
+    global last_heartbeat, tiempo_inactivo, last_activity
+
+    ahora = time.time()
+
+    # Calcular tiempo de inactividad
+    if last_activity > 0:
+        tiempo_inactivo = int(ahora - last_activity)
+    else:
+        tiempo_inactivo = 0
+
+    # Enviar estado completo
+    send_rs485("HEARTBEAT", int(ahora))  # Timestamp del heartbeat
+    send_rs485("CONT", contador)
+    send_rs485("TOTAL", total)
+    send_rs485("META", meta)
+    send_rs485("ESTADO", 1 if activo else 0)
+    send_rs485("LOG", log_contador)
+    send_rs485("INACTIVO", tiempo_inactivo)  # Tiempo sin actividad en segundos
+
+    last_heartbeat = ahora
+
+    # Mostrar en LCD si está en modo debug (opcional)
+    if modo_menu:
+        actualizar_lcd("HEARTBEAT", f"T:{tiempo_inactivo}s")
+        time.sleep_ms(500)
+
+def actualizar_actividad():
+    """Actualiza el timestamp de última actividad"""
+    global last_activity
+    last_activity = time.time()
+
 def guardar_config():
     """Guarda la configuración en flash"""
     config = {
@@ -198,7 +237,8 @@ def guardar_config():
         "brillo": brillo,
         "pin_supervisor": pin_supervisor,
         "device_id": device_id,
-        "log_contador": log_contador
+        "log_contador": log_contador,
+        "heartbeat_interval": heartbeat_interval
     }
     try:
         with open("/config.json", "w") as f:
@@ -208,7 +248,7 @@ def guardar_config():
 
 def cargar_config():
     """Carga la configuración desde flash"""
-    global meta, tara, step_size, debounce_ms, buzzer_on, brillo, pin_supervisor, device_id, log_contador
+    global meta, tara, step_size, debounce_ms, buzzer_on, brillo, pin_supervisor, device_id, log_contador, heartbeat_interval
     try:
         with open("/config.json", "r") as f:
             config = json.load(f)
@@ -221,6 +261,7 @@ def cargar_config():
             pin_supervisor = config.get("pin_supervisor", "1234")
             device_id = config.get("device_id", "PIC")
             log_contador = config.get("log_contador", 0)
+            heartbeat_interval = config.get("heartbeat_interval", 30)
     except:
         pass
 
@@ -408,6 +449,7 @@ def menu_principal():
         "4: BUZZER",
         "5: ID",
         "6: LOG CONTADOR",
+        "7: HEARTBEAT",
         "0: SALIR"
     ]
 
@@ -416,10 +458,10 @@ def menu_principal():
         for i, opcion in enumerate(opciones):
             lcd.clear()
             lcd.set_cursor(0, 0)
-            lcd.print(f"Opcion {i+1}/7:")
+            lcd.print(f"Opcion {i+1}/8:")
             tecla = mostrar_texto_deslizante(opcion, 1, 80)
 
-            if tecla and tecla in ['1', '2', '3', '4', '5', '6', '0']:
+            if tecla and tecla in ['1', '2', '3', '4', '5', '6', '7', '0']:
                 break
             time.sleep_ms(800)
 
@@ -497,6 +539,23 @@ def menu_principal():
             time.sleep_ms(3000)
             # Continuar en el menú
 
+        elif tecla == '7':  # CONFIGURAR HEARTBEAT
+            lcd.clear()
+            if verificar_pin():
+                nuevo_intervalo = entrada_numerica("HEARTBEAT (s):", heartbeat_interval)
+                if nuevo_intervalo is not None and nuevo_intervalo >= 5:  # Mínimo 5 segundos
+                    heartbeat_interval = nuevo_intervalo
+                    guardar_config()
+                    actualizar_lcd("HEARTBEAT OK:", f"{heartbeat_interval}s")
+                    time.sleep_ms(1000)
+                elif nuevo_intervalo is not None and nuevo_intervalo < 5:
+                    actualizar_lcd("ERROR", "Minimo 5s")
+                    time.sleep_ms(1000)
+            else:
+                actualizar_lcd("HEARTBEAT CANCELADO", "PIN incorrecto")
+                time.sleep_ms(1000)
+            # Continuar en el menú
+
         elif tecla == '0':  # SALIR
             # Guardar log_contador antes de salir
             guardar_config()
@@ -512,6 +571,9 @@ def on_detect(pin):
         contador += step_size
         total += step_size
         log_contador += step_size  # Incrementar log que no se reinicia
+
+        # Actualizar actividad
+        actualizar_actividad()
 
         # Guardar log_contador cada 50 lecturas para evitar escritura excesiva
         if log_contador % (step_size * 50) == 0:
@@ -563,6 +625,10 @@ sensor.irq(trigger=Pin.IRQ_FALLING, handler=on_detect)
 # --- Inicio ---
 cargar_config()
 
+# Inicializar timestamps
+actualizar_actividad()
+last_heartbeat = time.time()
+
 # Mostrar mensaje de bienvenida con efecto deslizante
 lcd.clear()
 mostrar_texto_deslizante("=== SISPRO ONE  ===", 0, 80)
@@ -575,9 +641,16 @@ modo_espera()
 
 # --- Bucle Principal ---
 while True:
+    # Verificar si es hora de enviar heartbeat
+    ahora = time.time()
+    if ahora - last_heartbeat >= heartbeat_interval:
+        enviar_heartbeat()
+
     tecla = teclado.leer_tecla()
 
     if tecla:
+        # Actualizar actividad cuando se presiona una tecla
+        actualizar_actividad()
         if tecla == 'D':  # MENÚ/OK
             modo_menu = True
             menu_principal()

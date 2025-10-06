@@ -1,0 +1,80 @@
+# Cursor Rules for Industrial Monitor Project
+
+# This project runs on Raspberry Pi and Raspberry Pi Pico
+
+## Programming Language Requirements
+
+- Use MicroPython for Raspberry Pi Pico development
+- Use Python 3 for Raspberry Pi development
+- Ensure compatibility with MicroPython's limited standard library
+- Use machine module for hardware control on Pico
+- Use GPIO pins and PWM through machine.Pin and machine.PWM
+
+## Component Testing Methodology
+
+- Each component MUST be tested individually before integration
+- Create test files in test_components/ folder for each hardware component
+- Test components in isolation first, then integrate to main project
+- Future components to test: DS3231 RTC, microSD card reader
+- Follow the pattern: test\_[component_name].py in test_components/
+
+## Character Encoding Rules
+
+- NEVER use emojis or special Unicode characters in code
+- NEVER use accented characters (á, é, í, ó, ú, ñ, ü, etc.)
+- Use only ASCII characters for maximum compatibility
+- Replace accented characters with their ASCII equivalents:
+  - á → a, é → e, í → i, ó → o, ú → u
+  - ñ → n, ü → u
+  - Use "conexion" instead of "conexión"
+  - Use "configuracion" instead of "configuración"
+  - Use "funcion" instead of "función"
+  - Use "estacion" instead of "estación"
+  - Use "ultimo" instead of "último"
+  - Use "segun" instead of "según"
+
+## Display Rules
+
+- Use plain text indicators instead of emojis:
+  - Use "[ACTIVO]" instead of "🟢"
+  - Use "[DETENIDO]" instead of "🔴"
+  - Use "ERROR:" instead of "❌"
+  - Use "INFO:" instead of "ℹ️"
+  - Use "WARNING:" instead of "⚠️"
+  - Use "SUCCESS:" instead of "✅"
+
+## Hardware Compatibility
+
+- This code runs on Raspberry Pi and Raspberry Pi Pico
+- Terminal environments may not support Unicode properly
+- Some embedded systems have limited character set support
+- ASCII-only output ensures compatibility across all platforms
+
+## Code Style
+
+- Keep comments and strings in Spanish but without accents
+- Use clear, descriptive variable names without special characters
+- Prefer English for technical terms (debug, mode, status, etc.)
+- Use underscores for multi-word variables (debug_mode, serial_port, etc.)
+
+## Examples of Correct Usage
+
+```python
+# Good
+print("Conectado a puerto serial")
+print("[ACTIVO] Estacion funcionando")
+debug_mode = True
+ultima_lectura = timestamp
+
+# Bad
+print("✅ Conectado a puerto serial")
+print("🟢 Estación funcionando")
+debug_mode = True
+última_lectura = timestamp
+```
+
+## File Naming
+
+- Use ASCII characters only in filenames
+- Use underscores instead of spaces or special characters
+- Avoid accented characters in file names

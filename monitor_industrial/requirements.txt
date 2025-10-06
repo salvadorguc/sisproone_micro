@@ -1,0 +1,53 @@
+# Monitor Industrial SISPRO - Dependencias
+# Raspberry Pi - Estación de Trabajo
+
+# Comunicación HTTP
+aiohttp>=3.8.0
+
+# Comunicación Serial RS485
+pyserial>=3.5
+
+# Cache Redis
+redis>=4.0.0
+
+# Base de datos SQLite (incluida en Python)
+# sqlite3
+
+# Interfaz gráfica (incluida en Python)
+# tkinter
+
+# Utilidades
+python-dateutil>=2.8.0
+
+# Logging (incluido en Python)
+# logging
+
+# Threading (incluido en Python)
+# threading
+
+# JSON (incluido en Python)
+# json
+
+# Datetime (incluido en Python)
+# datetime
+
+# Typing (incluido en Python)
+# typing
+
+# OS (incluido en Python)
+# os
+
+# Sys (incluido en Python)
+# sys
+
+# Time (incluido en Python)
+# time
+
+# Re (incluido en Python)
+# re
+
+# Enum (incluido en Python)
+# enum
+
+# Queue (incluido en Python)
+# queue

@@ -1,0 +1,83 @@
+2025-09-29 15:42:39,893 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:42:39,893 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:42:39,902 - cache_manager - ERROR - ❌ Error inicializando cache: Authentication required.
+2025-09-29 15:42:39,902 - __main__ - ERROR - ❌ Error en inicialización: Authentication required.
+2025-09-29 15:42:39,903 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:42:39,903 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:42:39,903 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:42:39,903 - cache_manager - INFO - ✅ Cache cerrado
+2025-09-29 15:42:39,903 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 15:46:53,751 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:46:53,751 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:46:53,754 - cache_manager - ERROR - ❌ Error inicializando cache: Authentication required.
+2025-09-29 15:46:53,754 - __main__ - ERROR - ❌ Error en inicialización: Authentication required.
+2025-09-29 15:46:53,754 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:46:53,754 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:46:53,754 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:46:53,754 - cache_manager - INFO - ✅ Cache cerrado
+2025-09-29 15:46:53,754 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 15:46:56,027 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:46:56,027 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:46:56,030 - cache_manager - ERROR - ❌ Error inicializando cache: Authentication required.
+2025-09-29 15:46:56,030 - __main__ - ERROR - ❌ Error en inicialización: Authentication required.
+2025-09-29 15:46:56,030 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:46:56,030 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:46:56,030 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:46:56,030 - cache_manager - INFO - ✅ Cache cerrado
+2025-09-29 15:46:56,030 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 15:57:25,510 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:57:25,510 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:57:25,513 - cache_manager - ERROR - ❌ Error inicializando cache: Authentication required.
+2025-09-29 15:57:25,513 - __main__ - ERROR - ❌ Error en inicialización: Authentication required.
+2025-09-29 15:57:25,513 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:57:25,513 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:57:25,513 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:57:25,513 - cache_manager - INFO - ✅ Cache cerrado
+2025-09-29 15:57:25,513 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 15:58:36,033 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:58:36,033 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:58:36,036 - cache_manager_mac - INFO - ✅ Tablas de SQLite creadas
+2025-09-29 15:58:36,036 - cache_manager_mac - INFO - ✅ SQLite inicializado (MODO MAC)
+2025-09-29 15:58:36,036 - __main__ - INFO - ✅ Cache SQLite inicializado
+2025-09-29 15:58:36,036 - __main__ - INFO - ✅ Simulador SISPRO conectado (MODO PRUEBA)
+2025-09-29 15:58:36,036 - __main__ - INFO - ✅ Conectado a SISPRO (simulado)
+2025-09-29 15:58:36,036 - __main__ - INFO - ✅ Simulador RS485 conectado (MODO PRUEBA)
+2025-09-29 15:58:36,036 - __main__ - INFO - ✅ RS485 conectado (simulado)
+2025-09-29 15:58:36,036 - __main__ - ERROR - ❌ Error en inicialización: Too early to create variable: no default root window
+2025-09-29 15:58:36,037 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:58:36,037 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:58:36,037 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:58:36,037 - cache_manager_mac - INFO - ✅ Cache cerrado
+2025-09-29 15:58:36,037 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 15:59:50,934 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 15:59:50,934 - cache_manager_mac - INFO - ✅ Tablas de SQLite creadas
+2025-09-29 15:59:50,934 - cache_manager_mac - INFO - ✅ SQLite inicializado (MODO MAC)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Cache SQLite inicializado
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Simulador SISPRO conectado (MODO PRUEBA)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Conectado a SISPRO (simulado)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Simulador RS485 conectado (MODO PRUEBA)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ RS485 conectado (simulado)
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Interfaz industrial preparada
+2025-09-29 15:59:50,934 - __main__ - ERROR - ❌ Error en ejecución: Too early to create variable: no default root window
+2025-09-29 15:59:50,934 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 15:59:50,934 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 15:59:50,934 - cache_manager_mac - INFO - ✅ Cache cerrado
+2025-09-29 15:59:50,934 - __main__ - INFO - 🛑 Monitor detenido
+2025-09-29 16:00:02,632 - __main__ - INFO - 🚀 Iniciando Monitor Industrial SISPRO (MODO PRUEBA MAC)
+2025-09-29 16:00:02,632 - __main__ - INFO - ✅ Configuración cargada
+2025-09-29 16:00:02,632 - cache_manager_mac - INFO - ✅ Tablas de SQLite creadas
+2025-09-29 16:00:02,632 - cache_manager_mac - INFO - ✅ SQLite inicializado (MODO MAC)
+2025-09-29 16:00:02,632 - __main__ - INFO - ✅ Cache SQLite inicializado
+2025-09-29 16:00:02,632 - __main__ - INFO - ✅ Simulador SISPRO conectado (MODO PRUEBA)
+2025-09-29 16:00:02,632 - __main__ - INFO - ✅ Conectado a SISPRO (simulado)
+2025-09-29 16:00:02,633 - __main__ - INFO - ✅ Simulador RS485 conectado (MODO PRUEBA)
+2025-09-29 16:00:02,633 - __main__ - INFO - ✅ RS485 conectado (simulado)
+2025-09-29 16:00:02,633 - __main__ - INFO - ✅ Interfaz industrial preparada
+2025-09-29 16:00:02,633 - __main__ - ERROR - ❌ Error en ejecución: Too early to create variable: no default root window
+2025-09-29 16:00:02,633 - __main__ - ERROR - ❌ Error desactivando Pico: 'NoneType' object is not subscriptable
+2025-09-29 16:00:02,633 - __main__ - INFO - ✅ Simulador RS485 desconectado
+2025-09-29 16:00:02,633 - __main__ - INFO - ✅ Simulador SISPRO desconectado
+2025-09-29 16:00:02,633 - cache_manager_mac - INFO - ✅ Cache cerrado
+2025-09-29 16:00:02,633 - __main__ - INFO - 🛑 Monitor detenido
