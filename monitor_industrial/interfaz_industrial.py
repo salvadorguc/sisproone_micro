@@ -113,109 +113,173 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error creando interfaz: {e}")
 
     def crear_panel_superior(self, parent):
-        """Crear panel superior con información de la estación"""
+        """Crear panel superior con configuracion de estacion"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.X, pady=(0, 10))
 
-            # Titulo principal
+            # Frame principal horizontal
+            main_frame = tk.Frame(panel, bg=self.colores['panel'])
+            main_frame.pack(fill=tk.X, pady=10, padx=20)
+
+            # Lado izquierdo: Titulo
             titulo = tk.Label(
-                panel,
+                main_frame,
                 text="MONITOR INDUSTRIAL SISPRO",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             )
-            titulo.pack(pady=10)
+            titulo.pack(side=tk.LEFT)
 
-            # Información de la estación
-            info_frame = tk.Frame(panel, bg=self.colores['panel'])
-            info_frame.pack(pady=10)
+            # Lado derecho: Configuracion de estacion
+            config_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            config_frame.pack(side=tk.RIGHT)
 
-            # Estación
+            # Estacion actual
             tk.Label(
-                info_frame,
-                text="Estación:",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
+                config_frame,
+                text="Estacion:",
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=10, sticky=tk.W)
+            ).grid(row=0, column=0, padx=5, sticky=tk.E)
 
             tk.Label(
-                info_frame,
+                config_frame,
                 textvariable=self.estacion_var,
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=10, sticky=tk.W)
+            ).grid(row=0, column=1, padx=5, sticky=tk.W)
 
-            # Estado
-            tk.Label(
-                info_frame,
-                text="Estado:",
-                font=self.fuente_grande,
+            # Boton cambiar estacion (pequeño)
+            btn_cambiar = tk.Button(
+                config_frame,
+                text="Cambiar",
+                font=self.fuente_pequena,
                 fg=self.colores['texto'],
+                bg=self.colores['borde'],
+                command=self.seleccionar_estacion,
+                width=10
+            )
+            btn_cambiar.grid(row=0, column=2, padx=5)
+
+            # Estado del sistema
+            tk.Label(
+                config_frame,
+                text="Estado:",
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=2, padx=10, sticky=tk.W)
+            ).grid(row=1, column=0, padx=5, sticky=tk.E)
 
             tk.Label(
-                info_frame,
+                config_frame,
                 textvariable=self.estado_var,
-                font=self.fuente_grande,
+                font=self.fuente_normal,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=3, padx=10, sticky=tk.W)
+            ).grid(row=1, column=1, columnspan=2, padx=5, sticky=tk.W)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
 
     def crear_panel_central(self, parent):
-        """Crear panel central con información de producción"""
+        """Crear panel central con ordenes de fabricacion"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-            # Información de la orden
-            orden_frame = tk.Frame(panel, bg=self.colores['panel'])
-            orden_frame.pack(fill=tk.X, pady=20)
-
-            # Orden de fabricación
+            # Titulo del panel
             tk.Label(
-                orden_frame,
-                text="Orden:",
+                panel,
+                text="ORDENES DE FABRICACION",
+                font=self.fuente_titulo,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=20)
+
+            # Frame para lista de ordenes y detalles
+            contenido_frame = tk.Frame(panel, bg=self.colores['panel'])
+            contenido_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+
+            # Panel izquierdo: Lista de ordenes
+            ordenes_frame = tk.Frame(contenido_frame, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
+            ordenes_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+
+            tk.Label(
+                ordenes_frame,
+                text="Ordenes Asignadas",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).pack(pady=10)
+
+            # Listbox para ordenes
+            self.lista_ordenes = tk.Listbox(
+                ordenes_frame,
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel'],
+                selectbackground=self.colores['accento'],
+                selectmode=tk.SINGLE,
+                height=15
+            )
+            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
+
+            # Panel derecho: Detalles de produccion
+            detalles_frame = tk.Frame(contenido_frame, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
+            detalles_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
             tk.Label(
-                orden_frame,
+                detalles_frame,
+                text="Produccion Actual",
+                font=self.fuente_grande,
+                fg=self.colores['texto'],
+                bg=self.colores['fondo']
+            ).pack(pady=10)
+
+            # Informacion de la orden actual
+            info_orden = tk.Frame(detalles_frame, bg=self.colores['fondo'])
+            info_orden.pack(pady=10)
+
+            tk.Label(
+                info_orden,
+                text="Orden:",
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['fondo']
+            ).grid(row=0, column=0, padx=10, sticky=tk.W)
+
+            tk.Label(
+                info_orden,
                 textvariable=self.orden_var,
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).grid(row=0, column=1, padx=10, sticky=tk.W)
 
-            # UPC
             tk.Label(
-                orden_frame,
+                info_orden,
                 text="UPC:",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=2, padx=20, sticky=tk.W)
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['fondo']
+            ).grid(row=1, column=0, padx=10, sticky=tk.W)
 
             tk.Label(
-                orden_frame,
+                info_orden,
                 textvariable=self.upc_var,
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=3, padx=20, sticky=tk.W)
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['fondo']
+            ).grid(row=1, column=1, padx=10, sticky=tk.W)
 
             # Contador principal
-            contador_frame = tk.Frame(panel, bg=self.colores['panel'])
-            contador_frame.pack(expand=True)
+            contador_frame = tk.Frame(detalles_frame, bg=self.colores['fondo'])
+            contador_frame.pack(expand=True, pady=20)
 
             # Contador actual
             tk.Label(
@@ -223,7 +287,7 @@ class InterfazIndustrial:
                 text="CONTADOR",
                 font=self.fuente_grande,
                 fg=self.colores['texto_secundario'],
-                bg=self.colores['panel']
+                bg=self.colores['fondo']
             ).pack()
 
             tk.Label(
@@ -231,55 +295,55 @@ class InterfazIndustrial:
                 textvariable=self.contador_var,
                 font=('Arial', 48, 'bold'),
                 fg=self.colores['accento'],
-                bg=self.colores['panel']
+                bg=self.colores['fondo']
             ).pack(pady=10)
 
             # Meta y progreso
-            meta_frame = tk.Frame(panel, bg=self.colores['panel'])
-            meta_frame.pack(pady=20)
+            meta_frame = tk.Frame(detalles_frame, bg=self.colores['fondo'])
+            meta_frame.pack(pady=10)
 
             # Meta
             tk.Label(
                 meta_frame,
                 text="META:",
-                font=self.fuente_grande,
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).grid(row=0, column=0, padx=10, sticky=tk.W)
 
             tk.Label(
                 meta_frame,
                 textvariable=self.meta_var,
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).grid(row=0, column=1, padx=10, sticky=tk.W)
 
             # Progreso
             tk.Label(
                 meta_frame,
                 text="PROGRESO:",
-                font=self.fuente_grande,
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=2, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).grid(row=1, column=0, padx=10, sticky=tk.W)
 
             tk.Label(
                 meta_frame,
                 textvariable=self.progreso_var,
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=3, padx=20, sticky=tk.W)
+                bg=self.colores['fondo']
+            ).grid(row=1, column=1, padx=10, sticky=tk.W)
 
             # Barra de progreso
             self.progreso_barra = ttk.Progressbar(
-                panel,
-                length=600,
+                detalles_frame,
+                length=400,
                 mode='determinate',
                 style='Industrial.Horizontal.TProgressbar'
             )
-            self.progreso_barra.pack(pady=20)
+            self.progreso_barra.pack(pady=10)
 
             # Configurar estilo de la barra de progreso
             self.configurar_estilo_progreso()
@@ -295,52 +359,22 @@ class InterfazIndustrial:
 
             # Botones de control
             botones_frame = tk.Frame(panel, bg=self.colores['panel'])
-            botones_frame.pack(pady=20)
+            botones_frame.pack(pady=15)
 
-            # Boton seleccionar estacion
-            btn_estacion = tk.Button(
-                botones_frame,
-                text="SELECCIONAR ESTACION",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['borde'],
-                relief=tk.RAISED,
-                bd=3,
-                command=self.seleccionar_estacion,
-                width=20,
-                height=2
-            )
-            btn_estacion.grid(row=0, column=0, padx=10, pady=5)
-
-            # Boton seleccionar orden
-            btn_orden = tk.Button(
-                botones_frame,
-                text="SELECCIONAR ORDEN",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['borde'],
-                relief=tk.RAISED,
-                bd=3,
-                command=self.seleccionar_orden,
-                width=20,
-                height=2
-            )
-            btn_orden.grid(row=0, column=1, padx=10, pady=5)
-
-            # Boton validar UPC
+            # Boton validar UPC (principal)
             btn_upc = tk.Button(
                 botones_frame,
                 text="VALIDAR UPC",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
-                bg=self.colores['borde'],
+                bg=self.colores['accento'],
                 relief=tk.RAISED,
                 bd=3,
                 command=self.validar_upc,
-                width=20,
+                width=25,
                 height=2
             )
-            btn_upc.grid(row=0, column=2, padx=10, pady=5)
+            btn_upc.grid(row=0, column=0, padx=10, pady=5)
 
             # Boton finalizar orden
             btn_finalizar = tk.Button(
@@ -348,44 +382,44 @@ class InterfazIndustrial:
                 text="FINALIZAR ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
-                bg=self.colores['error'],
+                bg=self.colores['advertencia'],
                 relief=tk.RAISED,
                 bd=3,
                 command=self.finalizar_orden,
-                width=20,
+                width=25,
                 height=2
             )
-            btn_finalizar.grid(row=1, column=0, padx=10, pady=5)
+            btn_finalizar.grid(row=0, column=1, padx=10, pady=5)
 
             # Boton sincronizar
             btn_sincronizar = tk.Button(
                 botones_frame,
                 text="SINCRONIZAR",
-                font=self.fuente_grande,
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['info'],
                 relief=tk.RAISED,
-                bd=3,
+                bd=2,
                 command=self.sincronizar_ahora,
-                width=20,
-                height=2
+                width=15,
+                height=1
             )
-            btn_sincronizar.grid(row=1, column=1, padx=10, pady=5)
+            btn_sincronizar.grid(row=1, column=0, padx=10, pady=5)
 
             # Boton salir
             btn_salir = tk.Button(
                 botones_frame,
                 text="SALIR",
-                font=self.fuente_grande,
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
                 relief=tk.RAISED,
-                bd=3,
+                bd=2,
                 command=self.salir,
-                width=20,
-                height=2
+                width=15,
+                height=1
             )
-            btn_salir.grid(row=1, column=2, padx=10, pady=5)
+            btn_salir.grid(row=1, column=1, padx=10, pady=5)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel inferior: {e}")
@@ -473,8 +507,12 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error configurando estilo progreso: {e}")
 
     def iniciar_actualizaciones(self):
-        """Iniciar actualizaciones automáticas de la interfaz"""
+        """Iniciar actualizaciones automaticas de la interfaz"""
         try:
+            # Cargar ordenes si hay estacion seleccionada
+            if self.monitor.estacion_actual:
+                self.cargar_ordenes()
+
             self.actualizar_interfaz()
             self.root.after(self.monitor.config.update_interval, self.iniciar_actualizaciones)
         except Exception as e:
@@ -742,10 +780,47 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error mostrando seleccion de orden: {e}")
             return None
 
+    def on_orden_seleccionada(self, event):
+        """Manejar seleccion de orden desde la lista"""
+        try:
+            seleccion = self.lista_ordenes.curselection()
+            if seleccion and hasattr(self, 'ordenes_disponibles'):
+                index = seleccion[0]
+                orden = self.ordenes_disponibles[index]
+                self.monitor.orden_actual = orden
+                self.orden_var.set(orden['ordenFabricacion'])
+                self.meta_var.set(str(orden.get('cantidadFabricar', 0)))
+                self.monitor.estado.cambiar_estado("ESPERANDO_UPC")
+                self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error en seleccion de orden: {e}")
+
+    def cargar_ordenes(self):
+        """Cargar ordenes de la estacion actual"""
+        try:
+            if not self.monitor.estacion_actual:
+                return
+
+            ordenes = self.monitor.sispro.obtener_ordenes_asignadas(
+                self.monitor.estacion_actual['id']
+            )
+
+            self.ordenes_disponibles = ordenes
+            self.lista_ordenes.delete(0, tk.END)
+
+            for orden in ordenes:
+                texto = f"{orden['ordenFabricacion']} - {orden.get('ptDescripcion', '')} ({orden.get('cantidadFabricar', 0)} pzs)"
+                self.lista_ordenes.insert(tk.END, texto)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error cargando ordenes: {e}")
+
     def seleccionar_estacion(self):
         """Seleccionar estacion de trabajo"""
         try:
             self.monitor.seleccionar_estacion()
+            # Cargar ordenes de la nueva estacion
+            self.cargar_ordenes()
         except Exception as e:
             self.logger.error(f"ERROR: Error seleccionando estacion: {e}")
             messagebox.showerror("Error", f"Error seleccionando estacion: {e}")
