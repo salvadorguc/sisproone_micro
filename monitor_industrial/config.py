@@ -16,9 +16,9 @@ class Config:
         """Configuración por defecto"""
         return {
             "sispro": {
-                "base_url": "http://localhost:3000",
-                "username": "monitor_pi",
-                "password": "password_segura",
+                "base_url": "http://100.24.193.207:3000",
+                "username": "HOOK",
+                "password": "HOOK25",
                 "empresa_id": 1,
                 "usuario_id": 1
             },
@@ -30,7 +30,7 @@ class Config:
             "cache": {
                 "redis_host": "localhost",
                 "redis_port": 6379,
-                "redis_password": "",
+                "redis_password": "Z67tyEr",
                 "redis_db": 0,
                 "sqlite_file": "monitor_cache.db"
             },
