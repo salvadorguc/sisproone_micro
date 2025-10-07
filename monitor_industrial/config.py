@@ -60,7 +60,7 @@ class Config:
             else:
                 self.guardar()
         except Exception as e:
-            print(f"⚠️ Error cargando configuración: {e}")
+            print(f"WARNING: Error cargando configuracion: {e}")
             self.guardar()
 
     def guardar(self):
@@ -69,7 +69,7 @@ class Config:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error guardando configuración: {e}")
+            print(f"ERROR: Error guardando configuracion: {e}")
 
     def merge_config(self, default: Dict, loaded: Dict) -> Dict:
         """Fusionar configuración cargada con la por defecto"""

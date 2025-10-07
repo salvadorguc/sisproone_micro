@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Monitor Industrial SISPRO - Script de Instalación
-# Raspberry Pi - Estación de Trabajo
+# Monitor Industrial SISPRO - Script de Instalacion
+# Raspberry Pi - Estacion de Trabajo
 
 set -e
 
-echo "🍓 Instalando Monitor Industrial SISPRO..."
+echo "Instalando Monitor Industrial SISPRO..."
 echo "========================================"
 
 # Colores para output
@@ -161,28 +161,28 @@ print_status "Configurando servicio systemd..."
 sudo systemctl daemon-reload
 sudo systemctl enable monitor-industrial.service
 
-print_status "Creando script de diagnóstico..."
+print_status "Creando script de diagnostico..."
 cat > diagnose.sh << 'EOF'
 #!/bin/bash
-echo "🔍 Diagnóstico del Monitor Industrial SISPRO"
+echo "Diagnostico del Monitor Industrial SISPRO"
 echo "=========================================="
 
-echo "📊 Estado del sistema:"
+echo "Estado del sistema:"
 echo "  - Usuario: $(whoami)"
 echo "  - Directorio: $(pwd)"
 echo "  - Python: $(python3 --version)"
 echo "  - Redis: $(redis-cli -a Z67tyEr ping 2>/dev/null || echo 'NO CONECTADO')"
 
 echo ""
-echo "🔌 Puertos RS485 disponibles:"
+echo "Puertos RS485 disponibles:"
 ls -la /dev/ttyUSB* 2>/dev/null || echo "  No se encontraron puertos USB"
 
 echo ""
-echo "📁 Archivos del proyecto:"
+echo "Archivos del proyecto:"
 ls -la
 
 echo ""
-echo "🗄️ Estado de la base de datos:"
+echo "Estado de la base de datos:"
 if [ -f "monitor_cache.db" ]; then
     echo "  - SQLite: $(sqlite3 monitor_cache.db 'SELECT COUNT(*) FROM lecturas_produccion;' 2>/dev/null || echo 'ERROR')"
 else
@@ -190,11 +190,11 @@ else
 fi
 
 echo ""
-echo "📋 Estado del servicio:"
+echo "Estado del servicio:"
 sudo systemctl status monitor-industrial.service --no-pager -l
 
 echo ""
-echo "📝 Últimos logs:"
+echo "Ultimos logs:"
 tail -n 10 logs/monitor_$(date +%Y%m%d).log 2>/dev/null || echo "  No hay logs disponibles"
 EOF
 
@@ -203,7 +203,7 @@ chmod +x diagnose.sh
 print_status "Creando script de limpieza..."
 cat > cleanup.sh << 'EOF'
 #!/bin/bash
-echo "🧹 Limpiando Monitor Industrial SISPRO"
+echo "Limpiando Monitor Industrial SISPRO"
 echo "====================================="
 
 echo "Deteniendo servicio..."
@@ -225,20 +225,20 @@ EOF
 
 chmod +x cleanup.sh
 
-print_success "Instalación completada!"
+print_success "Instalacion completada"
 echo ""
-echo "📋 Próximos pasos:"
+echo "Proximos pasos:"
 echo "  1. Configurar config.json con la URL de tu SISPRO"
 echo "  2. Conectar Raspberry Pi Pico con RS485"
 echo "  3. Ejecutar: ./start_monitor.sh"
 echo "  4. O iniciar servicio: sudo systemctl start monitor-industrial"
 echo ""
-echo "🔧 Comandos útiles:"
+echo "Comandos utiles:"
 echo "  - Iniciar: ./start_monitor.sh"
-echo "  - Diagnóstico: ./diagnose.sh"
+echo "  - Diagnostico: ./diagnose.sh"
 echo "  - Limpiar: ./cleanup.sh"
 echo "  - Logs: tail -f logs/monitor_\$(date +%Y%m%d).log"
 echo ""
-echo "📚 Documentación: README.md"
+echo "Documentacion: README.md"
 echo ""
-print_success "¡Monitor Industrial SISPRO instalado correctamente!"
+print_success "Monitor Industrial SISPRO instalado correctamente"

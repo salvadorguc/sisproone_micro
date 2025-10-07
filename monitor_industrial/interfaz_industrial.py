@@ -55,9 +55,9 @@ class InterfazIndustrial:
             self.configurar_ventana()
             self.crear_interfaz()
             self.iniciar_actualizaciones()
-            self.logger.info("✅ Interfaz industrial mostrada")
+            self.logger.info("SUCCESS: Interfaz industrial mostrada")
         except Exception as e:
-            self.logger.error(f"❌ Error mostrando interfaz: {e}")
+            self.logger.error(f"ERROR: Error mostrando interfaz: {e}")
 
     def configurar_ventana(self):
         """Configurar ventana principal"""
@@ -81,7 +81,7 @@ class InterfazIndustrial:
             self.root.geometry(f"{width}x{height}+0+0")
 
         except Exception as e:
-            self.logger.error(f"❌ Error configurando ventana: {e}")
+            self.logger.error(f"ERROR: Error configurando ventana: {e}")
 
     def crear_interfaz(self):
         """Crear interfaz principal"""
@@ -97,7 +97,7 @@ class InterfazIndustrial:
             self.crear_panel_estado(main_frame)
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando interfaz: {e}")
+            self.logger.error(f"ERROR: Error creando interfaz: {e}")
 
     def crear_panel_superior(self, parent):
         """Crear panel superior con información de la estación"""
@@ -105,10 +105,10 @@ class InterfazIndustrial:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.X, pady=(0, 10))
 
-            # Título principal
+            # Titulo principal
             titulo = tk.Label(
                 panel,
-                text="🍓 MONITOR INDUSTRIAL SISPRO",
+                text="MONITOR INDUSTRIAL SISPRO",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
@@ -154,7 +154,7 @@ class InterfazIndustrial:
             ).grid(row=0, column=3, padx=10, sticky=tk.W)
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando panel superior: {e}")
+            self.logger.error(f"ERROR: Error creando panel superior: {e}")
 
     def crear_panel_central(self, parent):
         """Crear panel central con información de producción"""
@@ -272,7 +272,7 @@ class InterfazIndustrial:
             self.configurar_estilo_progreso()
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando panel central: {e}")
+            self.logger.error(f"ERROR: Error creando panel central: {e}")
 
     def crear_panel_inferior(self, parent):
         """Crear panel inferior con botones de control"""
@@ -284,10 +284,10 @@ class InterfazIndustrial:
             botones_frame = tk.Frame(panel, bg=self.colores['panel'])
             botones_frame.pack(pady=20)
 
-            # Botón seleccionar estación
+            # Boton seleccionar estacion
             btn_estacion = tk.Button(
                 botones_frame,
-                text="🏭 SELECCIONAR ESTACIÓN",
+                text="SELECCIONAR ESTACION",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['borde'],
@@ -299,10 +299,10 @@ class InterfazIndustrial:
             )
             btn_estacion.grid(row=0, column=0, padx=10, pady=5)
 
-            # Botón seleccionar orden
+            # Boton seleccionar orden
             btn_orden = tk.Button(
                 botones_frame,
-                text="📦 SELECCIONAR ORDEN",
+                text="SELECCIONAR ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['borde'],
@@ -314,10 +314,10 @@ class InterfazIndustrial:
             )
             btn_orden.grid(row=0, column=1, padx=10, pady=5)
 
-            # Botón validar UPC
+            # Boton validar UPC
             btn_upc = tk.Button(
                 botones_frame,
-                text="📱 VALIDAR UPC",
+                text="VALIDAR UPC",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['borde'],
@@ -329,10 +329,10 @@ class InterfazIndustrial:
             )
             btn_upc.grid(row=0, column=2, padx=10, pady=5)
 
-            # Botón finalizar orden
+            # Boton finalizar orden
             btn_finalizar = tk.Button(
                 botones_frame,
-                text="✅ FINALIZAR ORDEN",
+                text="FINALIZAR ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
@@ -344,10 +344,10 @@ class InterfazIndustrial:
             )
             btn_finalizar.grid(row=1, column=0, padx=10, pady=5)
 
-            # Botón sincronizar
+            # Boton sincronizar
             btn_sincronizar = tk.Button(
                 botones_frame,
-                text="🔄 SINCRONIZAR",
+                text="SINCRONIZAR",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['info'],
@@ -359,10 +359,10 @@ class InterfazIndustrial:
             )
             btn_sincronizar.grid(row=1, column=1, padx=10, pady=5)
 
-            # Botón salir
+            # Boton salir
             btn_salir = tk.Button(
                 botones_frame,
-                text="🚪 SALIR",
+                text="SALIR",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
@@ -375,7 +375,7 @@ class InterfazIndustrial:
             btn_salir.grid(row=1, column=2, padx=10, pady=5)
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando panel inferior: {e}")
+            self.logger.error(f"ERROR: Error creando panel inferior: {e}")
 
     def crear_panel_estado(self, parent):
         """Crear panel de estado del Pico"""
@@ -439,7 +439,7 @@ class InterfazIndustrial:
             ).grid(row=0, column=5, padx=10, sticky=tk.W)
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando panel de estado: {e}")
+            self.logger.error(f"ERROR: Error creando panel de estado: {e}")
 
     def configurar_estilo_progreso(self):
         """Configurar estilo de la barra de progreso"""
@@ -457,7 +457,7 @@ class InterfazIndustrial:
             )
 
         except Exception as e:
-            self.logger.error(f"❌ Error configurando estilo progreso: {e}")
+            self.logger.error(f"ERROR: Error configurando estilo progreso: {e}")
 
     def iniciar_actualizaciones(self):
         """Iniciar actualizaciones automáticas de la interfaz"""
@@ -465,7 +465,7 @@ class InterfazIndustrial:
             self.actualizar_interfaz()
             self.root.after(self.monitor.config.update_interval, self.iniciar_actualizaciones)
         except Exception as e:
-            self.logger.error(f"❌ Error en actualizaciones: {e}")
+            self.logger.error(f"ERROR: Error en actualizaciones: {e}")
 
     def actualizar_interfaz(self):
         """Actualizar elementos de la interfaz"""
@@ -504,7 +504,7 @@ class InterfazIndustrial:
                 )
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando interfaz: {e}")
+            self.logger.error(f"ERROR: Error actualizando interfaz: {e}")
 
     def actualizar_contador(self, valor: int):
         """Actualizar contador en tiempo real"""
@@ -520,7 +520,7 @@ class InterfazIndustrial:
                     self.progreso_barra['value'] = progreso
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando contador: {e}")
+            self.logger.error(f"ERROR: Error actualizando contador: {e}")
 
     def actualizar_avance(self, avance: Dict[str, Any]):
         """Actualizar avance de la orden"""
@@ -533,7 +533,7 @@ class InterfazIndustrial:
                 self.progreso_barra['value'] = avance_porcentaje
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando avance: {e}")
+            self.logger.error(f"ERROR: Error actualizando avance: {e}")
 
     def actualizar_estado_pico(self, estado: Dict[str, Any]):
         """Actualizar estado del Pico"""
@@ -543,7 +543,7 @@ class InterfazIndustrial:
                 self.tiempo_inactivo_var.set(f"{estado.get('tiempo_inactivo', 0)}s")
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando estado Pico: {e}")
+            self.logger.error(f"ERROR: Error actualizando estado Pico: {e}")
 
     def mostrar_seleccion_estacion(self, estaciones: List[Dict]) -> Optional[Dict]:
         """Mostrar diálogo de selección de estación"""
@@ -563,10 +563,10 @@ class InterfazIndustrial:
             frame = tk.Frame(ventana, bg=self.colores['fondo'])
             frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-            # Título
+            # Titulo
             tk.Label(
                 frame,
-                text="SELECCIONAR ESTACIÓN DE TRABAJO",
+                text="SELECCIONAR ESTACION DE TRABAJO",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
@@ -634,7 +634,7 @@ class InterfazIndustrial:
             return resultado[0]
 
         except Exception as e:
-            self.logger.error(f"❌ Error mostrando selección de estación: {e}")
+            self.logger.error(f"ERROR: Error mostrando seleccion de estacion: {e}")
             return None
 
     def mostrar_seleccion_orden(self, ordenes: List[Dict]) -> Optional[Dict]:
@@ -655,10 +655,10 @@ class InterfazIndustrial:
             frame = tk.Frame(ventana, bg=self.colores['fondo'])
             frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-            # Título
+            # Titulo
             tk.Label(
                 frame,
-                text="SELECCIONAR ORDEN DE FABRICACIÓN",
+                text="SELECCIONAR ORDEN DE FABRICACION",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
@@ -726,61 +726,61 @@ class InterfazIndustrial:
             return resultado[0]
 
         except Exception as e:
-            self.logger.error(f"❌ Error mostrando selección de orden: {e}")
+            self.logger.error(f"ERROR: Error mostrando seleccion de orden: {e}")
             return None
 
     def seleccionar_estacion(self):
-        """Seleccionar estación de trabajo"""
+        """Seleccionar estacion de trabajo"""
         try:
             self.monitor.seleccionar_estacion()
         except Exception as e:
-            self.logger.error(f"❌ Error seleccionando estación: {e}")
-            messagebox.showerror("Error", f"Error seleccionando estación: {e}")
+            self.logger.error(f"ERROR: Error seleccionando estacion: {e}")
+            messagebox.showerror("Error", f"Error seleccionando estacion: {e}")
 
     def seleccionar_orden(self):
-        """Seleccionar orden de fabricación"""
+        """Seleccionar orden de fabricacion"""
         try:
             self.monitor.seleccionar_orden()
         except Exception as e:
-            self.logger.error(f"❌ Error seleccionando orden: {e}")
+            self.logger.error(f"ERROR: Error seleccionando orden: {e}")
             messagebox.showerror("Error", f"Error seleccionando orden: {e}")
 
     def validar_upc(self):
-        """Validar código UPC"""
+        """Validar codigo UPC"""
         try:
             upc = simpledialog.askstring(
                 "Validar UPC",
-                "Ingrese el código UPC:",
+                "Ingrese el codigo UPC:",
                 parent=self.root
             )
 
             if upc:
                 if self.monitor.validar_upc(upc):
-                    messagebox.showinfo("Éxito", "UPC válido. Producción iniciada.")
+                    messagebox.showinfo("Exito", "UPC valido. Produccion iniciada.")
                 else:
-                    messagebox.showerror("Error", "UPC inválido. Verifique el código.")
+                    messagebox.showerror("Error", "UPC invalido. Verifique el codigo.")
 
         except Exception as e:
-            self.logger.error(f"❌ Error validando UPC: {e}")
+            self.logger.error(f"ERROR: Error validando UPC: {e}")
             messagebox.showerror("Error", f"Error validando UPC: {e}")
 
     def finalizar_orden(self):
         """Finalizar orden actual"""
         try:
-            if messagebox.askyesno("Confirmar", "¿Finalizar la orden actual?"):
+            if messagebox.askyesno("Confirmar", "Finalizar la orden actual?"):
                 self.monitor.finalizar_orden()
-                messagebox.showinfo("Éxito", "Orden finalizada correctamente.")
+                messagebox.showinfo("Exito", "Orden finalizada correctamente.")
         except Exception as e:
-            self.logger.error(f"❌ Error finalizando orden: {e}")
+            self.logger.error(f"ERROR: Error finalizando orden: {e}")
             messagebox.showerror("Error", f"Error finalizando orden: {e}")
 
     def sincronizar_ahora(self):
         """Sincronizar datos ahora"""
         try:
             self.monitor.sincronizar_lecturas()
-            messagebox.showinfo("Éxito", "Datos sincronizados correctamente.")
+            messagebox.showinfo("Exito", "Datos sincronizados correctamente.")
         except Exception as e:
-            self.logger.error(f"❌ Error sincronizando: {e}")
+            self.logger.error(f"ERROR: Error sincronizando: {e}")
             messagebox.showerror("Error", f"Error sincronizando: {e}")
 
     def toggle_fullscreen(self, event=None):
@@ -788,14 +788,14 @@ class InterfazIndustrial:
         try:
             self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
         except Exception as e:
-            self.logger.error(f"❌ Error alternando fullscreen: {e}")
+            self.logger.error(f"ERROR: Error alternando fullscreen: {e}")
 
     def salir(self, event=None):
-        """Salir de la aplicación"""
+        """Salir de la aplicacion"""
         try:
-            if messagebox.askyesno("Confirmar", "¿Salir del Monitor Industrial?"):
+            if messagebox.askyesno("Confirmar", "Salir del Monitor Industrial?"):
                 self.monitor.detener()
                 self.root.quit()
         except Exception as e:
-            self.logger.error(f"❌ Error saliendo: {e}")
+            self.logger.error(f"ERROR: Error saliendo: {e}")
             self.root.quit()

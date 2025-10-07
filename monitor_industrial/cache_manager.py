@@ -33,7 +33,7 @@ class CacheManager:
 
             # Verificar conexión Redis
             self.redis_client.ping()
-            self.logger.info("✅ Redis conectado")
+            self.logger.info("SUCCESS: Redis conectado")
 
             # Inicializar SQLite
             self.sqlite_conn = sqlite3.connect(
@@ -44,10 +44,10 @@ class CacheManager:
 
             # Crear tablas si no existen
             self.crear_tablas()
-            self.logger.info("✅ SQLite inicializado")
+            self.logger.info("SUCCESS: SQLite inicializado")
 
         except Exception as e:
-            self.logger.error(f"❌ Error inicializando cache: {e}")
+            self.logger.error(f"ERROR: Error inicializando cache: {e}")
             raise
 
     def crear_tablas(self):
@@ -109,10 +109,10 @@ class CacheManager:
             ''')
 
             self.sqlite_conn.commit()
-            self.logger.info("✅ Tablas de SQLite creadas")
+            self.logger.info("SUCCESS: Tablas de SQLite creadas")
 
         except Exception as e:
-            self.logger.error(f"❌ Error creando tablas: {e}")
+            self.logger.error(f"ERROR: Error creando tablas: {e}")
             raise
 
     def guardar_lectura(self, lectura: Dict[str, Any]):
@@ -150,10 +150,10 @@ class CacheManager:
                 # Agregar a lista de lecturas pendientes
                 self.redis_client.lpush('lecturas_pendientes', lectura_id)
 
-                self.logger.debug(f"📊 Lectura guardada: {lectura_id}")
+                self.logger.debug(f"INFO: Lectura guardada: {lectura_id}")
 
         except Exception as e:
-            self.logger.error(f"❌ Error guardando lectura: {e}")
+            self.logger.error(f"ERROR: Error guardando lectura: {e}")
 
     def obtener_lecturas_pendientes(self) -> List[Dict[str, Any]]:
         """Obtener lecturas pendientes de sincronización"""
@@ -180,7 +180,7 @@ class CacheManager:
                 return lecturas
 
         except Exception as e:
-            self.logger.error(f"❌ Error obteniendo lecturas pendientes: {e}")
+            self.logger.error(f"ERROR: Error obteniendo lecturas pendientes: {e}")
             return []
 
     def marcar_como_sincronizadas(self, lecturas: List[Dict[str, Any]]):
@@ -207,10 +207,10 @@ class CacheManager:
                     self.redis_client.delete(redis_key)
                     self.redis_client.lrem('lecturas_pendientes', 0, lectura['id'])
 
-                self.logger.info(f"✅ {len(lecturas)} lecturas marcadas como sincronizadas")
+                self.logger.info(f"SUCCESS: {len(lecturas)} lecturas marcadas como sincronizadas")
 
         except Exception as e:
-            self.logger.error(f"❌ Error marcando lecturas como sincronizadas: {e}")
+            self.logger.error(f"ERROR: Error marcando lecturas como sincronizadas: {e}")
 
     def guardar_estado_estacion(self, estacion_id: str, estado: Dict[str, Any]):
         """Guardar estado de una estación"""
@@ -244,7 +244,7 @@ class CacheManager:
                 })
 
         except Exception as e:
-            self.logger.error(f"❌ Error guardando estado estación: {e}")
+            self.logger.error(f"ERROR: Error guardando estado estacion: {e}")
 
     def obtener_estado_estacion(self, estacion_id: str) -> Optional[Dict[str, Any]]:
         """Obtener estado de una estación"""
@@ -285,7 +285,7 @@ class CacheManager:
             return None
 
         except Exception as e:
-            self.logger.error(f"❌ Error obteniendo estado estación: {e}")
+            self.logger.error(f"ERROR: Error obteniendo estado estacion: {e}")
             return None
 
     def limpiar_lecturas_antiguas(self, dias: int = 7):
@@ -305,10 +305,10 @@ class CacheManager:
                 self.sqlite_conn.commit()
 
                 if eliminadas > 0:
-                    self.logger.info(f"🧹 {eliminadas} lecturas antiguas eliminadas")
+                    self.logger.info(f"INFO: {eliminadas} lecturas antiguas eliminadas")
 
         except Exception as e:
-            self.logger.error(f"❌ Error limpiando lecturas antiguas: {e}")
+            self.logger.error(f"ERROR: Error limpiando lecturas antiguas: {e}")
 
     def obtener_estadisticas(self) -> Dict[str, Any]:
         """Obtener estadísticas del cache"""
@@ -340,7 +340,7 @@ class CacheManager:
                 }
 
         except Exception as e:
-            self.logger.error(f"❌ Error obteniendo estadísticas: {e}")
+            self.logger.error(f"ERROR: Error obteniendo estadisticas: {e}")
             return {}
 
     def cerrar(self):
@@ -350,6 +350,6 @@ class CacheManager:
                 self.sqlite_conn.close()
             if self.redis_client:
                 self.redis_client.close()
-            self.logger.info("✅ Cache cerrado")
+            self.logger.info("SUCCESS: Cache cerrado")
         except Exception as e:
-            self.logger.error(f"❌ Error cerrando cache: {e}")
+            self.logger.error(f"ERROR: Error cerrando cache: {e}")

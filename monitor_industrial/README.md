@@ -1,22 +1,22 @@
-# 🍓 Monitor Industrial SISPRO - Raspberry Pi
+# Monitor Industrial SISPRO - Raspberry Pi
 
-## 📋 Descripción
+## Descripcion
 
-Monitor industrial para estaciones de trabajo que se comunica con el sistema SISPRO (Next.js) y la Raspberry Pi Pico mediante RS485. Proporciona una interfaz industrial fullscreen para operadores de producción.
+Monitor industrial para estaciones de trabajo que se comunica con el sistema SISPRO (Next.js) y la Raspberry Pi Pico mediante RS485. Proporciona una interfaz industrial fullscreen para operadores de produccion.
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ```
 Raspberry Pi (Monitor Industrial)
 ├── Interfaz Industrial Fullscreen (tkinter)
-├── Comunicación SISPRO (HTTP/APIs)
-├── Comunicación RS485 (Pico)
-├── Validación de Códigos de Barras
+├── Comunicacion SISPRO (HTTP/APIs)
+├── Comunicacion RS485 (Pico)
+├── Validacion de Codigos de Barras
 ├── Cache Local (Redis + SQLite)
-└── Gestión de Estados
+└── Gestion de Estados
 ```
 
-## 🚀 Instalación
+## Instalacion
 
 ### 1. Instalar dependencias del sistema
 
@@ -38,7 +38,7 @@ sudo apt install python3-dev build-essential -y
 sudo systemctl start redis-server
 sudo systemctl enable redis-server
 
-# Verificar que Redis esté funcionando
+# Verificar que Redis este funcionando
 redis-cli ping
 ```
 
@@ -65,13 +65,13 @@ pip install -r requirements.txt
 # Agregar usuario al grupo dialout para acceso serial
 sudo usermod -a -G dialout $USER
 
-# Reiniciar sesión o ejecutar
+# Reiniciar sesion o ejecutar
 newgrp dialout
 ```
 
-## ⚙️ Configuración
+## Configuracion
 
-### 1. Archivo de configuración
+### 1. Archivo de configuracion
 
 Crear `config.json` en el directorio del proyecto:
 
@@ -118,7 +118,7 @@ export SISPRO_PASSWORD="password_segura"
 export RS485_PORT="/dev/ttyUSB0"
 ```
 
-## 🚀 Uso
+## Uso
 
 ### 1. Ejecutar el monitor
 
@@ -132,29 +132,29 @@ python main.py
 
 ### 2. Flujo de trabajo
 
-1. **Inicialización**: El monitor se conecta a SISPRO y RS485
-2. **Selección de Estación**: Elegir estación de trabajo
-3. **Selección de Orden**: Elegir orden de fabricación asignada
-4. **Validación UPC**: Escanear código de barras del producto
-5. **Producción**: El Pico envía conteos en tiempo real
-6. **Sincronización**: Datos se sincronizan con SISPRO cada 5 minutos
+1. **Inicializacion**: El monitor se conecta a SISPRO y RS485
+2. **Seleccion de Estacion**: Elegir estacion de trabajo
+3. **Seleccion de Orden**: Elegir orden de fabricacion asignada
+4. **Validacion UPC**: Escanear codigo de barras del producto
+5. **Produccion**: El Pico envia conteos en tiempo real
+6. **Sincronizacion**: Datos se sincronizan con SISPRO cada 5 minutos
 
 ### 3. Controles de la interfaz
 
-- **🏭 SELECCIONAR ESTACIÓN**: Elegir estación de trabajo
-- **📦 SELECCIONAR ORDEN**: Elegir orden de fabricación
-- **📱 VALIDAR UPC**: Escanear código de barras
-- **✅ FINALIZAR ORDEN**: Terminar orden actual
-- **🔄 SINCRONIZAR**: Sincronizar datos inmediatamente
-- **🚪 SALIR**: Cerrar aplicación
+- **SELECCIONAR ESTACION**: Elegir estacion de trabajo
+- **SELECCIONAR ORDEN**: Elegir orden de fabricacion
+- **VALIDAR UPC**: Escanear codigo de barras
+- **FINALIZAR ORDEN**: Terminar orden actual
+- **SINCRONIZAR**: Sincronizar datos inmediatamente
+- **SALIR**: Cerrar aplicacion
 
 ### 4. Atajos de teclado
 
-- **Escape**: Salir de la aplicación
+- **Escape**: Salir de la aplicacion
 - **F11**: Alternar modo fullscreen
-- **Ctrl+Q**: Salir de la aplicación
+- **Ctrl+Q**: Salir de la aplicacion
 
-## 🔧 Configuración Avanzada
+## Configuracion Avanzada
 
 ### 1. Personalizar interfaz
 
@@ -166,13 +166,13 @@ self.colores = {
     'panel': '#2d2d2d',
     'texto': '#ffffff',
     'accento': '#00ff00',
-    # ... más colores
+    # ... mas colores
 }
 ```
 
-### 2. Configurar sincronización
+### 2. Configurar sincronizacion
 
-Ajustar intervalo de sincronización en `config.json`:
+Ajustar intervalo de sincronizacion en `config.json`:
 
 ```json
 {
@@ -196,7 +196,7 @@ tail -f logs/monitor_$(date +%Y%m%d).log
 grep "ERROR" logs/monitor_*.log
 ```
 
-## 🛠️ Mantenimiento
+## Mantenimiento
 
 ### 1. Limpiar cache
 
@@ -209,7 +209,7 @@ python -c "
 from cache_manager import CacheManager
 from config import Config
 cache = CacheManager(Config())
-cache.limpiar_lecturas_antiguas(7)  # Eliminar lecturas de más de 7 días
+cache.limpiar_lecturas_antiguas(7)  # Eliminar lecturas de mas de 7 dias
 "
 ```
 
@@ -237,22 +237,22 @@ pkill -f "python main.py"
 python main.py &
 ```
 
-## 🐛 Solución de Problemas
+## Solucion de Problemas
 
-### 1. Error de conexión RS485
+### 1. Error de conexion RS485
 
 ```bash
 # Verificar permisos
 ls -la /dev/ttyUSB0
 
-# Verificar si el puerto está en uso
+# Verificar si el puerto esta en uso
 sudo lsof /dev/ttyUSB0
 
 # Cambiar permisos si es necesario
 sudo chmod 666 /dev/ttyUSB0
 ```
 
-### 2. Error de conexión Redis
+### 2. Error de conexion Redis
 
 ```bash
 # Verificar estado de Redis
@@ -265,7 +265,7 @@ sudo systemctl restart redis-server
 sudo journalctl -u redis-server
 ```
 
-### 3. Error de conexión SISPRO
+### 3. Error de conexion SISPRO
 
 ```bash
 # Verificar conectividad de red
@@ -288,17 +288,17 @@ pkill -f "python main.py"
 python main.py
 ```
 
-## 📊 Monitoreo
+## Monitoreo
 
-### 1. Estadísticas del sistema
+### 1. Estadisticas del sistema
 
-El monitor proporciona estadísticas en tiempo real:
+El monitor proporciona estadisticas en tiempo real:
 
 - Estado del sistema
 - Estado del Pico
 - Tiempo de inactividad
-- Última sincronización
-- Contador de producción
+- Ultima sincronizacion
+- Contador de produccion
 - Progreso de la orden
 
 ### 2. Logs del sistema
@@ -307,30 +307,30 @@ El monitor proporciona estadísticas en tiempo real:
 # Ver logs en tiempo real
 tail -f logs/monitor_$(date +%Y%m%d).log
 
-# Buscar errores específicos
+# Buscar errores especificos
 grep "ERROR" logs/monitor_*.log | tail -20
 
-# Buscar actividad de producción
+# Buscar actividad de produccion
 grep "PRODUCIENDO" logs/monitor_*.log | tail -10
 ```
 
 ### 3. Estado de la base de datos
 
 ```bash
-# Ver estadísticas de SQLite
+# Ver estadisticas de SQLite
 sqlite3 monitor_cache.db "SELECT COUNT(*) FROM lecturas_produccion;"
 
 # Ver lecturas pendientes
 sqlite3 monitor_cache.db "SELECT COUNT(*) FROM lecturas_produccion WHERE sincronizada = FALSE;"
 ```
 
-## 🔒 Seguridad
+## Seguridad
 
-### 1. Configuración segura
+### 1. Configuracion segura
 
-- Usar contraseñas seguras en `config.json`
-- Restringir acceso a archivos de configuración
-- Usar HTTPS para comunicación con SISPRO
+- Usar contrasenas seguras en `config.json`
+- Restringir acceso a archivos de configuracion
+- Usar HTTPS para comunicacion con SISPRO
 - Mantener el sistema actualizado
 
 ### 2. Permisos de archivos
@@ -342,33 +342,33 @@ chmod 600 monitor_cache.db
 chmod 755 main.py
 ```
 
-## 📈 Rendimiento
+## Rendimiento
 
 ### 1. Optimizaciones
 
 - Usar SSD para mejor rendimiento de SQLite
 - Configurar Redis con persistencia adecuada
-- Ajustar intervalo de sincronización según necesidades
+- Ajustar intervalo de sincronizacion segun necesidades
 - Monitorear uso de memoria y CPU
 
 ### 2. Escalabilidad
 
-- El sistema soporta múltiples estaciones
+- El sistema soporta multiples estaciones
 - Cache distribuido con Redis
-- Sincronización eficiente con SISPRO
-- Recuperación automática de errores
+- Sincronizacion eficiente con SISPRO
+- Recuperacion automatica de errores
 
-## 🤝 Soporte
+## Soporte
 
-Para soporte técnico o reportar problemas:
+Para soporte tecnico o reportar problemas:
 
 1. Revisar logs del sistema
-2. Verificar configuración
-3. Consultar documentación
+2. Verificar configuracion
+3. Consultar documentacion
 4. Contactar al equipo de desarrollo
 
 ---
 
-**Versión**: 1.0.0
-**Última actualización**: Diciembre 2024
+**Version**: 1.0.0
+**Ultima actualizacion**: Diciembre 2024
 **Mantenido por**: Equipo de Desarrollo sisproone

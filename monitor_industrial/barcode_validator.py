@@ -28,7 +28,7 @@ class BarcodeValidator:
             return True
 
         except Exception as e:
-            self.logger.error(f"❌ Error validando formato UPC: {e}")
+            self.logger.error(f"ERROR: Error validando formato UPC: {e}")
             return False
 
     def validar_upc_contra_orden(self, upc: str, orden: Dict[str, Any]) -> bool:
@@ -40,7 +40,7 @@ class BarcodeValidator:
             # Obtener UPC esperado de la orden
             upc_esperado = orden.get('ptUPC', '')
             if not upc_esperado:
-                self.logger.warning("⚠️ Orden sin UPC especificado")
+                self.logger.warning("WARNING: Orden sin UPC especificado")
                 return False
 
             # Comparar UPCs
@@ -48,14 +48,14 @@ class BarcodeValidator:
             upc_esperado_limpio = re.sub(r'[^0-9]', '', upc_esperado)
 
             if upc_limpio == upc_esperado_limpio:
-                self.logger.info(f"✅ UPC válido: {upc} coincide con orden {orden.get('ordenFabricacion')}")
+                self.logger.info(f"SUCCESS: UPC valido: {upc} coincide con orden {orden.get('ordenFabricacion')}")
                 return True
             else:
-                self.logger.warning(f"⚠️ UPC inválido: {upc} no coincide con {upc_esperado}")
+                self.logger.warning(f"WARNING: UPC invalido: {upc} no coincide con {upc_esperado}")
                 return False
 
         except Exception as e:
-            self.logger.error(f"❌ Error validando UPC contra orden: {e}")
+            self.logger.error(f"ERROR: Error validando UPC contra orden: {e}")
             return False
 
     def extraer_informacion_upc(self, upc: str) -> Dict[str, Any]:
@@ -79,7 +79,7 @@ class BarcodeValidator:
             return info
 
         except Exception as e:
-            self.logger.error(f"❌ Error extrayendo información UPC: {e}")
+            self.logger.error(f"ERROR: Error extrayendo informacion UPC: {e}")
             return {}
 
     def calcular_digito_verificacion(self, upc: str) -> Optional[str]:
@@ -100,7 +100,7 @@ class BarcodeValidator:
             return str(digito_verificacion)
 
         except Exception as e:
-            self.logger.error(f"❌ Error calculando dígito de verificación: {e}")
+            self.logger.error(f"ERROR: Error calculando digito de verificacion: {e}")
             return None
 
     def validar_digito_verificacion(self, upc: str) -> bool:
@@ -120,7 +120,7 @@ class BarcodeValidator:
                 return False
 
         except Exception as e:
-            self.logger.error(f"❌ Error validando dígito de verificación: {e}")
+            self.logger.error(f"ERROR: Error validando digito de verificacion: {e}")
             return False
 
     def normalizar_upc(self, upc: str) -> str:
@@ -138,5 +138,5 @@ class BarcodeValidator:
             return upc_limpio
 
         except Exception as e:
-            self.logger.error(f"❌ Error normalizando UPC: {e}")
+            self.logger.error(f"ERROR: Error normalizando UPC: {e}")
             return upc

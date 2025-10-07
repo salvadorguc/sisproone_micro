@@ -75,36 +75,36 @@ class MonitorIndustrial:
     def inicializar(self):
         """Inicializar todos los componentes del sistema"""
         try:
-            self.logger.info("🚀 Iniciando Monitor Industrial SISPRO")
+            self.logger.info("INFO: Iniciando Monitor Industrial SISPRO")
 
-            # 1. Cargar configuración
+            # 1. Cargar configuracion
             self.config.cargar()
-            self.logger.info("✅ Configuración cargada")
+            self.logger.info("SUCCESS: Configuracion cargada")
 
             # 2. Inicializar cache
             self.cache.inicializar()
-            self.logger.info("✅ Cache inicializado")
+            self.logger.info("SUCCESS: Cache inicializado")
 
             # 3. Conectar a SISPRO
             if not self.sispro.conectar():
-                self.logger.error("❌ Error conectando a SISPRO")
+                self.logger.error("ERROR: Error conectando a SISPRO")
                 return False
-            self.logger.info("✅ Conectado a SISPRO")
+            self.logger.info("SUCCESS: Conectado a SISPRO")
 
             # 4. Conectar RS485
             if not self.rs485.conectar():
-                self.logger.error("❌ Error conectando RS485")
+                self.logger.error("ERROR: Error conectando RS485")
                 return False
-            self.logger.info("✅ RS485 conectado")
+            self.logger.info("SUCCESS: RS485 conectado")
 
             # 5. Crear interfaz industrial
             self.interfaz = InterfazIndustrial(self)
-            self.logger.info("✅ Interfaz industrial creada")
+            self.logger.info("SUCCESS: Interfaz industrial creada")
 
             return True
 
         except Exception as e:
-            self.logger.error(f"❌ Error en inicialización: {e}")
+            self.logger.error(f"ERROR: Error en inicializacion: {e}")
             return False
 
     def ejecutar(self):
@@ -125,9 +125,9 @@ class MonitorIndustrial:
             self.interfaz.root.mainloop()
 
         except KeyboardInterrupt:
-            self.logger.info("🛑 Deteniendo monitor por interrupción del usuario")
+            self.logger.info("INFO: Deteniendo monitor por interrupcion del usuario")
         except Exception as e:
-            self.logger.error(f"❌ Error en ejecución: {e}")
+            self.logger.error(f"ERROR: Error en ejecucion: {e}")
         finally:
             self.detener()
 
@@ -145,7 +145,7 @@ class MonitorIndustrial:
         self.thread_estado = threading.Thread(target=self.monitorear_estado_pico, daemon=True)
         self.thread_estado.start()
 
-        self.logger.info("✅ Threads iniciados")
+        self.logger.info("SUCCESS: Threads iniciados")
 
     def procesar_rs485(self):
         """Procesar mensajes RS485 del Pico"""
@@ -157,7 +157,7 @@ class MonitorIndustrial:
                         self.procesar_mensaje_pico(mensaje)
                 time.sleep(0.1)
             except Exception as e:
-                self.logger.error(f"❌ Error procesando RS485: {e}")
+                self.logger.error(f"ERROR: Error procesando RS485: {e}")
                 time.sleep(1)
 
     def procesar_mensaje_pico(self, mensaje: str):
@@ -187,7 +187,7 @@ class MonitorIndustrial:
                 if self.interfaz:
                     self.interfaz.actualizar_contador(valor)
 
-                self.logger.info(f"📊 Conteo actualizado: {valor}")
+                self.logger.info(f"INFO: Conteo actualizado: {valor}")
 
             elif tag == 'HEARTBEAT':
                 # Actualizar estado del Pico
@@ -198,7 +198,7 @@ class MonitorIndustrial:
                 self.estado.actualizar_tiempo_inactivo(device_id, valor)
 
         except Exception as e:
-            self.logger.error(f"❌ Error procesando mensaje Pico: {e}")
+            self.logger.error(f"ERROR: Error procesando mensaje Pico: {e}")
 
     def sincronizar_periodicamente(self):
         """Sincronizar datos con SISPRO periódicamente"""
@@ -208,7 +208,7 @@ class MonitorIndustrial:
                     self.sincronizar_lecturas()
                 time.sleep(300)  # Cada 5 minutos
             except Exception as e:
-                self.logger.error(f"❌ Error en sincronización: {e}")
+                self.logger.error(f"ERROR: Error en sincronizacion: {e}")
                 time.sleep(60)
 
     def sincronizar_lecturas(self):
@@ -237,12 +237,12 @@ class MonitorIndustrial:
                 # Actualizar avance
                 self.actualizar_avance_orden()
 
-                self.logger.info(f"✅ Sincronizadas {len(lecturas_pendientes)} lecturas")
+                self.logger.info(f"SUCCESS: Sincronizadas {len(lecturas_pendientes)} lecturas")
             else:
-                self.logger.warning("⚠️ Error sincronizando lecturas")
+                self.logger.warning("WARNING: Error sincronizando lecturas")
 
         except Exception as e:
-            self.logger.error(f"❌ Error sincronizando: {e}")
+            self.logger.error(f"ERROR: Error sincronizando: {e}")
 
     def actualizar_avance_orden(self):
         """Actualizar avance de la orden en SISPRO"""
@@ -251,7 +251,7 @@ class MonitorIndustrial:
             if avance and self.interfaz:
                 self.interfaz.actualizar_avance(avance)
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando avance: {e}")
+            self.logger.error(f"ERROR: Error actualizando avance: {e}")
 
     def monitorear_estado_pico(self):
         """Monitorear estado del Pico"""
@@ -263,7 +263,7 @@ class MonitorIndustrial:
                     self.interfaz.actualizar_estado_pico(estado_pico)
                 time.sleep(5)
             except Exception as e:
-                self.logger.error(f"❌ Error monitoreando Pico: {e}")
+                self.logger.error(f"ERROR: Error monitoreando Pico: {e}")
                 time.sleep(10)
 
     def seleccionar_estacion(self):
@@ -279,12 +279,12 @@ class MonitorIndustrial:
             if estacion:
                 self.estacion_actual = estacion
                 self.config.guardar_estacion(estacion['id'])
-                self.logger.info(f"✅ Estación seleccionada: {estacion['nombre']}")
+                self.logger.info(f"SUCCESS: Estacion seleccionada: {estacion['nombre']}")
                 return True
             return False
 
         except Exception as e:
-            self.logger.error(f"❌ Error seleccionando estación: {e}")
+            self.logger.error(f"ERROR: Error seleccionando estacion: {e}")
             return False
 
     def seleccionar_orden(self):
@@ -303,12 +303,12 @@ class MonitorIndustrial:
             if orden:
                 self.orden_actual = orden
                 self.estado.cambiar_estado("ESPERANDO_UPC")
-                self.logger.info(f"✅ Orden seleccionada: {orden['ordenFabricacion']}")
+                self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
                 return True
             return False
 
         except Exception as e:
-            self.logger.error(f"❌ Error seleccionando orden: {e}")
+            self.logger.error(f"ERROR: Error seleccionando orden: {e}")
             return False
 
     def validar_upc(self, upc: str):
@@ -322,17 +322,17 @@ class MonitorIndustrial:
                 self.upc_validado = upc
                 self.estado.cambiar_estado("PRODUCIENDO")
 
-                # Activar comunicación con Pico
+                # Activar comunicacion con Pico
                 self.activar_pico()
 
-                self.logger.info(f"✅ UPC validado: {upc}")
+                self.logger.info(f"SUCCESS: UPC validado: {upc}")
                 return True
             else:
-                self.logger.warning(f"⚠️ UPC inválido: {upc}")
+                self.logger.warning(f"WARNING: UPC invalido: {upc}")
                 return False
 
         except Exception as e:
-            self.logger.error(f"❌ Error validando UPC: {e}")
+            self.logger.error(f"ERROR: Error validando UPC: {e}")
             return False
 
     def activar_pico(self):
@@ -346,10 +346,10 @@ class MonitorIndustrial:
             meta_comando = f"{self.estacion_actual['id']}:META:{self.orden_actual['cantidadFabricar']}"
             self.rs485.enviar_comando(meta_comando)
 
-            self.logger.info("✅ Pico activado")
+            self.logger.info("SUCCESS: Pico activado")
 
         except Exception as e:
-            self.logger.error(f"❌ Error activando Pico: {e}")
+            self.logger.error(f"ERROR: Error activando Pico: {e}")
 
     def finalizar_orden(self):
         """Finalizar orden de fabricación"""
@@ -373,19 +373,19 @@ class MonitorIndustrial:
                 self.lecturas_acumuladas = 0
                 self.estado.cambiar_estado("INACTIVO")
 
-                self.logger.info("✅ Orden finalizada")
+                self.logger.info("SUCCESS: Orden finalizada")
 
         except Exception as e:
-            self.logger.error(f"❌ Error finalizando orden: {e}")
+            self.logger.error(f"ERROR: Error finalizando orden: {e}")
 
     def desactivar_pico(self):
         """Desactivar comunicación con el Pico"""
         try:
             comando = f"{self.estacion_actual['id']}:DESACTIVAR:0"
             self.rs485.enviar_comando(comando)
-            self.logger.info("✅ Pico desactivado")
+            self.logger.info("SUCCESS: Pico desactivado")
         except Exception as e:
-            self.logger.error(f"❌ Error desactivando Pico: {e}")
+            self.logger.error(f"ERROR: Error desactivando Pico: {e}")
 
     def detener(self):
         """Detener el monitor industrial"""
@@ -404,10 +404,10 @@ class MonitorIndustrial:
             self.sispro.desconectar()
             self.cache.cerrar()
 
-            self.logger.info("🛑 Monitor detenido")
+            self.logger.info("INFO: Monitor detenido")
 
         except Exception as e:
-            self.logger.error(f"❌ Error deteniendo monitor: {e}")
+            self.logger.error(f"ERROR: Error deteniendo monitor: {e}")
 
 def main():
     """Función principal"""
@@ -415,7 +415,7 @@ def main():
         monitor = MonitorIndustrial()
         monitor.ejecutar()
     except Exception as e:
-        print(f"❌ Error fatal: {e}")
+        print(f"ERROR: Error fatal: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
