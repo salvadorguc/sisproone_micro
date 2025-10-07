@@ -38,7 +38,7 @@ class MonitorIndustrial:
         self.rs485 = MonitorRS485(self.config)
         self.barcode = BarcodeValidator()
         self.cache = CacheManager(self.config)
-        self.database = DatabaseManager(self.config.__dict__)
+        self.database = DatabaseManager(self.config.config)
         self.estado = EstadoManager()
         self.interfaz = None
 
@@ -196,7 +196,7 @@ class MonitorIndustrial:
                         'fuente': 'RS485',
                         'sincronizada': False,
                         'estacion_id': self.estacion_actual['id'],
-                        'usuario_id': self.config.usuario_id,
+                        'usuario_id': self.config.get('sispro.usuario_id', 228),
                         'orden_fabricacion_id': self.orden_actual.get('id')
                     })
 
@@ -251,7 +251,7 @@ class MonitorIndustrial:
 
             # Obtener lecturas pendientes del cache
             lecturas_pendientes = self.cache.obtener_lecturas_pendientes(
-                limite=self.config.lotes.get('tamaño_maximo', 100)
+                limite=self.config.get('lotes.tamaño_maximo', 100)
             )
 
             if not lecturas_pendientes:
