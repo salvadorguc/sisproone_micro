@@ -20,7 +20,7 @@ class Config:
                 "username": "HOOK",
                 "password": "HOOK25",
                 "empresa_id": 1,
-                "usuario_id": 1
+                "usuario_id": 228
             },
             "rs485": {
                 "port": "/dev/ttyUSB0",

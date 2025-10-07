@@ -13,6 +13,8 @@ class SISPROConnector:
     def __init__(self, config):
         self.config = config
         self.base_url = config.sispro_base_url
+        self.username = config.sispro_username
+        self.password = config.sispro_password
         self.empresa_id = config.empresa_id
         self.usuario_id = config.usuario_id
         self.token = None
@@ -33,13 +35,34 @@ class SISPROConnector:
             return False
 
     def autenticar(self) -> bool:
-        """Autenticar con SISPRO"""
+        """Autenticar con SISPRO usando JWT"""
         try:
-            # Por ahora, usar autenticacion basica
-            # En produccion, implementar JWT
-            self.token = "monitor_pi_token"
-            self.logger.info("SUCCESS: Autenticado con SISPRO")
-            return True
+            url = f"{self.base_url}/api/auth/login_local"
+
+            payload = {
+                "username": self.username,
+                "password": self.password
+            }
+
+            headers = {
+                'Content-Type': 'application/json',
+                'empresa-id': str(self.empresa_id)
+            }
+
+            response = self.session.post(url, json=payload, headers=headers, timeout=10)
+
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success'):
+                    self.token = data.get('token')
+                    self.logger.info(f"SUCCESS: Autenticado con SISPRO - Token obtenido")
+                    return True
+                else:
+                    self.logger.error(f"ERROR: Autenticacion fallida: {data.get('message', 'Sin mensaje')}")
+                    return False
+            else:
+                self.logger.error(f"ERROR: HTTP {response.status_code}: {response.text}")
+                return False
 
         except Exception as e:
             self.logger.error(f"ERROR: Error autenticando: {e}")
