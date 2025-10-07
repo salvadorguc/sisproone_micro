@@ -272,3 +272,19 @@ class SISPROConnector:
         except Exception as e:
             self.logger.error(f"ERROR: Error verificando conexion: {e}")
             return False
+
+    def consultar_estatus_orden(self, orden_fabricacion: str) -> Optional[Dict]:
+        """Consultar estatus y receta de una orden de fabricacion"""
+        try:
+            params = {'orden': orden_fabricacion}
+            result = self._make_request(
+                'GET',
+                '/api/ordenesDeFabricacion/estatus',
+                params=params
+            )
+            if result and result.get('success'):
+                return result
+            return None
+        except Exception as e:
+            self.logger.error(f"ERROR: Error consultando estatus de orden: {e}")
+            return None

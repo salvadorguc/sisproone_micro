@@ -538,14 +538,15 @@ class MonitorIndustrial:
             if not self.orden_actual:
                 return
 
-            # Obtener receta desde MySQL
-            self.receta_actual = self.database.obtener_receta_orden(
-                self.orden_actual['ordenFabricacion']
-            )
+            # Obtener receta desde SISPRO API
+            receta_data = self.sispro.consultar_estatus_orden(self.orden_actual['ordenFabricacion'])
 
-            if self.receta_actual and self.interfaz:
-                self.interfaz.mostrar_receta(self.receta_actual)
-                self.logger.info(f"SUCCESS: Receta cargada para orden {self.orden_actual['ordenFabricacion']}")
+            if receta_data and receta_data.get('success') and receta_data.get('data'):
+                self.receta_actual = receta_data['data']
+
+                if self.interfaz:
+                    self.interfaz.mostrar_receta(self.receta_actual)
+                    self.logger.info(f"SUCCESS: Receta cargada para orden {self.orden_actual['ordenFabricacion']}")
             else:
                 self.logger.warning(f"WARNING: No se pudo cargar receta para orden {self.orden_actual['ordenFabricacion']}")
 

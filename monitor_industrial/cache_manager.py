@@ -72,6 +72,22 @@ class CacheManager:
                 )
             ''')
 
+            # Agregar columnas si no existen (para bases de datos existentes)
+            try:
+                cursor.execute('ALTER TABLE lecturas_produccion ADD COLUMN estacion_id INTEGER')
+            except:
+                pass  # Columna ya existe
+
+            try:
+                cursor.execute('ALTER TABLE lecturas_produccion ADD COLUMN usuario_id INTEGER')
+            except:
+                pass  # Columna ya existe
+
+            try:
+                cursor.execute('ALTER TABLE lecturas_produccion ADD COLUMN orden_fabricacion_id INTEGER')
+            except:
+                pass  # Columna ya existe
+
             # Tabla de estado de estaciones
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS estado_estaciones (
@@ -194,9 +210,9 @@ class CacheManager:
                         'cantidad': row['cantidad'],
                         'timestamp': datetime.fromisoformat(row['timestamp']),
                         'fuente': row['fuente'],
-                        'estacion_id': row.get('estacion_id'),
-                        'usuario_id': row.get('usuario_id'),
-                        'orden_fabricacion_id': row.get('orden_fabricacion_id')
+                        'estacion_id': row['estacion_id'] if 'estacion_id' in row.keys() else None,
+                        'usuario_id': row['usuario_id'] if 'usuario_id' in row.keys() else None,
+                        'orden_fabricacion_id': row['orden_fabricacion_id'] if 'orden_fabricacion_id' in row.keys() else None
                     })
 
                 return lecturas
@@ -225,9 +241,9 @@ class CacheManager:
                         'cantidad': row['cantidad'],
                         'timestamp': datetime.fromisoformat(row['timestamp']),
                         'fuente': row['fuente'],
-                        'estacion_id': row.get('estacion_id'),
-                        'usuario_id': row.get('usuario_id'),
-                        'orden_fabricacion_id': row.get('orden_fabricacion_id')
+                        'estacion_id': row['estacion_id'] if 'estacion_id' in row.keys() else None,
+                        'usuario_id': row['usuario_id'] if 'usuario_id' in row.keys() else None,
+                        'orden_fabricacion_id': row['orden_fabricacion_id'] if 'orden_fabricacion_id' in row.keys() else None
                     })
 
                 return lecturas
