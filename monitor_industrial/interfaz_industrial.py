@@ -70,6 +70,15 @@ class InterfazIndustrial:
             self.estado_pico_var = tk.StringVar(value="DESCONECTADO")
             self.tiempo_inactivo_var = tk.StringVar(value="0s")
 
+            # Variables para reloj y semáforo
+            self.reloj_var = tk.StringVar(value="00:00:00")
+            self.ultima_lectura_var = tk.StringVar(value="N/A")
+            self.semaforo_color = tk.StringVar(value="red")
+
+            # Variables internas
+            self.orden_actual = None
+            self.ultima_lectura_timestamp = None
+
             self.configurar_ventana()
             self.crear_interfaz()
             self.iniciar_actualizaciones()
@@ -138,9 +147,46 @@ class InterfazIndustrial:
             )
             titulo.pack(side=tk.LEFT)
 
-            # Lado derecho: Configuracion de estacion
-            config_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            config_frame.pack(side=tk.RIGHT)
+            # Lado derecho: Reloj y configuracion
+            right_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            right_frame.pack(side=tk.RIGHT)
+
+            # Reloj en la parte superior derecha
+            clock_frame = tk.Frame(right_frame, bg=self.colores['panel'])
+            clock_frame.pack(side=tk.TOP, pady=(0, 10))
+
+            tk.Label(
+                clock_frame,
+                text="HORA:",
+                font=self.fuente_pequena,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).pack(side=tk.LEFT)
+
+            tk.Label(
+                clock_frame,
+                textvariable=self.reloj_var,
+                font=self.fuente_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(side=tk.LEFT, padx=5)
+
+            # Semáforo de estado de lecturas
+            semaforo_frame = tk.Frame(clock_frame, bg=self.colores['panel'])
+            semaforo_frame.pack(side=tk.LEFT, padx=20)
+
+            self.semaforo_label = tk.Label(
+                semaforo_frame,
+                text="●",
+                font=self.fuente_titulo,
+                fg=self.colores['error'],
+                bg=self.colores['panel']
+            )
+            self.semaforo_label.pack()
+
+            # Configuracion de estacion
+            config_frame = tk.Frame(right_frame, bg=self.colores['panel'])
+            config_frame.pack(side=tk.BOTTOM)
 
             # Estacion actual
             tk.Label(
@@ -170,6 +216,18 @@ class InterfazIndustrial:
                 width=10
             )
             btn_cambiar.grid(row=0, column=2, padx=5)
+
+            # Boton cerrar orden (protegido)
+            btn_cerrar = tk.Button(
+                config_frame,
+                text="CERRAR ORDEN",
+                font=self.fuente_pequena,
+                fg=self.colores['texto'],
+                bg=self.colores['error'],
+                command=self.cerrar_orden,
+                width=12
+            )
+            btn_cerrar.grid(row=0, column=3, padx=10)
 
             # Estado del sistema
             tk.Label(
@@ -366,7 +424,7 @@ class InterfazIndustrial:
             # Titulo del panel
             tk.Label(
                 self.panel_receta,
-                text="RECETA DE PRODUCCION",
+                text="MATERIALES DE LA ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
@@ -417,20 +475,6 @@ class InterfazIndustrial:
             )
             btn_upc.grid(row=0, column=0, padx=10, pady=5)
 
-            # Boton finalizar orden
-            btn_finalizar = tk.Button(
-                botones_frame,
-                text="FINALIZAR ORDEN",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['advertencia'],
-                relief=tk.RAISED,
-                bd=3,
-                command=self.finalizar_orden,
-                width=25,
-                height=2
-            )
-            btn_finalizar.grid(row=0, column=1, padx=10, pady=5)
 
             # Boton sincronizar
             btn_sincronizar = tk.Button(
@@ -526,6 +570,23 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=0, column=5, padx=10, sticky=tk.W)
 
+            # Última lectura del Pico
+            tk.Label(
+                estado_frame,
+                text="Última lectura Pico:",
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel']
+            ).grid(row=1, column=0, padx=10, sticky=tk.W)
+
+            tk.Label(
+                estado_frame,
+                textvariable=self.ultima_lectura_var,
+                font=self.fuente_normal,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).grid(row=1, column=1, padx=10, sticky=tk.W)
+
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel de estado: {e}")
 
@@ -555,6 +616,8 @@ class InterfazIndustrial:
                 self.cargar_ordenes()
 
             self.actualizar_interfaz()
+            self.actualizar_reloj()
+            self.actualizar_semaforo()
             self.root.after(self.monitor.config.update_interval, self.iniciar_actualizaciones)
         except Exception as e:
             self.logger.error(f"ERROR: Error en actualizaciones: {e}")
@@ -960,15 +1023,131 @@ MATERIALES REQUERIDOS:
             self.logger.error(f"ERROR: Error validando UPC: {e}")
             messagebox.showerror("Error", f"Error validando UPC: {e}")
 
-    def finalizar_orden(self):
-        """Finalizar orden actual"""
+    def cerrar_orden(self):
+        """Cerrar orden actual con proteccion por PIN"""
         try:
-            if messagebox.askyesno("Confirmar", "Finalizar la orden actual?"):
+            if not self.orden_actual:
+                messagebox.showwarning("Advertencia", "No hay orden seleccionada")
+                return
+
+            # Solicitar PIN de seguridad
+            pin_dialog = tk.Toplevel(self.root)
+            pin_dialog.title("Cerrar Orden - Seguridad")
+            pin_dialog.geometry("350x200")
+            pin_dialog.resizable(False, False)
+            pin_dialog.transient(self.root)
+            pin_dialog.grab_set()
+
+            # Centrar ventana
+            pin_dialog.update_idletasks()
+            x = (pin_dialog.winfo_screenwidth() // 2) - (350 // 2)
+            y = (pin_dialog.winfo_screenheight() // 2) - (200 // 2)
+            pin_dialog.geometry(f"350x200+{x}+{y}")
+
+            # Configurar colores
+            pin_dialog.configure(bg=self.colores['panel'])
+
+            # Titulo
+            tk.Label(
+                pin_dialog,
+                text="CERRAR ORDEN",
+                font=self.fuente_grande,
+                fg=self.colores['error'],
+                bg=self.colores['panel']
+            ).pack(pady=10)
+
+            # Advertencia
+            tk.Label(
+                pin_dialog,
+                text="Esta accion cerrara la orden de fabricacion",
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel']
+            ).pack(pady=5)
+
+            tk.Label(
+                pin_dialog,
+                text=f"Orden: {self.orden_actual['ordenFabricacion']}",
+                font=self.fuente_normal,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=5)
+
+            # Campo de PIN
+            tk.Label(
+                pin_dialog,
+                text="Ingrese PIN de seguridad:",
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel']
+            ).pack(pady=10)
+
+            pin_entry = tk.Entry(
+                pin_dialog,
+                font=self.fuente_grande,
+                show="*",
+                width=15,
+                justify=tk.CENTER
+            )
+            pin_entry.pack(pady=5)
+            pin_entry.focus()
+
+            # Variable para resultado
+            resultado = {'confirmado': False}
+
+            def validar_pin():
+                pin_ingresado = pin_entry.get()
+                if pin_ingresado == "314151":
+                    resultado['confirmado'] = True
+                    pin_dialog.destroy()
+                else:
+                    messagebox.showerror("Error", "PIN incorrecto")
+                    pin_entry.delete(0, tk.END)
+                    pin_entry.focus()
+
+            def cancelar():
+                pin_dialog.destroy()
+
+            # Botones
+            botones_frame = tk.Frame(pin_dialog, bg=self.colores['panel'])
+            botones_frame.pack(pady=20)
+
+            tk.Button(
+                botones_frame,
+                text="CANCELAR",
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['borde'],
+                command=cancelar,
+                width=10
+            ).pack(side=tk.LEFT, padx=10)
+
+            tk.Button(
+                botones_frame,
+                text="CONFIRMAR",
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['error'],
+                command=validar_pin,
+                width=10
+            ).pack(side=tk.LEFT, padx=10)
+
+            # Bind Enter key
+            pin_entry.bind('<Return>', lambda e: validar_pin())
+            pin_dialog.bind('<Escape>', lambda e: cancelar())
+
+            # Esperar resultado
+            pin_dialog.wait_window()
+
+            # Ejecutar cierre si PIN correcto
+            if resultado['confirmado'] and self.monitor:
                 self.monitor.finalizar_orden()
-                messagebox.showinfo("Exito", "Orden finalizada correctamente.")
+                messagebox.showinfo("Exito", "Orden cerrada correctamente.")
+                self.logger.info("SUCCESS: Orden cerrada con PIN correcto")
+
         except Exception as e:
-            self.logger.error(f"ERROR: Error finalizando orden: {e}")
-            messagebox.showerror("Error", f"Error finalizando orden: {e}")
+            self.logger.error(f"ERROR: Error cerrando orden: {e}")
+            messagebox.showerror("Error", f"Error cerrando orden: {e}")
 
     def sincronizar_ahora(self):
         """Sincronizar datos ahora"""
@@ -995,3 +1174,53 @@ MATERIALES REQUERIDOS:
         except Exception as e:
             self.logger.error(f"ERROR: Error saliendo: {e}")
             self.root.quit()
+
+    def actualizar_reloj(self):
+        """Actualizar reloj en tiempo real"""
+        try:
+            from datetime import datetime
+            ahora = datetime.now()
+            self.reloj_var.set(ahora.strftime("%H:%M:%S"))
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando reloj: {e}")
+
+    def actualizar_semaforo(self):
+        """Actualizar semáforo según tiempo desde última lectura"""
+        try:
+            if not self.ultima_lectura_timestamp:
+                # Sin lecturas
+                self.semaforo_label.config(fg=self.colores['error'])  # Rojo
+                return
+
+            from datetime import datetime, timedelta
+            ahora = datetime.now()
+            tiempo_transcurrido = ahora - self.ultima_lectura_timestamp
+
+            if tiempo_transcurrido > timedelta(minutes=30):
+                # Más de 30 minutos - Rojo
+                self.semaforo_label.config(fg=self.colores['error'])
+            elif tiempo_transcurrido > timedelta(minutes=15):
+                # Entre 15-30 minutos - Amarillo
+                self.semaforo_label.config(fg=self.colores['advertencia'])
+            else:
+                # Menos de 15 minutos - Verde
+                self.semaforo_label.config(fg=self.colores['accento'])
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando semáforo: {e}")
+
+    def actualizar_ultima_lectura(self, timestamp):
+        """Actualizar timestamp de última lectura del Pico"""
+        try:
+            self.ultima_lectura_timestamp = timestamp
+
+            # Actualizar texto en interfaz
+            if timestamp:
+                from datetime import datetime
+                hora_lectura = timestamp.strftime("%H:%M:%S")
+                self.ultima_lectura_var.set(hora_lectura)
+            else:
+                self.ultima_lectura_var.set("N/A")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando última lectura: {e}")

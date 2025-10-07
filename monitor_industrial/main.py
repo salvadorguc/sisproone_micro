@@ -203,6 +203,9 @@ class MonitorIndustrial:
                 # Actualizar interfaz
                 if self.interfaz:
                     self.interfaz.actualizar_contador(valor)
+                    # Actualizar última lectura del Pico
+                    from datetime import datetime
+                    self.interfaz.actualizar_ultima_lectura(datetime.now())
 
                 self.logger.info(f"INFO: Conteo actualizado: {valor} (+{incremento})")
 
@@ -370,6 +373,10 @@ class MonitorIndustrial:
                 self.orden_actual = orden
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+
+                # Cargar receta de la orden
+                self.cargar_receta_orden()
+
                 self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
                 return True
             return False
