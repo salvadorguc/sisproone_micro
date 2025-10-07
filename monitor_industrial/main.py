@@ -190,6 +190,19 @@ class MonitorIndustrial:
 
                 self.logger.info(f"INFO: Conteo actualizado: {valor}")
 
+            elif tag == 'FIN':
+                # Lectura completada
+                self.logger.info(f"INFO: Lectura completada con {self.lecturas_acumuladas} unidades")
+
+                # Sincronizar inmediatamente
+                self.sincronizar_lecturas()
+
+                # Recargar ordenes para actualizar cantidades pendientes
+                if self.interfaz:
+                    self.interfaz.cargar_ordenes()
+
+                self.logger.info("SUCCESS: Lectura finalizada y sincronizada")
+
             elif tag == 'HEARTBEAT':
                 # Actualizar estado del Pico
                 self.estado.actualizar_estado_pico(device_id, 'ACTIVO')
@@ -237,9 +250,16 @@ class MonitorIndustrial:
                 self.ultima_sincronizacion = datetime.now()
 
                 # Actualizar avance
-                self.actualizar_avance_orden()
+                avance = self.actualizar_avance_orden()
 
-                self.logger.info(f"SUCCESS: Sincronizadas {len(lecturas_pendientes)} lecturas")
+                # Verificar si la orden esta completa
+                if avance and avance.get('cantidadPendiente', 0) == 0:
+                    self.logger.info("INFO: Orden completada, finalizando automaticamente")
+                    # Recargar ordenes para quitar la completa de la lista
+                    if self.interfaz:
+                        self.interfaz.cargar_ordenes()
+
+                self.logger.info(f"SUCCESS: Sincronizadas {len(lecturas_pendientes)} lecturas (Total: {cantidad_total})")
             else:
                 self.logger.warning("WARNING: Error sincronizando lecturas")
 
@@ -250,10 +270,14 @@ class MonitorIndustrial:
         """Actualizar avance de la orden en SISPRO"""
         try:
             avance = self.sispro.consultar_avance_orden(self.orden_actual['ordenFabricacion'])
-            if avance and self.interfaz:
-                self.interfaz.actualizar_avance(avance)
+            if avance:
+                if self.interfaz:
+                    self.interfaz.actualizar_avance(avance)
+                return avance
+            return None
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando avance: {e}")
+            return None
 
     def monitorear_estado_pico(self):
         """Monitorear estado del Pico"""
@@ -340,9 +364,59 @@ class MonitorIndustrial:
             return False
 
     def activar_pico(self):
-        """Activar comunicación con el Pico"""
+        """Activar comunicacion con el Pico"""
         try:
-            # Enviar comando de activación al Pico
+            # Solicitar estado actual del Pico (HEARTBEAT tiene el contador)
+            time.sleep(0.5)  # Esperar ultimo heartbeat
+
+            # Revisar si hay lecturas previas del Pico
+            contador_actual = self.lecturas_acumuladas
+
+            # Si hay contador existente, alertar al operador
+            if contador_actual > 0:
+                from tkinter import messagebox
+                respuesta = messagebox.askyesno(
+                    "ALERTA - Contador Existente",
+                    f"El dispositivo ya tiene {contador_actual} lecturas.\n\n"
+                    f"¿Desea usar este conteo actual?\n\n"
+                    f"SI = Continuar con {contador_actual}\n"
+                    f"NO = Cancela y reinicia manualmente en el Pico\n\n"
+                    f"(Para reiniciar: Presiona C en el teclado del Pico)",
+                    icon='warning'
+                )
+
+                if respuesta:
+                    # Usar contador actual
+                    # Actualizar interfaz con el contador existente
+                    if self.interfaz:
+                        self.interfaz.actualizar_contador(contador_actual)
+                    # Guardar lectura inicial
+                    self.cache.guardar_lectura({
+                        'orden_fabricacion': self.orden_actual['ordenFabricacion'],
+                        'upc': self.upc_validado,
+                        'cantidad': contador_actual,
+                        'timestamp': datetime.now(),
+                        'fuente': 'RS485_INICIAL'
+                    })
+                    self.logger.info(f"INFO: Usando contador existente: {contador_actual}")
+                else:
+                    # Cancelar y pedir que reinicie manualmente
+                    messagebox.showinfo(
+                        "Reinicio Manual Requerido",
+                        "Por favor:\n\n"
+                        "1. Ve al dispositivo Pico\n"
+                        "2. Presiona tecla C (RESET)\n"
+                        "3. Ingresa el PIN de supervisor\n"
+                        "4. El contador se reiniciara a 0\n"
+                        "5. Vuelve e intenta validar el UPC de nuevo"
+                    )
+                    from estado_manager import EstadoSistema
+                    self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+                    self.upc_validado = None
+                    self.logger.info("INFO: Validacion cancelada - reinicio manual requerido")
+                    return
+
+            # Enviar comando de activacion al Pico
             comando = f"{self.estacion_actual['id']}:ACTIVAR:{self.orden_actual['pt']}"
             self.rs485.enviar_comando(comando)
 

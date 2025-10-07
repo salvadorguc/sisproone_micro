@@ -827,15 +827,26 @@ class InterfazIndustrial:
                 self.monitor.estacion_actual['id']
             )
 
-            self.ordenes_disponibles = ordenes
+            # Filtrar solo ordenes pendientes (no completadas y no cerradas)
+            ordenes_pendientes = [
+                orden for orden in ordenes
+                if orden.get('cantidadPendiente', 0) > 0 and not orden.get('isClosed', False)
+            ]
+
+            self.ordenes_disponibles = ordenes_pendientes
             self.lista_ordenes.delete(0, tk.END)
 
-            for orden in ordenes:
+            if not ordenes_pendientes:
+                self.lista_ordenes.insert(tk.END, "No hay ordenes pendientes")
+                return
+
+            for orden in ordenes_pendientes:
                 pt = orden.get('pt', '')
                 desc = orden.get('ptDescripcion', '')[:40]  # Limitar descripcion
                 cantidad = orden.get('cantidadFabricar', 0)
+                pendiente = orden.get('cantidadPendiente', 0)
                 upc = orden.get('ptUPC', '')
-                texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({cantidad} pzs)"
+                texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({pendiente}/{cantidad} pzs)"
                 self.lista_ordenes.insert(tk.END, texto)
 
         except Exception as e:
