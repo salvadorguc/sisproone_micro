@@ -86,11 +86,10 @@ class DatabaseManager:
 
                 datos_insercion.append((
                     lectura['upc'],
-                    lectura['timestamp'].date(),
-                    lectura['timestamp'].time(),
+                    lectura['timestamp'],  # fechaLectura: datetime(3)
                     lectura['usuario_id'],
                     lectura['orden_fabricacion_id'],
-                    lectura['hora_lectura'],
+                    lectura['timestamp'],  # horaLectura: datetime(3)
                     lectura['estacion_id'],
                     lectura['orden_fabricacion'],
                     indice
@@ -99,9 +98,9 @@ class DatabaseManager:
             # Query de insercion con manejo de duplicados
             query = """
             INSERT IGNORE INTO lecturaUPC
-            (upc, fechaLectura, horaLectura, usuarioId, ordenFabricacionId,
-             fechaLectura, estacionId, ordenFabricacion, indice)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (upc, fechaLectura, usuarioId, ordenFabricacionId, horaLectura,
+             estacionId, ordenFabricacion, indice)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
 
             # Ejecutar insercion en lote
