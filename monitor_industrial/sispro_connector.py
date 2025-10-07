@@ -277,14 +277,22 @@ class SISPROConnector:
         """Consultar estatus y receta de una orden de fabricacion"""
         try:
             params = {'orden': orden_fabricacion}
+            self.logger.info(f"INFO: Consultando estatus de orden {orden_fabricacion}")
+            self.logger.info(f"INFO: URL: {self.base_url}/api/ordenesDeFabricacion/estatus")
+            self.logger.info(f"INFO: Params: {params}")
+            
             result = self._make_request(
                 'GET',
                 '/api/ordenesDeFabricacion/estatus',
                 params=params
             )
+            
             if result and result.get('success'):
+                self.logger.info(f"SUCCESS: Receta obtenida para orden {orden_fabricacion}")
                 return result
-            return None
+            else:
+                self.logger.warning(f"WARNING: No se pudo obtener receta para orden {orden_fabricacion}")
+                return None
         except Exception as e:
             self.logger.error(f"ERROR: Error consultando estatus de orden: {e}")
             return None

@@ -520,24 +520,27 @@ class MonitorIndustrial:
         try:
             self.running = False
 
-            # Verificar si hay lecturas pendientes
-            lecturas_pendientes = self.cache.contar_lecturas_pendientes()
-
-            if lecturas_pendientes > 0:
-                self.logger.warning(f"WARNING: Hay {lecturas_pendientes} lecturas pendientes de sincronizar")
-
-                # Intentar sincronizar una última vez
-                self.logger.info("INFO: Intentando sincronizar lecturas pendientes...")
-                self.sincronizar_lecturas()
-
-                # Verificar nuevamente
-                lecturas_restantes = self.cache.contar_lecturas_pendientes()
-
-                if lecturas_restantes > 0:
-                    self.logger.error(f"ERROR: No se pudieron sincronizar {lecturas_restantes} lecturas")
-                    self.logger.error("ERROR: Las lecturas se mantendrán en cache para la próxima ejecución")
-                else:
-                    self.logger.info("SUCCESS: Todas las lecturas sincronizadas correctamente")
+            # Verificar si hay lecturas pendientes (antes de cerrar conexiones)
+            try:
+                lecturas_pendientes = self.cache.contar_lecturas_pendientes()
+                
+                if lecturas_pendientes > 0:
+                    self.logger.warning(f"WARNING: Hay {lecturas_pendientes} lecturas pendientes de sincronizar")
+                    
+                    # Intentar sincronizar una última vez
+                    self.logger.info("INFO: Intentando sincronizar lecturas pendientes...")
+                    self.sincronizar_lecturas()
+                    
+                    # Verificar nuevamente
+                    lecturas_restantes = self.cache.contar_lecturas_pendientes()
+                    
+                    if lecturas_restantes > 0:
+                        self.logger.error(f"ERROR: No se pudieron sincronizar {lecturas_restantes} lecturas")
+                        self.logger.error("ERROR: Las lecturas se mantendrán en cache para la próxima ejecución")
+                    else:
+                        self.logger.info("SUCCESS: Todas las lecturas sincronizadas correctamente")
+            except Exception as e:
+                self.logger.warning(f"WARNING: No se pudo verificar lecturas pendientes: {e}")
 
             # Finalizar orden si esta activa
             from estado_manager import EstadoSistema

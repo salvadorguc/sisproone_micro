@@ -456,25 +456,24 @@ class InterfazIndustrial:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.X, pady=(0, 10))
 
-            # Botones de control
+            # Botones de control en fila
             botones_frame = tk.Frame(panel, bg=self.colores['panel'])
-            botones_frame.pack(pady=15)
+            botones_frame.pack(pady=10)
 
-            # Boton validar UPC (principal)
+            # Boton validar UPC (principal - más grande)
             btn_upc = tk.Button(
                 botones_frame,
                 text="VALIDAR UPC",
                 font=self.fuente_grande,
                 fg=self.colores['texto'],
-                bg=self.colores['accento'],
+                bg='#4CAF50',  # Verde pastel
                 relief=tk.RAISED,
-                bd=3,
+                bd=2,
                 command=self.validar_upc,
-                width=25,
+                width=18,
                 height=2
             )
-            btn_upc.grid(row=0, column=0, padx=10, pady=5)
-
+            btn_upc.grid(row=0, column=0, padx=8, pady=5)
 
             # Boton sincronizar
             btn_sincronizar = tk.Button(
@@ -482,14 +481,14 @@ class InterfazIndustrial:
                 text="SINCRONIZAR",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['info'],
+                bg='#2196F3',  # Azul pastel
                 relief=tk.RAISED,
                 bd=2,
                 command=self.sincronizar_ahora,
-                width=15,
-                height=1
+                width=12,
+                height=2
             )
-            btn_sincronizar.grid(row=1, column=0, padx=10, pady=5)
+            btn_sincronizar.grid(row=0, column=1, padx=8, pady=5)
 
             # Boton salir
             btn_salir = tk.Button(
@@ -497,14 +496,14 @@ class InterfazIndustrial:
                 text="SALIR",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['error'],
+                bg='#F44336',  # Rojo pastel
                 relief=tk.RAISED,
                 bd=2,
                 command=self.salir,
-                width=15,
-                height=1
+                width=12,
+                height=2
             )
-            btn_salir.grid(row=1, column=1, padx=10, pady=5)
+            btn_salir.grid(row=0, column=2, padx=8, pady=5)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel inferior: {e}")
@@ -674,7 +673,9 @@ class InterfazIndustrial:
     def mostrar_receta(self, receta):
         """Mostrar receta de la orden en el panel"""
         try:
+            self.logger.info(f"INFO: Mostrando receta: {receta is not None}")
             if not self.receta_text or not receta:
+                self.logger.warning("WARNING: No se puede mostrar receta - receta_text o receta es None")
                 return
 
             # Habilitar edicion temporalmente
