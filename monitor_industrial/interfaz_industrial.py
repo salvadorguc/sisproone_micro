@@ -618,10 +618,10 @@ class InterfazIndustrial:
             tk.Label(
                 frame,
                 text="SELECCIONAR ESTACION DE TRABAJO",
-                font=self.fuente_titulo,
+                font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
-            ).pack(pady=20)
+            ).pack(pady=15)
 
             # Lista de estaciones
             lista_frame = tk.Frame(frame, bg=self.colores['fondo'])
@@ -654,6 +654,11 @@ class InterfazIndustrial:
 
             def cancelar():
                 ventana.destroy()
+
+            # Bindings para interaccion
+            lista.bind('<Double-Button-1>', lambda e: seleccionar())
+            lista.bind('<Return>', lambda e: seleccionar())
+            ventana.bind('<Escape>', lambda e: cancelar())
 
             # Botones
             botones_frame = tk.Frame(frame, bg=self.colores['fondo'])
@@ -710,12 +715,12 @@ class InterfazIndustrial:
             tk.Label(
                 frame,
                 text="SELECCIONAR ORDEN DE FABRICACION",
-                font=self.fuente_titulo,
+                font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
-            ).pack(pady=20)
+            ).pack(pady=15)
 
-            # Lista de órdenes
+            # Lista de ordenes
             lista_frame = tk.Frame(frame, bg=self.colores['fondo'])
             lista_frame.pack(fill=tk.BOTH, expand=True, pady=20)
 
@@ -730,7 +735,7 @@ class InterfazIndustrial:
             )
             lista.pack(fill=tk.BOTH, expand=True)
 
-            # Agregar órdenes a la lista
+            # Agregar ordenes a la lista
             for orden in ordenes:
                 texto = f"{orden['ordenFabricacion']} - {orden.get('ptDescripcion', '')} - Cantidad: {orden.get('cantidadFabricar', 0)}"
                 lista.insert(tk.END, texto)
@@ -746,6 +751,11 @@ class InterfazIndustrial:
 
             def cancelar():
                 ventana.destroy()
+
+            # Bindings para interaccion
+            lista.bind('<Double-Button-1>', lambda e: seleccionar())
+            lista.bind('<Return>', lambda e: seleccionar())
+            ventana.bind('<Escape>', lambda e: cancelar())
 
             # Botones
             botones_frame = tk.Frame(frame, bg=self.colores['fondo'])
