@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interfaz Industrial Fullscreen - Monitor de Estación de Trabajo
+Interfaz Industrial Fullscreen - Monitor de Estacion de Trabajo
 """
 
 import tkinter as tk
@@ -10,6 +10,7 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import logging
+from estado_manager import EstadoSistema
 
 class InterfazIndustrial:
     def __init__(self, monitor):
@@ -522,13 +523,17 @@ class InterfazIndustrial:
         """Actualizar elementos de la interfaz"""
         try:
             # Actualizar estado del sistema
-            self.estado_var.set(self.monitor.estado.estado_actual.value)
+            estado = self.monitor.estado.estado_actual
+            if hasattr(estado, 'value'):
+                self.estado_var.set(estado.value)
+            else:
+                self.estado_var.set(str(estado))
 
             # Actualizar información de la estación
             if self.monitor.estacion_actual:
                 self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
 
-            # Actualizar información de la orden
+            # Actualizar informacion de la orden
             if self.monitor.orden_actual:
                 self.orden_var.set(self.monitor.orden_actual.get('ordenFabricacion', 'N/A'))
                 self.upc_var.set(self.monitor.orden_actual.get('ptUPC', 'N/A'))
@@ -544,6 +549,12 @@ class InterfazIndustrial:
                 else:
                     self.progreso_var.set("0%")
                     self.progreso_barra['value'] = 0
+            else:
+                self.orden_var.set('N/A')
+                self.upc_var.set('N/A')
+                self.meta_var.set('0')
+                self.progreso_var.set("0%")
+                self.progreso_barra['value'] = 0
 
             # Actualizar contador
             self.contador_var.set(str(self.monitor.lecturas_acumuladas))
@@ -799,9 +810,10 @@ class InterfazIndustrial:
                 orden = self.ordenes_disponibles[index]
                 self.monitor.orden_actual = orden
                 self.orden_var.set(orden['ordenFabricacion'])
+                self.upc_var.set(orden.get('ptUPC', 'N/A'))
                 self.meta_var.set(str(orden.get('cantidadFabricar', 0)))
-                self.monitor.estado.cambiar_estado("ESPERANDO_UPC")
-                self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
+                self.monitor.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+                self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']} - UPC: {orden.get('ptUPC', 'N/A')}")
         except Exception as e:
             self.logger.error(f"ERROR: Error en seleccion de orden: {e}")
 
@@ -819,7 +831,11 @@ class InterfazIndustrial:
             self.lista_ordenes.delete(0, tk.END)
 
             for orden in ordenes:
-                texto = f"{orden['ordenFabricacion']} - {orden.get('ptDescripcion', '')} ({orden.get('cantidadFabricar', 0)} pzs)"
+                pt = orden.get('pt', '')
+                desc = orden.get('ptDescripcion', '')[:40]  # Limitar descripcion
+                cantidad = orden.get('cantidadFabricar', 0)
+                upc = orden.get('ptUPC', '')
+                texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({cantidad} pzs)"
                 self.lista_ordenes.insert(tk.END, texto)
 
         except Exception as e:

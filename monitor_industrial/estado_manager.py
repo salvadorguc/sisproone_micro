@@ -41,7 +41,7 @@ class EstadoManager:
             self.estado_actual = nuevo_estado
             self.ultima_actividad = datetime.now()
 
-            self.logger.info(f"🔄 Estado cambiado: {estado_anterior.value} → {nuevo_estado.value}")
+            self.logger.info(f"INFO: Estado cambiado: {estado_anterior.value} -> {nuevo_estado.value}")
 
             # Ejecutar acciones según el estado
             self._ejecutar_acciones_estado(nuevo_estado)

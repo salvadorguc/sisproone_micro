@@ -151,7 +151,8 @@ class MonitorIndustrial:
         """Procesar mensajes RS485 del Pico"""
         while self.running:
             try:
-                if self.estado.estado_actual == "PRODUCIENDO" and self.upc_validado:
+                from estado_manager import EstadoSistema
+                if self.estado.estado_actual == EstadoSistema.PRODUCIENDO and self.upc_validado:
                     mensaje = self.rs485.leer_mensaje()
                     if mensaje:
                         self.procesar_mensaje_pico(mensaje)
@@ -201,10 +202,11 @@ class MonitorIndustrial:
             self.logger.error(f"ERROR: Error procesando mensaje Pico: {e}")
 
     def sincronizar_periodicamente(self):
-        """Sincronizar datos con SISPRO periódicamente"""
+        """Sincronizar datos con SISPRO periodicamente"""
         while self.running:
             try:
-                if self.estado.estado_actual == "PRODUCIENDO" and self.orden_actual:
+                from estado_manager import EstadoSistema
+                if self.estado.estado_actual == EstadoSistema.PRODUCIENDO and self.orden_actual:
                     self.sincronizar_lecturas()
                 time.sleep(300)  # Cada 5 minutos
             except Exception as e:
@@ -302,7 +304,8 @@ class MonitorIndustrial:
             orden = self.interfaz.mostrar_seleccion_orden(ordenes)
             if orden:
                 self.orden_actual = orden
-                self.estado.cambiar_estado("ESPERANDO_UPC")
+                from estado_manager import EstadoSistema
+                self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
                 self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
                 return True
             return False
@@ -320,7 +323,8 @@ class MonitorIndustrial:
             # Validar UPC contra la orden
             if upc == self.orden_actual['ptUPC']:
                 self.upc_validado = upc
-                self.estado.cambiar_estado("PRODUCIENDO")
+                from estado_manager import EstadoSistema
+                self.estado.cambiar_estado(EstadoSistema.PRODUCIENDO)
 
                 # Activar comunicacion con Pico
                 self.activar_pico()
@@ -371,7 +375,8 @@ class MonitorIndustrial:
                 self.orden_actual = None
                 self.upc_validado = None
                 self.lecturas_acumuladas = 0
-                self.estado.cambiar_estado("INACTIVO")
+                from estado_manager import EstadoSistema
+                self.estado.cambiar_estado(EstadoSistema.INACTIVO)
 
                 self.logger.info("SUCCESS: Orden finalizada")
 
@@ -393,8 +398,9 @@ class MonitorIndustrial:
         try:
             self.running = False
 
-            # Finalizar orden si está activa
-            if self.estado.estado_actual == "PRODUCIENDO":
+            # Finalizar orden si esta activa
+            from estado_manager import EstadoSistema
+            if self.estado.estado_actual == EstadoSistema.PRODUCIENDO:
                 self.finalizar_orden()
 
             # Desactivar Pico
