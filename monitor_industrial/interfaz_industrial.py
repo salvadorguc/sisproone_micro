@@ -17,17 +17,17 @@ class InterfazIndustrial:
         self.root = None
         self.logger = logging.getLogger(__name__)
 
-        # Variables de la interfaz
-        self.contador_var = tk.StringVar(value="0")
-        self.meta_var = tk.StringVar(value="0")
-        self.progreso_var = tk.StringVar(value="0%")
-        self.estado_var = tk.StringVar(value="INACTIVO")
-        self.orden_var = tk.StringVar(value="N/A")
-        self.upc_var = tk.StringVar(value="N/A")
-        self.estacion_var = tk.StringVar(value="N/A")
-        self.ultima_sincronizacion_var = tk.StringVar(value="N/A")
-        self.estado_pico_var = tk.StringVar(value="DESCONECTADO")
-        self.tiempo_inactivo_var = tk.StringVar(value="0s")
+        # Variables de la interfaz (se inicializaran despues de crear root)
+        self.contador_var = None
+        self.meta_var = None
+        self.progreso_var = None
+        self.estado_var = None
+        self.orden_var = None
+        self.upc_var = None
+        self.estacion_var = None
+        self.ultima_sincronizacion_var = None
+        self.estado_pico_var = None
+        self.tiempo_inactivo_var = None
 
         # Colores del tema industrial
         self.colores = {
@@ -52,6 +52,19 @@ class InterfazIndustrial:
         """Mostrar la interfaz industrial"""
         try:
             self.root = tk.Tk()
+
+            # Inicializar variables tkinter despues de crear root
+            self.contador_var = tk.StringVar(value="0")
+            self.meta_var = tk.StringVar(value="0")
+            self.progreso_var = tk.StringVar(value="0%")
+            self.estado_var = tk.StringVar(value="INACTIVO")
+            self.orden_var = tk.StringVar(value="N/A")
+            self.upc_var = tk.StringVar(value="N/A")
+            self.estacion_var = tk.StringVar(value="N/A")
+            self.ultima_sincronizacion_var = tk.StringVar(value="N/A")
+            self.estado_pico_var = tk.StringVar(value="DESCONECTADO")
+            self.tiempo_inactivo_var = tk.StringVar(value="0s")
+
             self.configurar_ventana()
             self.crear_interfaz()
             self.iniciar_actualizaciones()

@@ -381,9 +381,10 @@ class MonitorIndustrial:
     def desactivar_pico(self):
         """Desactivar comunicación con el Pico"""
         try:
-            comando = f"{self.estacion_actual['id']}:DESACTIVAR:0"
-            self.rs485.enviar_comando(comando)
-            self.logger.info("SUCCESS: Pico desactivado")
+            if self.estacion_actual:
+                comando = f"{self.estacion_actual['id']}:DESACTIVAR:0"
+                self.rs485.enviar_comando(comando)
+                self.logger.info("SUCCESS: Pico desactivado")
         except Exception as e:
             self.logger.error(f"ERROR: Error desactivando Pico: {e}")
 
