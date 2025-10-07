@@ -35,11 +35,11 @@ class MonitorRS485:
             )
 
             self.running = True
-            self.logger.info(f"✅ Conectado a RS485: {self.port} @ {self.baudrate} bps")
+            self.logger.info(f"SUCCESS: Conectado a RS485: {self.port} @ {self.baudrate} bps")
             return True
 
         except Exception as e:
-            self.logger.error(f"❌ Error conectando RS485: {e}")
+            self.logger.error(f"ERROR: Error conectando RS485: {e}")
             return False
 
     def desconectar(self):
@@ -48,9 +48,9 @@ class MonitorRS485:
             self.running = False
             if self.ser and self.ser.is_open:
                 self.ser.close()
-            self.logger.info("✅ RS485 desconectado")
+            self.logger.info("SUCCESS: RS485 desconectado")
         except Exception as e:
-            self.logger.error(f"❌ Error desconectando RS485: {e}")
+            self.logger.error(f"ERROR: Error desconectando RS485: {e}")
 
     def leer_mensaje(self) -> Optional[str]:
         """Leer mensaje del Pico"""
@@ -61,12 +61,12 @@ class MonitorRS485:
             if self.ser.in_waiting > 0:
                 mensaje = self.ser.readline().decode('utf-8', errors='ignore')
                 if mensaje.strip():
-                    self.logger.debug(f"📨 Mensaje recibido: {mensaje.strip()}")
+                    self.logger.debug(f"INFO: Mensaje recibido: {mensaje.strip()}")
                     return mensaje.strip()
             return None
 
         except Exception as e:
-            self.logger.error(f"❌ Error leyendo mensaje: {e}")
+            self.logger.error(f"ERROR: Error leyendo mensaje: {e}")
             return None
 
     def enviar_comando(self, comando: str) -> bool:
@@ -80,11 +80,11 @@ class MonitorRS485:
             self.ser.write(data)
             self.ser.flush()
 
-            self.logger.info(f"📤 Comando enviado: {comando}")
+            self.logger.info(f"INFO: Comando enviado: {comando}")
             return True
 
         except Exception as e:
-            self.logger.error(f"❌ Error enviando comando: {e}")
+            self.logger.error(f"ERROR: Error enviando comando: {e}")
             return False
 
     def activar_estacion(self, device_id: str, producto_id: str) -> bool:
@@ -140,12 +140,12 @@ class MonitorRS485:
                         try:
                             callback(mensaje)
                         except Exception as e:
-                            self.logger.error(f"❌ Error en callback: {e}")
+                            self.logger.error(f"ERROR: Error en callback: {e}")
 
                 time.sleep(0.1)
 
             except Exception as e:
-                self.logger.error(f"❌ Error procesando mensajes: {e}")
+                self.logger.error(f"ERROR: Error procesando mensajes: {e}")
                 time.sleep(1)
 
     def obtener_mensaje_de_cola(self) -> Optional[str]:

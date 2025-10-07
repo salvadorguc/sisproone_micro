@@ -1,8 +1,8 @@
 # Monitor Industrial SISPRO - Dependencias
-# Raspberry Pi - Estación de Trabajo
+# Raspberry Pi - Estacion de Trabajo
 
-# Comunicación HTTP
-aiohttp>=3.8.0
+# Comunicacion HTTP
+requests>=2.28.0
 
 # Comunicación Serial RS485
 pyserial>=3.5

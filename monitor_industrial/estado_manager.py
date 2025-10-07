@@ -47,7 +47,7 @@ class EstadoManager:
             self._ejecutar_acciones_estado(nuevo_estado)
 
         except Exception as e:
-            self.logger.error(f"❌ Error cambiando estado: {e}")
+            self.logger.error(f"ERROR: Error cambiando estado: {e}")
 
     def _ejecutar_acciones_estado(self, estado: EstadoSistema):
         """Ejecutar acciones según el estado"""
@@ -68,7 +68,7 @@ class EstadoManager:
                 self._acciones_sincronizando()
 
         except Exception as e:
-            self.logger.error(f"❌ Error ejecutando acciones de estado: {e}")
+            self.logger.error(f"ERROR: Error ejecutando acciones de estado: {e}")
 
     def _acciones_inactivo(self):
         """Acciones para estado INACTIVO"""
@@ -112,7 +112,7 @@ class EstadoManager:
             self.logger.debug(f"📡 Estado Pico {device_id}: {estado}")
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando estado Pico: {e}")
+            self.logger.error(f"ERROR: Error actualizando estado Pico: {e}")
 
     def actualizar_tiempo_inactivo(self, device_id: str, tiempo: int):
         """Actualizar tiempo de inactividad del Pico"""
@@ -122,7 +122,7 @@ class EstadoManager:
                 self.estado_pico[device_id]['ultima_actividad'] = datetime.now()
 
         except Exception as e:
-            self.logger.error(f"❌ Error actualizando tiempo inactivo: {e}")
+            self.logger.error(f"ERROR: Error actualizando tiempo inactivo: {e}")
 
     def obtener_estado_pico(self, device_id: str = None) -> Dict[str, Any]:
         """Obtener estado del Pico"""
@@ -137,7 +137,7 @@ class EstadoManager:
                 return self.estado_pico
 
         except Exception as e:
-            self.logger.error(f"❌ Error obteniendo estado Pico: {e}")
+            self.logger.error(f"ERROR: Error obteniendo estado Pico: {e}")
             return {}
 
     def verificar_estado_pico(self, device_id: str) -> bool:
@@ -157,21 +157,21 @@ class EstadoManager:
             return ultima_actividad > tiempo_limite
 
         except Exception as e:
-            self.logger.error(f"❌ Error verificando estado Pico: {e}")
+            self.logger.error(f"ERROR: Error verificando estado Pico: {e}")
             return False
 
     def registrar_error(self, error: str):
         """Registrar error del sistema"""
         try:
             self.errores_consecutivos += 1
-            self.logger.error(f"❌ Error #{self.errores_consecutivos}: {error}")
+            self.logger.error(f"ERROR: Error #{self.errores_consecutivos}: {error}")
 
             # Si hay muchos errores consecutivos, cambiar a estado ERROR
             if self.errores_consecutivos >= 5:
                 self.cambiar_estado(EstadoSistema.ERROR)
 
         except Exception as e:
-            self.logger.error(f"❌ Error registrando error: {e}")
+            self.logger.error(f"ERROR: Error registrando error: {e}")
 
     def limpiar_errores(self):
         """Limpiar contador de errores"""
@@ -190,7 +190,7 @@ class EstadoManager:
             }
 
         except Exception as e:
-            self.logger.error(f"❌ Error obteniendo estadísticas: {e}")
+            self.logger.error(f"ERROR: Error obteniendo estadísticas: {e}")
             return {}
 
     def es_estado_valido(self, estado: str) -> bool:
@@ -227,5 +227,5 @@ class EstadoManager:
             return nuevo_estado in transiciones_validas.get(self.estado_actual, [])
 
         except Exception as e:
-            self.logger.error(f"❌ Error verificando transición de estado: {e}")
+            self.logger.error(f"ERROR: Error verificando transición de estado: {e}")
             return False
