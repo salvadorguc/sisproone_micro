@@ -45,6 +45,7 @@ class MonitorIndustrial:
         self.orden_actual = None
         self.upc_validado = None
         self.lecturas_acumuladas = 0
+        self.ultima_cantidad_sincronizada = 0
         self.ultima_sincronizacion = None
 
         # Threads
@@ -173,22 +174,25 @@ class MonitorIndustrial:
 
             if tag == 'CONT':
                 # Actualizar contador local
+                incremento = valor - self.lecturas_acumuladas
                 self.lecturas_acumuladas = valor
 
-                # Guardar en cache
-                self.cache.guardar_lectura({
-                    'orden_fabricacion': self.orden_actual['ordenFabricacion'],
-                    'upc': self.upc_validado,
-                    'cantidad': valor,
-                    'timestamp': datetime.now(),
-                    'fuente': 'RS485'
-                })
+                # Guardar lectura individual en cache (para velocidad de produccion)
+                if incremento > 0:
+                    self.cache.guardar_lectura({
+                        'orden_fabricacion': self.orden_actual['ordenFabricacion'],
+                        'upc': self.upc_validado,
+                        'cantidad': incremento,
+                        'timestamp': datetime.now(),
+                        'fuente': 'RS485',
+                        'sincronizada': False
+                    })
 
                 # Actualizar interfaz
                 if self.interfaz:
                     self.interfaz.actualizar_contador(valor)
 
-                self.logger.info(f"INFO: Conteo actualizado: {valor}")
+                self.logger.info(f"INFO: Conteo actualizado: {valor} (+{incremento})")
 
             elif tag == 'FIN':
                 # Lectura completada
@@ -229,39 +233,67 @@ class MonitorIndustrial:
     def sincronizar_lecturas(self):
         """Sincronizar lecturas acumuladas con SISPRO"""
         try:
-            lecturas_pendientes = self.cache.obtener_lecturas_pendientes()
-            if not lecturas_pendientes:
+            # Verificar si hay datos para sincronizar
+            if not self.orden_actual or not self.upc_validado:
                 return
 
-            # Agregar lecturas acumuladas
-            cantidad_total = sum(lectura['cantidad'] for lectura in lecturas_pendientes)
+            # Obtener lecturas pendientes del cache
+            lecturas_pendientes = self.cache.obtener_lecturas_pendientes()
 
-            # Enviar a SISPRO
-            success = self.sispro.registrar_lectura_upc(
-                orden_fabricacion=self.orden_actual['ordenFabricacion'],
-                upc=self.upc_validado,
-                estacion_id=self.estacion_actual['id'],
-                usuario_id=self.config.usuario_id
-            )
+            if not lecturas_pendientes:
+                self.logger.info("INFO: No hay lecturas pendientes para sincronizar")
+                return
 
-            if success:
-                # Marcar como sincronizadas
-                self.cache.marcar_como_sincronizadas(lecturas_pendientes)
-                self.ultima_sincronizacion = datetime.now()
+            lecturas_exitosas = 0
+            cantidad_total = 0
 
-                # Actualizar avance
-                avance = self.actualizar_avance_orden()
+            # Enviar cada lectura individual a /api/lecturaUPC/registrar
+            for lectura in lecturas_pendientes:
+                success = self.sispro.registrar_lectura_upc(
+                    orden_fabricacion=lectura['orden_fabricacion'],
+                    upc=lectura['upc'],
+                    estacion_id=self.estacion_actual['id'],
+                    usuario_id=self.config.usuario_id,
+                    cantidad=lectura['cantidad']
+                )
 
-                # Verificar si la orden esta completa
-                if avance and avance.get('cantidadPendiente', 0) == 0:
-                    self.logger.info("INFO: Orden completada, finalizando automaticamente")
-                    # Recargar ordenes para quitar la completa de la lista
-                    if self.interfaz:
-                        self.interfaz.cargar_ordenes()
+                if success:
+                    lecturas_exitosas += 1
+                    cantidad_total += lectura['cantidad']
+                else:
+                    self.logger.warning(f"WARNING: Error sincronizando lectura individual")
 
-                self.logger.info(f"SUCCESS: Sincronizadas {len(lecturas_pendientes)} lecturas (Total: {cantidad_total})")
+            # Si todas las lecturas se sincronizaron, actualizar el avance en ordenEstacion
+            if lecturas_exitosas > 0:
+                # Actualizar avance en ordenEstacion con el total
+                success_avance = self.sispro.registrar_lectura_produccion(
+                    orden_fabricacion=self.orden_actual['ordenFabricacion'],
+                    estacion_id=self.estacion_actual['id'],
+                    usuario_id=self.config.usuario_id,
+                    cantidad=cantidad_total
+                )
+
+                if success_avance:
+                    # Marcar lecturas como sincronizadas
+                    self.cache.marcar_como_sincronizadas(lecturas_pendientes)
+                    self.ultima_cantidad_sincronizada = self.lecturas_acumuladas
+                    self.ultima_sincronizacion = datetime.now()
+
+                    # Actualizar avance en interfaz
+                    avance = self.actualizar_avance_orden()
+
+                    # Verificar si la orden esta completa
+                    if avance and avance.get('cantidadPendiente', 0) == 0:
+                        self.logger.info("INFO: Orden completada, finalizando automaticamente")
+                        # Recargar ordenes para quitar la completa de la lista
+                        if self.interfaz:
+                            self.interfaz.cargar_ordenes()
+
+                    self.logger.info(f"SUCCESS: {lecturas_exitosas} lecturas sincronizadas - Total: {cantidad_total}")
+                else:
+                    self.logger.warning("WARNING: Error actualizando avance en ordenEstacion")
             else:
-                self.logger.warning("WARNING: Error sincronizando lecturas")
+                self.logger.warning("WARNING: No se pudieron sincronizar las lecturas")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error sincronizando: {e}")
@@ -449,6 +481,7 @@ class MonitorIndustrial:
                 self.orden_actual = None
                 self.upc_validado = None
                 self.lecturas_acumuladas = 0
+                self.ultima_cantidad_sincronizada = 0
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.INACTIVO)
 

@@ -131,23 +131,49 @@ class SISPROConnector:
             self.logger.error(f"ERROR: Error obteniendo ordenes: {e}")
             return []
 
-    def registrar_lectura_upc(self, orden_fabricacion: str, upc: str, estacion_id: int, usuario_id: int) -> bool:
-        """Registrar lectura UPC"""
+    def registrar_lectura_upc(self, orden_fabricacion: str, upc: str, estacion_id: int, usuario_id: int, cantidad: int = 1) -> bool:
+        """Registrar lectura UPC con cantidad"""
         try:
             data = {
                 'ordenFabricacion': orden_fabricacion,
                 'upc': upc,
                 'estacionId': estacion_id,
-                'usuarioId': usuario_id
+                'usuarioId': usuario_id,
+                'cantidad': cantidad
             }
             result = self._make_request(
                 'POST',
                 '/api/lecturaUPC/registrar',
                 json=data
             )
+            if result:
+                self.logger.info(f"INFO: Lectura registrada - OF: {orden_fabricacion}, Cantidad: {cantidad}")
             return result and result.get('success', False)
         except Exception as e:
             self.logger.error(f"ERROR: Error registrando lectura UPC: {e}")
+            return False
+
+    def registrar_lectura_produccion(self, orden_fabricacion: str, estacion_id: int, usuario_id: int, cantidad: int) -> bool:
+        """Registrar lectura de produccion RS485 (actualiza ordenEstacion)"""
+        try:
+            data = {
+                'ordenFabricacion': orden_fabricacion,
+                'estacionId': estacion_id,
+                'usuarioId': usuario_id,
+                'cantidad': cantidad,
+                'fuente': 'RS485',
+                'timestamp': datetime.now().isoformat()
+            }
+            result = self._make_request(
+                'POST',
+                '/api/ordenesDeFabricacion/registrarLecturaRS485',
+                json=data
+            )
+            if result:
+                self.logger.info(f"INFO: Produccion registrada - OF: {orden_fabricacion}, Cantidad: {cantidad}")
+            return result and result.get('success', False)
+        except Exception as e:
+            self.logger.error(f"ERROR: Error registrando produccion: {e}")
             return False
 
     def consultar_avance_orden(self, orden_fabricacion: str) -> Optional[Dict]:
