@@ -47,6 +47,18 @@ class Config:
             "estacion": {
                 "id": None,
                 "nombre": None
+            },
+            "database": {
+                "host": "100.24.193.207",
+                "port": 3306,
+                "username": "sisprouser",
+                "password": "B9thd1604$",
+                "database": "sisproone"
+            },
+            "lotes": {
+                "tamaño_maximo": 100,
+                "tiempo_espera": 30,
+                "lecturas_minimas": 10
             }
         }
 
