@@ -36,7 +36,7 @@ class MonitorIndustrial:
         self.sispro = SISPROConnector(self.config)
         self.rs485 = MonitorRS485(self.config)
         self.barcode = BarcodeValidator()
-        self.cache = CacheManager()
+        self.cache = CacheManager(self.config)
         self.estado = EstadoManager()
         self.interfaz = None
 
