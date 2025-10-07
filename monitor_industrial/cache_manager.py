@@ -65,6 +65,9 @@ class CacheManager:
                     timestamp DATETIME NOT NULL,
                     fuente TEXT NOT NULL,
                     sincronizada BOOLEAN DEFAULT FALSE,
+                    estacion_id INTEGER,
+                    usuario_id INTEGER,
+                    orden_fabricacion_id INTEGER,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
@@ -119,18 +122,26 @@ class CacheManager:
         """Guardar lectura de producción"""
         try:
             with self.lock:
+                # Agregar timestamp si no existe
+                if 'timestamp' not in lectura:
+                    lectura['timestamp'] = datetime.now()
+
                 # Guardar en SQLite (persistencia)
                 cursor = self.sqlite_conn.cursor()
                 cursor.execute('''
                     INSERT INTO lecturas_produccion
-                    (orden_fabricacion, upc, cantidad, timestamp, fuente)
-                    VALUES (?, ?, ?, ?, ?)
+                    (orden_fabricacion, upc, cantidad, timestamp, fuente, sincronizada, estacion_id, usuario_id, orden_fabricacion_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     lectura['orden_fabricacion'],
                     lectura['upc'],
                     lectura['cantidad'],
                     lectura['timestamp'],
-                    lectura['fuente']
+                    lectura['fuente'],
+                    lectura.get('sincronizada', False),
+                    lectura.get('estacion_id'),
+                    lectura.get('usuario_id'),
+                    lectura.get('orden_fabricacion_id')
                 ))
                 self.sqlite_conn.commit()
 
@@ -144,7 +155,10 @@ class CacheManager:
                     'cantidad': lectura['cantidad'],
                     'timestamp': lectura['timestamp'].isoformat(),
                     'fuente': lectura['fuente'],
-                    'sincronizada': 'false'
+                    'sincronizada': str(lectura.get('sincronizada', False)),
+                    'estacion_id': str(lectura.get('estacion_id', '')),
+                    'usuario_id': str(lectura.get('usuario_id', '')),
+                    'orden_fabricacion_id': str(lectura.get('orden_fabricacion_id', ''))
                 })
 
                 # Agregar a lista de lecturas pendientes
@@ -155,16 +169,21 @@ class CacheManager:
         except Exception as e:
             self.logger.error(f"ERROR: Error guardando lectura: {e}")
 
-    def obtener_lecturas_pendientes(self) -> List[Dict[str, Any]]:
+    def obtener_lecturas_pendientes(self, limite: int = None) -> List[Dict[str, Any]]:
         """Obtener lecturas pendientes de sincronización"""
         try:
             with self.lock:
                 cursor = self.sqlite_conn.cursor()
-                cursor.execute('''
+                query = '''
                     SELECT * FROM lecturas_produccion
                     WHERE sincronizada = FALSE
                     ORDER BY timestamp ASC
-                ''')
+                '''
+
+                if limite:
+                    query += f' LIMIT {limite}'
+
+                cursor.execute(query)
 
                 lecturas = []
                 for row in cursor.fetchall():
@@ -174,7 +193,10 @@ class CacheManager:
                         'upc': row['upc'],
                         'cantidad': row['cantidad'],
                         'timestamp': datetime.fromisoformat(row['timestamp']),
-                        'fuente': row['fuente']
+                        'fuente': row['fuente'],
+                        'estacion_id': row.get('estacion_id'),
+                        'usuario_id': row.get('usuario_id'),
+                        'orden_fabricacion_id': row.get('orden_fabricacion_id')
                     })
 
                 return lecturas
@@ -182,6 +204,49 @@ class CacheManager:
         except Exception as e:
             self.logger.error(f"ERROR: Error obteniendo lecturas pendientes: {e}")
             return []
+
+    def obtener_lecturas_por_orden(self, orden_fabricacion: str, estacion_id: int) -> List[Dict[str, Any]]:
+        """Obtener lecturas de una orden específica"""
+        try:
+            with self.lock:
+                cursor = self.sqlite_conn.cursor()
+                cursor.execute('''
+                    SELECT * FROM lecturas_produccion
+                    WHERE orden_fabricacion = ? AND estacion_id = ?
+                    ORDER BY timestamp ASC
+                ''', (orden_fabricacion, estacion_id))
+
+                lecturas = []
+                for row in cursor.fetchall():
+                    lecturas.append({
+                        'id': row['id'],
+                        'orden_fabricacion': row['orden_fabricacion'],
+                        'upc': row['upc'],
+                        'cantidad': row['cantidad'],
+                        'timestamp': datetime.fromisoformat(row['timestamp']),
+                        'fuente': row['fuente'],
+                        'estacion_id': row.get('estacion_id'),
+                        'usuario_id': row.get('usuario_id'),
+                        'orden_fabricacion_id': row.get('orden_fabricacion_id')
+                    })
+
+                return lecturas
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error obteniendo lecturas por orden: {e}")
+            return []
+
+    def contar_lecturas_pendientes(self) -> int:
+        """Contar lecturas pendientes de sincronización"""
+        try:
+            with self.lock:
+                cursor = self.sqlite_conn.cursor()
+                cursor.execute('SELECT COUNT(*) FROM lecturas_produccion WHERE sincronizada = FALSE')
+                return cursor.fetchone()[0]
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error contando lecturas pendientes: {e}")
+            return 0
 
     def marcar_como_sincronizadas(self, lecturas: List[Dict[str, Any]]):
         """Marcar lecturas como sincronizadas"""

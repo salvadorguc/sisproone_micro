@@ -26,6 +26,7 @@ from sispro_connector import SISPROConnector
 from monitor_rs485 import MonitorRS485
 from barcode_validator import BarcodeValidator
 from cache_manager import CacheManager
+from database_manager import DatabaseManager
 from estado_manager import EstadoManager
 from interfaz_industrial import InterfazIndustrial
 
@@ -37,6 +38,7 @@ class MonitorIndustrial:
         self.rs485 = MonitorRS485(self.config)
         self.barcode = BarcodeValidator()
         self.cache = CacheManager(self.config)
+        self.database = DatabaseManager(self.config.__dict__)
         self.estado = EstadoManager()
         self.interfaz = None
 
@@ -47,6 +49,7 @@ class MonitorIndustrial:
         self.lecturas_acumuladas = 0
         self.ultima_cantidad_sincronizada = 0
         self.ultima_sincronizacion = None
+        self.receta_actual = None
 
         # Threads
         self.thread_rs485 = None
@@ -91,6 +94,12 @@ class MonitorIndustrial:
                 self.logger.error("ERROR: Error conectando a SISPRO")
                 return False
             self.logger.info("SUCCESS: Conectado a SISPRO")
+
+            # 4. Conectar a base de datos MySQL
+            if not self.database.conectar():
+                self.logger.error("ERROR: Error conectando a MySQL")
+                return False
+            self.logger.info("SUCCESS: Conectado a MySQL")
 
             # 4. Conectar RS485
             if not self.rs485.conectar():
@@ -185,7 +194,10 @@ class MonitorIndustrial:
                         'cantidad': incremento,
                         'timestamp': datetime.now(),
                         'fuente': 'RS485',
-                        'sincronizada': False
+                        'sincronizada': False,
+                        'estacion_id': self.estacion_actual['id'],
+                        'usuario_id': self.config.usuario_id,
+                        'orden_fabricacion_id': self.orden_actual.get('id')
                     })
 
                 # Actualizar interfaz
@@ -231,50 +243,46 @@ class MonitorIndustrial:
                 time.sleep(60)
 
     def sincronizar_lecturas(self):
-        """Sincronizar lecturas acumuladas con SISPRO"""
+        """Sincronizar lecturas acumuladas con MySQL"""
         try:
             # Verificar si hay datos para sincronizar
             if not self.orden_actual or not self.upc_validado:
                 return
 
             # Obtener lecturas pendientes del cache
-            lecturas_pendientes = self.cache.obtener_lecturas_pendientes()
+            lecturas_pendientes = self.cache.obtener_lecturas_pendientes(
+                limite=self.config.lotes.get('tamaño_maximo', 100)
+            )
 
             if not lecturas_pendientes:
                 self.logger.info("INFO: No hay lecturas pendientes para sincronizar")
                 return
 
-            lecturas_exitosas = 0
-            cantidad_total = 0
-
-            # Enviar cada lectura individual a /api/lecturaUPC/registrar
+            # Preparar datos para MySQL
+            lecturas_mysql = []
             for lectura in lecturas_pendientes:
-                success = self.sispro.registrar_lectura_upc(
-                    orden_fabricacion=lectura['orden_fabricacion'],
-                    upc=lectura['upc'],
-                    estacion_id=self.estacion_actual['id'],
-                    usuario_id=self.config.usuario_id,
-                    cantidad=lectura['cantidad']
-                )
+                lecturas_mysql.append({
+                    'orden_fabricacion': lectura['orden_fabricacion'],
+                    'upc': lectura['upc'],
+                    'cantidad': lectura['cantidad'],
+                    'timestamp': lectura['timestamp'],
+                    'estacion_id': lectura['estacion_id'],
+                    'usuario_id': lectura['usuario_id'],
+                    'orden_fabricacion_id': lectura['orden_fabricacion_id']
+                })
 
-                if success:
-                    lecturas_exitosas += 1
-                    cantidad_total += lectura['cantidad']
-                else:
-                    self.logger.warning(f"WARNING: Error sincronizando lectura individual")
+            # Cargar lecturas en lote a MySQL
+            success, cantidad_cargada = self.database.cargar_lecturas_lote(lecturas_mysql)
 
-            # Si todas las lecturas se sincronizaron, actualizar el avance en ordenEstacion
-            if lecturas_exitosas > 0:
-                # Actualizar avance en ordenEstacion con el total
-                success_avance = self.sispro.registrar_lectura_produccion(
-                    orden_fabricacion=self.orden_actual['ordenFabricacion'],
-                    estacion_id=self.estacion_actual['id'],
-                    usuario_id=self.config.usuario_id,
-                    cantidad=cantidad_total
+            if success and cantidad_cargada > 0:
+                # Actualizar ordenEstacion con las lecturas cargadas
+                success_avance = self.database.actualizar_orden_estacion(
+                    self.orden_actual['ordenFabricacion'],
+                    self.estacion_actual['id']
                 )
 
                 if success_avance:
-                    # Marcar lecturas como sincronizadas
+                    # Marcar lecturas como sincronizadas en cache
                     self.cache.marcar_como_sincronizadas(lecturas_pendientes)
                     self.ultima_cantidad_sincronizada = self.lecturas_acumuladas
                     self.ultima_sincronizacion = datetime.now()
@@ -289,11 +297,11 @@ class MonitorIndustrial:
                         if self.interfaz:
                             self.interfaz.cargar_ordenes()
 
-                    self.logger.info(f"SUCCESS: {lecturas_exitosas} lecturas sincronizadas - Total: {cantidad_total}")
+                    self.logger.info(f"SUCCESS: {cantidad_cargada} lecturas cargadas en MySQL")
                 else:
-                    self.logger.warning("WARNING: Error actualizando avance en ordenEstacion")
+                    self.logger.warning("WARNING: Error actualizando ordenEstacion")
             else:
-                self.logger.warning("WARNING: No se pudieron sincronizar las lecturas")
+                self.logger.warning("WARNING: No se pudieron cargar las lecturas en MySQL")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error sincronizando: {e}")
@@ -516,12 +524,33 @@ class MonitorIndustrial:
             # Cerrar conexiones
             self.rs485.desconectar()
             self.sispro.desconectar()
+            self.database.desconectar()
             self.cache.cerrar()
 
             self.logger.info("INFO: Monitor detenido")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error deteniendo monitor: {e}")
+
+    def cargar_receta_orden(self):
+        """Cargar receta de la orden actual"""
+        try:
+            if not self.orden_actual:
+                return
+
+            # Obtener receta desde MySQL
+            self.receta_actual = self.database.obtener_receta_orden(
+                self.orden_actual['ordenFabricacion']
+            )
+
+            if self.receta_actual and self.interfaz:
+                self.interfaz.mostrar_receta(self.receta_actual)
+                self.logger.info(f"SUCCESS: Receta cargada para orden {self.orden_actual['ordenFabricacion']}")
+            else:
+                self.logger.warning(f"WARNING: No se pudo cargar receta para orden {self.orden_actual['ordenFabricacion']}")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error cargando receta: {e}")
 
 def main():
     """Función principal"""

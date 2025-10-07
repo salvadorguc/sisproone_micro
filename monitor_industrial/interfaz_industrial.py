@@ -30,6 +30,10 @@ class InterfazIndustrial:
         self.estado_pico_var = None
         self.tiempo_inactivo_var = None
 
+        # Panel de receta
+        self.panel_receta = None
+        self.receta_text = None
+
         # Colores del tema industrial
         self.colores = {
             'fondo': '#1a1a1a',
@@ -107,6 +111,7 @@ class InterfazIndustrial:
             # Crear paneles
             self.crear_panel_superior(main_frame)
             self.crear_panel_central(main_frame)
+            self.crear_panel_receta(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
 
@@ -352,6 +357,41 @@ class InterfazIndustrial:
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel central: {e}")
 
+    def crear_panel_receta(self, parent):
+        """Crear panel de receta de la orden"""
+        try:
+            self.panel_receta = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
+            self.panel_receta.pack(fill=tk.X, pady=(0, 10))
+
+            # Titulo del panel
+            tk.Label(
+                self.panel_receta,
+                text="RECETA DE PRODUCCION",
+                font=self.fuente_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=10)
+
+            # Area de texto para la receta
+            self.receta_text = tk.Text(
+                self.panel_receta,
+                height=8,
+                font=self.fuente_pequena,
+                fg=self.colores['texto'],
+                bg=self.colores['fondo'],
+                wrap=tk.WORD,
+                state=tk.DISABLED
+            )
+            self.receta_text.pack(fill=tk.X, padx=20, pady=(0, 10))
+
+            # Scrollbar para el texto
+            scrollbar = tk.Scrollbar(self.panel_receta, orient=tk.VERTICAL, command=self.receta_text.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            self.receta_text.config(yscrollcommand=scrollbar.set)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error creando panel receta: {e}")
+
     def crear_panel_inferior(self, parent):
         """Crear panel inferior con botones de control"""
         try:
@@ -567,6 +607,37 @@ class InterfazIndustrial:
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando interfaz: {e}")
+
+    def mostrar_receta(self, receta):
+        """Mostrar receta de la orden en el panel"""
+        try:
+            if not self.receta_text or not receta:
+                return
+
+            # Habilitar edicion temporalmente
+            self.receta_text.config(state=tk.NORMAL)
+            self.receta_text.delete(1.0, tk.END)
+
+            # Formatear receta
+            texto_receta = f"""
+ORDEN: {receta.get('ordenFabricacion', 'N/A')}
+PRODUCTO: {receta.get('articuloPT', 'N/A')} - {receta.get('descripcionPT', 'N/A')}
+CANTIDAD: {receta.get('cantidadPlanificada', 'N/A')}
+CAJA: {receta.get('caja', 'N/A')}
+CLIENTE: {receta.get('razonSocial', 'N/A')}
+
+MATERIALES REQUERIDOS:
+"""
+
+            # Agregar partidas
+            for partida in receta.get('partidas', []):
+                texto_receta += f"• {partida.get('articuloMP', 'N/A')} - {partida.get('descripcionMP', 'N/A')} (Cant: {partida.get('cantidad', 'N/A')})\n"
+
+            self.receta_text.insert(1.0, texto_receta)
+            self.receta_text.config(state=tk.DISABLED)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando receta: {e}")
 
     def actualizar_contador(self, valor: int):
         """Actualizar contador en tiempo real"""
