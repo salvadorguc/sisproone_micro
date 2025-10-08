@@ -452,7 +452,7 @@ class InterfazIndustrial:
 
             # Barra de progreso
             progreso_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            progreso_frame.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=20)
+            progreso_frame.pack(side=tk.RIGHT, padx=20)
 
             self.progreso_barra = tk.Scale(
                 progreso_frame,
@@ -466,7 +466,7 @@ class InterfazIndustrial:
                 troughcolor=self.colores['fondo'],
                 activebackground=self.colores['accento']
             )
-            self.progreso_barra.pack(fill=tk.X, pady=5)
+            self.progreso_barra.pack(pady=5)
 
             self.configurar_estilo_progreso()
 
