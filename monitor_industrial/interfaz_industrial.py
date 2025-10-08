@@ -1078,13 +1078,6 @@ MATERIALES REQUERIDOS:
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando ultima lectura: {e}")
 
-    def mostrar(self):
-        """Mostrar interfaz"""
-        try:
-            self.root.mainloop()
-            self.logger.info("SUCCESS: Interfaz industrial mostrada")
-        except Exception as e:
-            self.logger.error(f"ERROR: Error mostrando interfaz: {e}")
 
     def ocultar(self):
         """Ocultar interfaz"""
