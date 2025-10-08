@@ -167,7 +167,6 @@ class InterfazIndustrial:
             # Crear paneles
             self.crear_panel_superior(main_frame)
             self.crear_panel_central(main_frame)
-            self.crear_panel_receta(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
 
@@ -310,8 +309,8 @@ class InterfazIndustrial:
             # Titulo del panel
             tk.Label(
                 panel,
-                text="MATERIALES DE LA ORDEN",
-                font=self.fuente_grande,  # Mismo tamaño que ÓRDENES ASIGNADAS
+                text="MATERIALES DE LA ORDEN DE FABRICACIÓN",
+                font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).pack(pady=10)
@@ -323,8 +322,8 @@ class InterfazIndustrial:
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=12,  # Altura aumentada
-                font=self.fuente_normal,  # Aumentar fuente 50% (de pequeña a normal)
+                height=25,  # Altura significativamente aumentada para usar todo el espacio
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
@@ -339,46 +338,6 @@ class InterfazIndustrial:
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel central: {e}")
-
-    def crear_panel_receta(self, parent):
-        """Crear panel de receta con ordenes asignadas"""
-        try:
-            self.panel_receta = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            self.panel_receta.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
-
-            # Titulo del panel
-            tk.Label(
-                self.panel_receta,
-                text="ORDENES ASIGNADAS",
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).pack(pady=10)
-
-            # Frame para lista de ordenes
-            ordenes_frame = tk.Frame(self.panel_receta, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
-            ordenes_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
-
-            # Listbox para ordenes
-            self.lista_ordenes = tk.Listbox(
-                ordenes_frame,
-                font=self.fuente_pequena,  # Disminuir fuente 20%
-                fg=self.colores['texto'],
-                bg=self.colores['panel'],
-                selectbackground=self.colores['accento'],
-                selectmode=tk.SINGLE,
-                height=4  # Disminuir altura 50%
-            )
-            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-            self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
-
-            # Scrollbar para la lista
-            scrollbar_ordenes = tk.Scrollbar(ordenes_frame, orient=tk.VERTICAL, command=self.lista_ordenes.yview)
-            scrollbar_ordenes.pack(side=tk.RIGHT, fill=tk.Y)
-            self.lista_ordenes.config(yscrollcommand=scrollbar_ordenes.set)
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error creando panel receta: {e}")
 
     def crear_panel_estado(self, parent):
         """Crear panel de estado con informacion de produccion"""
@@ -757,39 +716,6 @@ class InterfazIndustrial:
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando seleccion de orden: {e}")
             return None
-
-    def on_orden_seleccionada(self, event):
-        """Manejar seleccion de orden desde la lista"""
-        try:
-            # Verificar si hay una lectura activa (bloquear selección solo si está produciendo)
-            if (hasattr(self.monitor, 'estado') and
-                self.monitor.estado.estado_actual == EstadoSistema.PRODUCIENDO):
-                messagebox.showwarning(
-                    "Lectura Activa",
-                    "Hay una lectura en proceso. Use 'CAMBIAR ORDEN' para cambiar a otra orden."
-                )
-                return
-
-            seleccion = self.lista_ordenes.curselection()
-            if seleccion and hasattr(self, 'ordenes_disponibles'):
-                index = seleccion[0]
-                orden = self.ordenes_disponibles[index]
-                self.monitor.orden_actual = orden
-                self.orden_var.set(orden['ordenFabricacion'])
-                self.upc_var.set(orden.get('ptUPC', 'N/A'))
-                # Mostrar pendiente/total
-                pendiente = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
-                total = orden.get('cantidadFabricar', 0)
-                self.meta_var.set(f"{pendiente}/{total}")
-                self.monitor.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
-
-                # Cargar receta de la orden seleccionada
-                self.logger.info(f"INFO: Cargando receta para orden seleccionada: {orden['ordenFabricacion']}")
-                self.monitor.cargar_receta_orden()
-
-                self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']} - UPC: {orden.get('ptUPC', 'N/A')}")
-        except Exception as e:
-            self.logger.error(f"ERROR: Error en seleccion de orden: {e}")
 
     def cargar_ordenes(self):
         """Cargar ordenes de la estacion actual"""
@@ -1348,15 +1274,15 @@ MATERIALES REQUERIDOS:
 
             # Actualizar fuentes dinámicamente basadas en el valor del contador
             fuente_dinamica = self.calcular_fuente_dinamica(valor)
-            
+
             # Actualizar fuente del contador
             if hasattr(self, 'contador_label'):
                 self.contador_label.config(font=fuente_dinamica)
-            
+
             # Actualizar fuente de la meta
             if hasattr(self, 'meta_label'):
                 self.meta_label.config(font=fuente_dinamica)
-            
+
             # Actualizar fuente del progreso
             if hasattr(self, 'progreso_label'):
                 self.progreso_label.config(font=fuente_dinamica)
@@ -1554,9 +1480,7 @@ Salto detectado: +{salto} lecturas
             else:
                 self.logger.warning("WARNING: receta_text no existe o es None")
 
-            # Limpiar selección en la lista de órdenes
-            if hasattr(self, 'lista_ordenes') and self.lista_ordenes:
-                self.lista_ordenes.selection_clear(0, tk.END)
+            # Nota: La lista de órdenes ahora se maneja solo a través del modal
 
             # Actualizar estado
             if hasattr(self, 'estado_var'):
