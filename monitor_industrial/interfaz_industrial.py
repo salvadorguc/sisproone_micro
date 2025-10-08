@@ -56,7 +56,11 @@ class InterfazIndustrial:
             'boton_azul': '#1e40af',      # Azul más oscuro
             'boton_verde': '#059669',     # Verde más oscuro
             'boton_rojo': '#dc2626',      # Rojo más oscuro
-            'boton_info': '#0284c7'       # Azul info más oscuro
+            'boton_info': '#0284c7',      # Azul info más oscuro
+            # Colores para botones superiores
+            'boton_cambiar': '#6b7280',   # Gris para cambiar estación
+            'boton_cerrar': '#dc2626',    # Rojo para cerrar orden
+            'texto_boton': '#ffffff'      # Texto blanco para botones
         }
 
         # Fuentes
@@ -225,12 +229,13 @@ class InterfazIndustrial:
             # Boton cambiar estacion (pequeño)
             btn_cambiar = tk.Button(
                 config_frame,
-                text="Cambiar",
+                text="Cambiar Estacion",
                 font=self.fuente_pequena,
-                fg=self.colores['texto'],
-                bg=self.colores['borde'],
+                fg=self.colores['texto_boton'],
+                bg=self.colores['boton_cambiar'],
+                activebackground='#4b5563',
                 command=self.seleccionar_estacion,
-                width=10
+                width=15
             )
             btn_cambiar.grid(row=0, column=2, padx=5)
 
@@ -239,8 +244,9 @@ class InterfazIndustrial:
                 config_frame,
                 text="CERRAR ORDEN",
                 font=self.fuente_pequena,
-                fg=self.colores['texto'],
-                bg=self.colores['error'],
+                fg=self.colores['texto_boton'],
+                bg=self.colores['boton_cerrar'],
+                activebackground='#b91c1c',
                 command=self.cerrar_orden,
                 width=12
             )
@@ -276,10 +282,10 @@ class InterfazIndustrial:
             tk.Label(
                 panel,
                 text="MATERIALES DE LA ORDEN",
-                font=self.fuente_titulo,
+                font=self.fuente_grande,  # Mismo tamaño que ÓRDENES ASIGNADAS
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).pack(pady=20)
+            ).pack(pady=10)
 
             # Frame para el texto de la receta
             text_frame = tk.Frame(panel, bg=self.colores['panel'])
@@ -289,7 +295,7 @@ class InterfazIndustrial:
             self.receta_text = tk.Text(
                 text_frame,
                 height=12,  # Altura aumentada
-                font=self.fuente_pequena,
+                font=self.fuente_normal,  # Aumentar fuente 50% (de pequeña a normal)
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
@@ -327,12 +333,12 @@ class InterfazIndustrial:
             # Listbox para ordenes
             self.lista_ordenes = tk.Listbox(
                 ordenes_frame,
-                font=self.fuente_normal,
+                font=self.fuente_pequena,  # Disminuir fuente 20%
                 fg=self.colores['texto'],
                 bg=self.colores['panel'],
                 selectbackground=self.colores['accento'],
                 selectmode=tk.SINGLE,
-                height=8
+                height=4  # Disminuir altura 50%
             )
             self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
             self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
@@ -476,6 +482,7 @@ class InterfazIndustrial:
                 fg='white',
                 bg=self.colores['boton_azul'],
                 activebackground='#1d4ed8',
+                activeforeground='white',
                 command=self.validar_upc,
                 width=boton_width,
                 height=boton_height
@@ -490,6 +497,7 @@ class InterfazIndustrial:
                 fg='white',
                 bg=self.colores['boton_verde'],
                 activebackground='#047857',
+                activeforeground='white',
                 command=self.cambiar_orden,
                 width=boton_width,
                 height=boton_height
@@ -504,6 +512,7 @@ class InterfazIndustrial:
                 fg='white',
                 bg=self.colores['boton_info'],
                 activebackground='#0369a1',
+                activeforeground='white',
                 command=self.sincronizar,
                 width=boton_width,
                 height=boton_height
@@ -518,6 +527,7 @@ class InterfazIndustrial:
                 fg='white',
                 bg=self.colores['boton_rojo'],
                 activebackground='#b91c1c',
+                activeforeground='white',
                 command=self.salir,
                 width=boton_width,
                 height=boton_height
@@ -720,7 +730,7 @@ class InterfazIndustrial:
         """Manejar seleccion de orden desde la lista"""
         try:
             # Verificar si hay una lectura activa (bloquear selección solo si está produciendo)
-            if (hasattr(self.monitor, 'estado') and 
+            if (hasattr(self.monitor, 'estado') and
                 self.monitor.estado.estado_actual == EstadoSistema.PRODUCIENDO):
                 messagebox.showwarning(
                     "Lectura Activa",
@@ -1101,7 +1111,7 @@ MATERIALES REQUERIDOS:
         try:
             ahora = datetime.now()
             tiempo_str = ahora.strftime("%H:%M:%S")
-            self.reloj_var.set(f"HORA: {tiempo_str}")
+            self.reloj_var.set(tiempo_str)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando reloj: {e}")
