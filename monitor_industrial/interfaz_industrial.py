@@ -838,11 +838,14 @@ class InterfazIndustrial:
                 total = orden.get('cantidadFabricar', 0)
                 self.meta_var.set(f"{pendiente}/{total}")
 
-            # Actualizar Progreso
+            # Actualizar Progreso (basado en lo completado de lo pendiente)
             if hasattr(self, 'progreso_var'):
-                if pendiente > 0:
-                    # Progreso basado en cantidad pendiente (lo que falta por hacer)
-                    progreso = ((total - pendiente) / total) * 100
+                # El progreso se calcula sobre el pendiente_inicial, no sobre el total
+                pendiente_inicial = self.monitor.pendiente_inicial if hasattr(self.monitor, 'pendiente_inicial') and self.monitor.pendiente_inicial > 0 else pendiente
+                if pendiente_inicial > 0:
+                    # Progreso = lecturas completadas / pendiente inicial
+                    lecturas_completadas = pendiente_inicial - pendiente
+                    progreso = (lecturas_completadas / pendiente_inicial) * 100
                     self.progreso_var.set(f"{progreso:.1f}%")
                 else:
                     self.progreso_var.set("100%")
@@ -1065,11 +1068,10 @@ class InterfazIndustrial:
 
             # Actualizar progreso
             if self.monitor.orden_actual:
-                meta_pendiente = self.monitor.orden_actual.get('cantidadPendiente', self.monitor.orden_actual.get('cantidadFabricar', 0))
-                meta_total = self.monitor.orden_actual.get('cantidadFabricar', 0)
-                if meta_total > 0:
-                    # Progreso basado en cantidad pendiente
-                    progreso = ((meta_total - meta_pendiente) / meta_total) * 100
+                pendiente_inicial = self.monitor.pendiente_inicial if hasattr(self.monitor, 'pendiente_inicial') and self.monitor.pendiente_inicial > 0 else 0
+                if pendiente_inicial > 0:
+                    # Progreso = contador actual / pendiente inicial
+                    progreso = (self.monitor.contador_actual / pendiente_inicial) * 100
                     # Limitar progreso a 100%
                     if progreso > 100:
                         progreso = 100
@@ -1319,11 +1321,12 @@ MATERIALES REQUERIDOS:
         try:
             self.contador_var.set(str(valor))
 
-            # Actualizar progreso basado en cantidad pendiente
+            # Actualizar progreso basado en cantidad pendiente inicial
             if self.monitor.orden_actual:
-                meta_pendiente = self.monitor.orden_actual.get('cantidadPendiente', self.monitor.orden_actual.get('cantidadFabricar', 0))
-                if meta_pendiente > 0:
-                    progreso = (valor / meta_pendiente) * 100
+                pendiente_inicial = self.monitor.pendiente_inicial if hasattr(self.monitor, 'pendiente_inicial') and self.monitor.pendiente_inicial > 0 else 0
+                if pendiente_inicial > 0:
+                    # Progreso = contador actual / pendiente inicial
+                    progreso = (valor / pendiente_inicial) * 100
                     # Limitar progreso a 100%
                     if progreso > 100:
                         progreso = 100

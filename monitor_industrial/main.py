@@ -51,6 +51,7 @@ class MonitorIndustrial:
         self.ultima_cantidad_sincronizada = 0
         self.ultima_sincronizacion = None
         self.receta_actual = None
+        self.pendiente_inicial = 0  # Cantidad pendiente al seleccionar la orden
 
         # Threads
         self.thread_rs485 = None
@@ -417,6 +418,9 @@ class MonitorIndustrial:
             if orden:
                 self.logger.info(f"INFO: Orden seleccionada del diálogo: {orden}")
                 self.orden_actual = orden
+                
+                # Guardar cantidad pendiente inicial para cálculo de progreso
+                self.pendiente_inicial = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
                 
                 # Resetear contador para nueva orden
                 self.contador_actual = 0
