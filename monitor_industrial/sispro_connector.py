@@ -125,7 +125,18 @@ class SISPROConnector:
                 params=params
             )
             if result and result.get('success'):
-                return result.get('data', [])
+                data = result.get('data', [])
+                self.logger.info(f"INFO: API devolvió {len(data)} órdenes para estación {estacion_id}")
+                # Log de las primeras 5 órdenes para debugging
+                for i, orden in enumerate(data[:5], 1):
+                    of = orden.get('ordenFabricacion', 'N/A')
+                    pendiente = orden.get('cantidadPendiente', 0)
+                    fabricar = orden.get('cantidadFabricar', 0)
+                    is_closed = orden.get('isClosed', False)
+                    self.logger.info(f"  API[{i}]: OF: {of} | Pendiente: {pendiente}/{fabricar} | Cerrada: {is_closed}")
+                if len(data) > 5:
+                    self.logger.info(f"  ... y {len(data) - 5} órdenes más")
+                return data
             return []
         except Exception as e:
             self.logger.error(f"ERROR: Error obteniendo ordenes: {e}")

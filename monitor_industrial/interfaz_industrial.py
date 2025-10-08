@@ -737,6 +737,16 @@ class InterfazIndustrial:
 
             self.logger.info(f"INFO: Se obtuvieron {len(ordenes) if ordenes else 0} ordenes de la API")
 
+            # Log detallado de todas las órdenes obtenidas
+            if ordenes:
+                self.logger.info("INFO: Lista completa de órdenes de la API:")
+                for i, orden in enumerate(ordenes, 1):
+                    of = orden.get('ordenFabricacion', 'N/A')
+                    pendiente = orden.get('cantidadPendiente', 0)
+                    fabricar = orden.get('cantidadFabricar', 0)
+                    is_closed = orden.get('isClosed', False)
+                    self.logger.info(f"  {i}. OF: {of} | Pendiente: {pendiente}/{fabricar} | Cerrada: {is_closed}")
+
             # Filtrar solo ordenes pendientes (no completadas y no cerradas)
             ordenes_pendientes = [
                 orden for orden in ordenes
@@ -744,6 +754,17 @@ class InterfazIndustrial:
             ]
 
             self.logger.info(f"INFO: Se filtraron {len(ordenes_pendientes)} ordenes pendientes")
+            
+            # Log detallado de órdenes pendientes filtradas
+            if ordenes_pendientes:
+                self.logger.info("INFO: Órdenes pendientes filtradas:")
+                for i, orden in enumerate(ordenes_pendientes, 1):
+                    of = orden.get('ordenFabricacion', 'N/A')
+                    pendiente = orden.get('cantidadPendiente', 0)
+                    fabricar = orden.get('cantidadFabricar', 0)
+                    self.logger.info(f"  {i}. OF: {of} | Pendiente: {pendiente}/{fabricar}")
+            else:
+                self.logger.warning("WARNING: No se encontraron órdenes pendientes después del filtrado")
             self.ordenes_disponibles = ordenes_pendientes
             self.lista_ordenes.delete(0, tk.END)
 
