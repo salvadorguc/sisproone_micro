@@ -1038,14 +1038,6 @@ MATERIALES REQUERIDOS:
             import traceback
             self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
 
-    def actualizar_contador(self, valor: int):
-        """Actualizar contador en tiempo real"""
-        try:
-            self.contador_var.set(str(valor))
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando contador: {e}")
-
     def actualizar_reloj(self):
         """Actualizar reloj en tiempo real"""
         try:

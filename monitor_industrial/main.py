@@ -184,6 +184,7 @@ class MonitorIndustrial:
                 # Actualizar contador local
                 incremento = valor - self.lecturas_acumuladas
                 self.lecturas_acumuladas = valor
+                self.contador_actual = valor
 
                 # Guardar lectura individual en cache (para velocidad de produccion)
                 if incremento > 0:
@@ -402,6 +403,9 @@ class MonitorIndustrial:
             # Validar UPC contra la orden
             if upc == self.orden_actual['ptUPC']:
                 self.upc_validado = upc
+                # Resetear contador para nueva orden
+                self.contador_actual = 0
+                self.lecturas_acumuladas = 0
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.PRODUCIENDO)
 
@@ -442,6 +446,7 @@ class MonitorIndustrial:
 
                 if respuesta:
                     # Usar contador actual
+                    self.contador_actual = contador_actual
                     # Actualizar interfaz con el contador existente
                     if self.interfaz:
                         self.interfaz.actualizar_contador(contador_actual)
