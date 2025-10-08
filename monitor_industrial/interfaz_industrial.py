@@ -96,7 +96,7 @@ class InterfazIndustrial:
             self.contador_var = tk.StringVar(value="0")
             self.meta_var = tk.StringVar(value="0/0")
             self.progreso_var = tk.StringVar(value="0%")
-            self.estado_var = tk.StringVar(value="INACTIVO")
+            self.estado_var = tk.StringVar(value="Estado: INACTIVO")
             self.orden_var = tk.StringVar(value="N/A")
             self.upc_var = tk.StringVar(value="N/A")
             self.estacion_var = tk.StringVar(value="N/A")
@@ -254,22 +254,22 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=0, column=1, padx=5, sticky=tk.W)
 
-            # Boton cambiar estacion (pequeño)
-            btn_cambiar = tk.Button(
+            # Boton cambiar estacion
+            self.btn_cambiar_estacion = tk.Button(
                 config_frame,
-                text="Cambiar Estacion",
+                text="CAMBIAR ESTACION",
                 font=self.fuente_pequena,
                 fg='white',
                 bg=self.colores['boton_cambiar'],
                 activebackground='#4b5563',
                 activeforeground='white',
                 command=self.seleccionar_estacion,
-                width=15
+                width=20
             )
-            btn_cambiar.grid(row=0, column=2, padx=5)
+            self.btn_cambiar_estacion.grid(row=0, column=2, padx=5)
 
             # Boton cerrar orden (protegido)
-            btn_cerrar = tk.Button(
+            self.btn_cerrar_orden = tk.Button(
                 config_frame,
                 text="CERRAR ORDEN",
                 font=self.fuente_pequena,
@@ -278,26 +278,19 @@ class InterfazIndustrial:
                 activebackground='#b91c1c',
                 activeforeground='white',
                 command=self.cerrar_orden,
-                width=12
+                width=15,
+                state=tk.DISABLED  # Deshabilitado hasta que se seleccione una orden
             )
-            btn_cerrar.grid(row=0, column=3, padx=10)
+            self.btn_cerrar_orden.grid(row=0, column=3, padx=10)
 
             # Estado del sistema
-            tk.Label(
-                config_frame,
-                text="Estado:",
-                font=self.fuente_normal,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['panel']
-            ).grid(row=1, column=0, padx=5, sticky=tk.E)
-
             tk.Label(
                 config_frame,
                 textvariable=self.estado_var,
                 font=self.fuente_normal,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=1, column=1, columnspan=2, padx=5, sticky=tk.W)
+            ).grid(row=1, column=0, columnspan=3, padx=5, sticky=tk.W)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
@@ -797,6 +790,10 @@ class InterfazIndustrial:
             # Actualizar la variable de la estación en la interfaz
             if hasattr(self, 'estacion_var') and self.monitor.estacion_actual:
                 self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
+                
+                # Deshabilitar el boton de cambiar estacion una vez seleccionada
+                if hasattr(self, 'btn_cambiar_estacion'):
+                    self.btn_cambiar_estacion.config(state=tk.DISABLED)
 
             # Cargar ordenes de la nueva estacion inmediatamente
             self.ultima_recarga_ordenes = None  # Forzar recarga
@@ -858,6 +855,10 @@ class InterfazIndustrial:
 
             # Cargar receta de la orden
             self.monitor.cargar_receta_orden()
+            
+            # Habilitar boton de cerrar orden
+            if hasattr(self, 'btn_cerrar_orden'):
+                self.btn_cerrar_orden.config(state=tk.NORMAL)
 
             self.logger.info(f"SUCCESS: Campos actualizados para orden {orden.get('ordenFabricacion', 'N/A')}")
 
@@ -1543,6 +1544,10 @@ Salto detectado: +{salto} lecturas
             # Limpiar última lectura
             if hasattr(self, 'ultima_lectura_var'):
                 self.ultima_lectura_var.set("Ultima lectura: N/A")
+            
+            # Deshabilitar boton de cerrar orden
+            if hasattr(self, 'btn_cerrar_orden'):
+                self.btn_cerrar_orden.config(state=tk.DISABLED)
 
             self.logger.info("SUCCESS: Interfaz limpiada para nueva orden")
 
