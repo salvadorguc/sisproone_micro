@@ -56,6 +56,7 @@ class MonitorIndustrial:
         self.thread_sincronizacion = None
         self.thread_estado = None
         self.running = False
+        self._detenido = False
 
         # Configurar logging
         self.setup_logging()
@@ -525,6 +526,11 @@ class MonitorIndustrial:
     def detener(self):
         """Detener el monitor industrial"""
         try:
+            # Evitar doble llamada
+            if hasattr(self, '_detenido') and self._detenido:
+                return
+            
+            self._detenido = True
             self.running = False
 
             # Verificar si hay lecturas pendientes (antes de cerrar conexiones)

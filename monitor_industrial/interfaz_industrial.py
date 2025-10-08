@@ -956,7 +956,7 @@ class InterfazIndustrial:
     def actualizar_interfaz(self):
         """Actualizar interfaz con estado actual"""
         try:
-            estado_actual = self.monitor.estado.obtener_estado()
+            estado_actual = self.monitor.estado.estado_actual
 
             if hasattr(estado_actual, 'value'):
                 estado_texto = estado_actual.value
