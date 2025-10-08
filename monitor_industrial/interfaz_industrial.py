@@ -135,8 +135,8 @@ class InterfazIndustrial:
 
             # Crear paneles
             self.crear_panel_superior(main_frame)
-            self.crear_panel_receta(main_frame)
             self.crear_panel_central(main_frame)
+            self.crear_panel_receta(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
 
@@ -282,20 +282,20 @@ class InterfazIndustrial:
 
             # Frame para el texto de la receta
             text_frame = tk.Frame(panel, bg=self.colores['panel'])
-            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+            text_frame.pack(fill=tk.X, expand=False, padx=20, pady=10)
 
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=8,  # Altura fija
+                height=6,  # Altura fija reducida
                 font=self.fuente_pequena,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
                 state=tk.DISABLED,
-                width=80  # Ancho fijo
+                width=60  # Ancho fijo reducido
             )
-            self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
 
             # Scrollbar para el texto
             scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.receta_text.yview)
