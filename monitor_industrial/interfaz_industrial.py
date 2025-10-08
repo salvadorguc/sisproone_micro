@@ -49,6 +49,7 @@ class InterfazIndustrial:
             'accento': '#0066cc',
             'advertencia': '#cc6600',
             'error': '#cc0000',
+            'success': '#00cc00',
             'info': '#0066cc',
             'borde': '#cccccc'
         }
@@ -84,6 +85,7 @@ class InterfazIndustrial:
             # Variables internas
             self.orden_actual = None
             self.ultima_lectura_timestamp = None
+            self.ultima_recarga_ordenes = None
 
             self.configurar_ventana()
             self.crear_interfaz()
@@ -799,8 +801,10 @@ class InterfazIndustrial:
         """Seleccionar estacion de trabajo"""
         try:
             self.monitor.seleccionar_estacion()
-            # Cargar ordenes de la nueva estacion
+            # Cargar ordenes de la nueva estacion inmediatamente
+            self.ultima_recarga_ordenes = None  # Forzar recarga
             self.cargar_ordenes()
+            self.ultima_recarga_ordenes = datetime.now()
         except Exception as e:
             self.logger.error(f"ERROR: Error seleccionando estacion: {e}")
             messagebox.showerror("Error", f"Error seleccionando estacion: {e}")
@@ -939,9 +943,13 @@ class InterfazIndustrial:
     def iniciar_actualizaciones(self):
         """Iniciar actualizaciones automaticas de la interfaz"""
         try:
-            # Cargar ordenes si hay estacion seleccionada
+            # Cargar ordenes solo cada 30 segundos
+            ahora = datetime.now()
             if self.monitor.estacion_actual:
-                self.cargar_ordenes()
+                if (self.ultima_recarga_ordenes is None or 
+                    (ahora - self.ultima_recarga_ordenes).total_seconds() >= 30):
+                    self.cargar_ordenes()
+                    self.ultima_recarga_ordenes = ahora
 
             self.actualizar_interfaz()
             self.actualizar_reloj()

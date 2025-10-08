@@ -203,7 +203,6 @@ class MonitorIndustrial:
                 if self.interfaz:
                     self.interfaz.actualizar_contador(valor)
                     # Actualizar última lectura del Pico
-                    from datetime import datetime
                     self.interfaz.actualizar_ultima_lectura(datetime.now())
 
                 self.logger.info(f"INFO: Conteo actualizado: {valor} (+{incremento})")
