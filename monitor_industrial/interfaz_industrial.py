@@ -939,8 +939,10 @@ class InterfazIndustrial:
                 botones_frame,
                 text="Confirmar",
                 font=self.fuente_normal,
-                fg=self.colores['texto'],
+                fg='white',
                 bg=self.colores['accento'],
+                activebackground='#1d4ed8',
+                activeforeground='white',
                 command=confirmar
             ).pack(side=tk.LEFT, padx=10)
 
@@ -948,8 +950,10 @@ class InterfazIndustrial:
                 botones_frame,
                 text="Cancelar",
                 font=self.fuente_normal,
-                fg=self.colores['texto'],
+                fg='white',
                 bg=self.colores['error'],
+                activebackground='#b91c1c',
+                activeforeground='white',
                 command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
