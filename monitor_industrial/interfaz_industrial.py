@@ -118,14 +118,101 @@ class InterfazIndustrial:
             self.crear_interfaz()
             self.iniciar_actualizaciones()
             self.logger.info("SUCCESS: Interfaz industrial mostrada")
-
-            # Seleccionar estacion automaticamente al iniciar
-            self.root.after(500, self.seleccionar_estacion)
+            
+            # Mostrar loading mientras se inicializa
+            self.mostrar_loading()
+            
+            # Seleccionar estacion automaticamente al iniciar (después del loading)
+            self.root.after(2000, self.ocultar_loading_y_seleccionar_estacion)
 
             # Iniciar el bucle principal
             self.root.mainloop()
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando interfaz: {e}")
+
+    def mostrar_loading(self):
+        """Mostrar pantalla de carga"""
+        try:
+            # Crear frame de loading que cubra toda la pantalla
+            self.loading_frame = tk.Frame(self.root, bg=self.colores['fondo'])
+            self.loading_frame.place(x=0, y=0, relwidth=1, relheight=1)
+            
+            # Título principal
+            tk.Label(
+                self.loading_frame,
+                text="MONITOR SISPRO ONE 1.0",
+                font=('Arial', 48, 'bold'),
+                fg=self.colores['accento'],
+                bg=self.colores['fondo']
+            ).pack(expand=True)
+            
+            # Mensaje de carga
+            tk.Label(
+                self.loading_frame,
+                text="Iniciando sistema...",
+                font=('Arial', 24),
+                fg=self.colores['texto'],
+                bg=self.colores['fondo']
+            ).pack()
+            
+            # Indicador de progreso (puntos animados)
+            self.loading_dots = tk.Label(
+                self.loading_frame,
+                text="",
+                font=('Arial', 18),
+                fg=self.colores['accento'],
+                bg=self.colores['fondo']
+            )
+            self.loading_dots.pack(pady=20)
+            
+            # Iniciar animación de puntos
+            self.animar_loading()
+            
+            self.logger.info("INFO: Pantalla de carga mostrada")
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando loading: {e}")
+
+    def animar_loading(self):
+        """Animar los puntos de carga"""
+        try:
+            if hasattr(self, 'loading_frame') and self.loading_frame.winfo_exists():
+                # Obtener texto actual
+                texto_actual = self.loading_dots.cget('text')
+                
+                # Ciclar entre 1, 2, 3 puntos
+                if texto_actual == "":
+                    nuevo_texto = "."
+                elif texto_actual == ".":
+                    nuevo_texto = ".."
+                elif texto_actual == "..":
+                    nuevo_texto = "..."
+                else:
+                    nuevo_texto = ""
+                
+                self.loading_dots.config(text=nuevo_texto)
+                
+                # Programar siguiente animación
+                self.root.after(500, self.animar_loading)
+                
+        except Exception as e:
+            self.logger.error(f"ERROR: Error animando loading: {e}")
+
+    def ocultar_loading_y_seleccionar_estacion(self):
+        """Ocultar loading y seleccionar estación"""
+        try:
+            # Ocultar loading
+            if hasattr(self, 'loading_frame'):
+                self.loading_frame.destroy()
+                delattr(self, 'loading_frame')
+            
+            # Seleccionar estación
+            self.seleccionar_estacion()
+            
+            self.logger.info("SUCCESS: Loading ocultado, iniciando selección de estación")
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error ocultando loading: {e}")
 
     def configurar_ventana(self):
         """Configurar ventana principal"""
