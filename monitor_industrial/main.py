@@ -368,17 +368,24 @@ class MonitorIndustrial:
                 return False
 
             # Mostrar diálogo de selección
+            self.logger.info(f"INFO: Mostrando diálogo de selección con {len(ordenes)} órdenes")
             orden = self.interfaz.mostrar_seleccion_orden(ordenes)
+
             if orden:
+                self.logger.info(f"INFO: Orden seleccionada del diálogo: {orden}")
                 self.orden_actual = orden
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
 
                 # Cargar receta de la orden
+                self.logger.info(f"INFO: Iniciando carga de receta para orden {orden['ordenFabricacion']}")
                 self.cargar_receta_orden()
 
                 self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']}")
                 return True
+            else:
+                self.logger.warning("WARNING: No se seleccionó ninguna orden")
+                return False
             return False
 
         except Exception as e:
@@ -565,22 +572,38 @@ class MonitorIndustrial:
         """Cargar receta de la orden actual"""
         try:
             if not self.orden_actual:
+                self.logger.warning("WARNING: No hay orden actual para cargar receta")
                 return
+
+            self.logger.info(f"INFO: Cargando receta para orden {self.orden_actual['ordenFabricacion']}")
 
             # Obtener receta desde SISPRO API
             receta_data = self.sispro.consultar_estatus_orden(self.orden_actual['ordenFabricacion'])
 
+            self.logger.info(f"INFO: Respuesta de API: {receta_data is not None}")
+            if receta_data:
+                self.logger.info(f"INFO: Success: {receta_data.get('success')}")
+                self.logger.info(f"INFO: Data presente: {receta_data.get('data') is not None}")
+
             if receta_data and receta_data.get('success') and receta_data.get('data'):
                 self.receta_actual = receta_data['data']
+                self.logger.info(f"INFO: Receta obtenida con {len(self.receta_actual.get('partidas', []))} partidas")
 
                 if self.interfaz:
+                    self.logger.info("INFO: Llamando a interfaz.mostrar_receta")
                     self.interfaz.mostrar_receta(self.receta_actual)
                     self.logger.info(f"SUCCESS: Receta cargada para orden {self.orden_actual['ordenFabricacion']}")
+                else:
+                    self.logger.warning("WARNING: No hay interfaz disponible para mostrar receta")
             else:
                 self.logger.warning(f"WARNING: No se pudo cargar receta para orden {self.orden_actual['ordenFabricacion']}")
+                if receta_data:
+                    self.logger.warning(f"WARNING: Respuesta API: {receta_data}")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error cargando receta: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
 
 def main():
     """Función principal"""

@@ -92,7 +92,7 @@ class InterfazIndustrial:
             self.root.title("Monitor Industrial SISPRO")
             self.root.configure(bg=self.colores['fondo'])
 
-            # Fullscreen
+            # Configurar ventana para ajustarse a la pantalla
             self.root.attributes('-fullscreen', True)
             self.root.attributes('-topmost', True)
 
@@ -101,11 +101,16 @@ class InterfazIndustrial:
             self.root.bind('<F11>', self.toggle_fullscreen)
             self.root.bind('<Control-q>', self.salir)
 
-            # Centrar ventana
+            # Obtener dimensiones de pantalla y ajustar
             self.root.update_idletasks()
-            width = self.root.winfo_screenwidth()
-            height = self.root.winfo_screenheight()
-            self.root.geometry(f"{width}x{height}+0+0")
+            screen_width = self.root.winfo_screenwidth()
+            screen_height = self.root.winfo_screenheight()
+
+            # Dejar un pequeño margen para asegurar que todo quepa
+            usable_width = screen_width - 20
+            usable_height = screen_height - 20
+
+            self.root.geometry(f"{usable_width}x{usable_height}+10+10")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error configurando ventana: {e}")
@@ -115,7 +120,7 @@ class InterfazIndustrial:
         try:
             # Frame principal
             main_frame = tk.Frame(self.root, bg=self.colores['fondo'])
-            main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            main_frame.pack(fill=tk.BOTH, padx=5, pady=5)
 
             # Crear paneles
             self.crear_panel_superior(main_frame)
@@ -253,7 +258,7 @@ class InterfazIndustrial:
         """Crear panel central con ordenes de fabricacion"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+            panel.pack(fill=tk.BOTH, pady=(0, 10))
 
             # Titulo del panel
             tk.Label(
@@ -430,20 +435,25 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).pack(pady=10)
 
+            # Frame para el texto y scrollbar
+            text_frame = tk.Frame(self.panel_receta, bg=self.colores['panel'])
+            text_frame.pack(fill=tk.X, padx=20, pady=(0, 10))
+
             # Area de texto para la receta
             self.receta_text = tk.Text(
-                self.panel_receta,
-                height=8,
+                text_frame,
+                height=6,  # Altura fija más pequeña
                 font=self.fuente_pequena,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
-                state=tk.DISABLED
+                state=tk.DISABLED,
+                width=80  # Ancho fijo
             )
-            self.receta_text.pack(fill=tk.X, padx=20, pady=(0, 10))
+            self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             # Scrollbar para el texto
-            scrollbar = tk.Scrollbar(self.panel_receta, orient=tk.VERTICAL, command=self.receta_text.yview)
+            scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.receta_text.yview)
             scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
             self.receta_text.config(yscrollcommand=scrollbar.set)
 
@@ -674,9 +684,14 @@ class InterfazIndustrial:
         """Mostrar receta de la orden en el panel"""
         try:
             self.logger.info(f"INFO: Mostrando receta: {receta is not None}")
+            self.logger.info(f"INFO: receta_text existe: {self.receta_text is not None}")
+            self.logger.info(f"INFO: panel_receta existe: {self.panel_receta is not None}")
+
             if not self.receta_text or not receta:
                 self.logger.warning("WARNING: No se puede mostrar receta - receta_text o receta es None")
                 return
+
+            self.logger.info(f"INFO: Receta tiene {len(receta.get('partidas', []))} partidas")
 
             # Habilitar edicion temporalmente
             self.receta_text.config(state=tk.NORMAL)
@@ -697,11 +712,15 @@ MATERIALES REQUERIDOS:
             for partida in receta.get('partidas', []):
                 texto_receta += f"• {partida.get('articuloMP', 'N/A')} - {partida.get('descripcionMP', 'N/A')} (Cant: {partida.get('cantidad', 'N/A')})\n"
 
+            self.logger.info(f"INFO: Texto receta preparado, longitud: {len(texto_receta)}")
             self.receta_text.insert(1.0, texto_receta)
             self.receta_text.config(state=tk.DISABLED)
+            self.logger.info("SUCCESS: Receta mostrada correctamente")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando receta: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
 
     def actualizar_contador(self, valor: int):
         """Actualizar contador en tiempo real"""
