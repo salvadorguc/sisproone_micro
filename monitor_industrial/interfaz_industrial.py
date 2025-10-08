@@ -89,7 +89,7 @@ class InterfazIndustrial:
     def configurar_ventana(self):
         """Configurar ventana principal"""
         try:
-            self.root.title("Monitor Industrial SISPRO")
+            self.root.title("Monitor sispro one 1.0")
             self.root.configure(bg=self.colores['fondo'])
 
             # Configurar ventana para ajustarse a la pantalla
@@ -145,7 +145,7 @@ class InterfazIndustrial:
             # Lado izquierdo: Titulo
             titulo = tk.Label(
                 main_frame,
-                text="MONITOR INDUSTRIAL SISPRO",
+                text="MONITOR SISPRO ONE 1.0",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
@@ -967,6 +967,11 @@ MATERIALES REQUERIDOS:
                 self.upc_var.set(orden.get('ptUPC', 'N/A'))
                 self.meta_var.set(str(orden.get('cantidadFabricar', 0)))
                 self.monitor.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+
+                # Cargar receta de la orden seleccionada
+                self.logger.info(f"INFO: Cargando receta para orden seleccionada: {orden['ordenFabricacion']}")
+                self.monitor.cargar_receta_orden()
+
                 self.logger.info(f"SUCCESS: Orden seleccionada: {orden['ordenFabricacion']} - UPC: {orden.get('ptUPC', 'N/A')}")
         except Exception as e:
             self.logger.error(f"ERROR: Error en seleccion de orden: {e}")
@@ -975,11 +980,15 @@ MATERIALES REQUERIDOS:
         """Cargar ordenes de la estacion actual"""
         try:
             if not self.monitor.estacion_actual:
+                self.logger.warning("WARNING: No hay estacion actual para cargar ordenes")
                 return
 
+            self.logger.info(f"INFO: Cargando ordenes para estacion {self.monitor.estacion_actual['id']}")
             ordenes = self.monitor.sispro.obtener_ordenes_asignadas(
                 self.monitor.estacion_actual['id']
             )
+
+            self.logger.info(f"INFO: Se obtuvieron {len(ordenes) if ordenes else 0} ordenes de la API")
 
             # Filtrar solo ordenes pendientes (no completadas y no cerradas)
             ordenes_pendientes = [
@@ -987,11 +996,13 @@ MATERIALES REQUERIDOS:
                 if orden.get('cantidadPendiente', 0) > 0 and not orden.get('isClosed', False)
             ]
 
+            self.logger.info(f"INFO: Se filtraron {len(ordenes_pendientes)} ordenes pendientes")
             self.ordenes_disponibles = ordenes_pendientes
             self.lista_ordenes.delete(0, tk.END)
 
             if not ordenes_pendientes:
                 self.lista_ordenes.insert(tk.END, "No hay ordenes pendientes")
+                self.logger.info("INFO: No hay ordenes pendientes para mostrar")
                 return
 
             for orden in ordenes_pendientes:
@@ -1003,8 +1014,12 @@ MATERIALES REQUERIDOS:
                 texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({pendiente}/{cantidad} pzs)"
                 self.lista_ordenes.insert(tk.END, texto)
 
+            self.logger.info(f"SUCCESS: Se cargaron {len(ordenes_pendientes)} ordenes en la lista")
+
         except Exception as e:
             self.logger.error(f"ERROR: Error cargando ordenes: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
 
     def seleccionar_estacion(self):
         """Seleccionar estacion de trabajo"""
