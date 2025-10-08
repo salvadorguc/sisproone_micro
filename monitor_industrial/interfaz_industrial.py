@@ -76,16 +76,16 @@ class InterfazIndustrial:
     def calcular_fuente_dinamica(self, valor_contador):
         """Calcular tamaño de fuente dinámico basado en el valor del contador"""
         try:
-            # Tamaño base de la fuente
-            tamaño_base = 20  # fuente_footer_normal
+            # Tamaño base de la fuente del contador (60)
+            tamaño_base = 60  # fuente_footer_contador
             # Aumentar al 80% del valor del contador
             incremento = int(valor_contador * 0.8)
-            # Tamaño final (mínimo 15, máximo 100)
-            tamaño_final = max(15, min(100, tamaño_base + incremento))
+            # Tamaño final (mínimo 60, máximo 120)
+            tamaño_final = max(60, min(120, tamaño_base + incremento))
             return ('Arial', tamaño_final, 'bold')
         except Exception as e:
             self.logger.error(f"ERROR: Error calculando fuente dinámica: {e}")
-            return self.fuente_footer_normal
+            return self.fuente_footer_contador
 
     def mostrar(self):
         """Mostrar la interfaz industrial"""
@@ -1328,7 +1328,7 @@ MATERIALES REQUERIDOS:
 
             # Actualizar fuente dinámica solo para el contador
             fuente_dinamica = self.calcular_fuente_dinamica(valor)
-            
+
             # Actualizar fuente del contador (solo el número)
             if hasattr(self, 'contador_label'):
                 self.contador_label.config(font=fuente_dinamica)
