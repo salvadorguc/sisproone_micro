@@ -36,15 +36,15 @@ class InterfazIndustrial:
 
         # Colores del tema industrial
         self.colores = {
-            'fondo': '#1a1a1a',
-            'panel': '#2d2d2d',
-            'texto': '#ffffff',
-            'texto_secundario': '#cccccc',
-            'accento': '#00ff00',
-            'advertencia': '#ffaa00',
-            'error': '#ff0000',
-            'info': '#0099ff',
-            'borde': '#444444'
+            'fondo': '#f5f5f5',
+            'panel': '#e8e8e8',
+            'texto': '#0066cc',
+            'texto_secundario': '#4d79a3',
+            'accento': '#0066cc',
+            'advertencia': '#cc6600',
+            'error': '#cc0000',
+            'info': '#0066cc',
+            'borde': '#cccccc'
         }
 
         # Fuentes
@@ -124,8 +124,8 @@ class InterfazIndustrial:
 
             # Crear paneles
             self.crear_panel_superior(main_frame)
-            self.crear_panel_central(main_frame)
             self.crear_panel_receta(main_frame)
+            self.crear_panel_central(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
 
@@ -255,7 +255,7 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
 
     def crear_panel_central(self, parent):
-        """Crear panel central con ordenes de fabricacion"""
+        """Crear panel central con materiales de la orden"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.BOTH, pady=(0, 10))
@@ -263,186 +263,20 @@ class InterfazIndustrial:
             # Titulo del panel
             tk.Label(
                 panel,
-                text="ORDENES DE FABRICACION",
+                text="MATERIALES DE LA ORDEN",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).pack(pady=20)
 
-            # Frame para lista de ordenes y detalles
-            contenido_frame = tk.Frame(panel, bg=self.colores['panel'])
-            contenido_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-
-            # Panel izquierdo: Lista de ordenes
-            ordenes_frame = tk.Frame(contenido_frame, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
-            ordenes_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
-
-            tk.Label(
-                ordenes_frame,
-                text="Ordenes Asignadas",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['fondo']
-            ).pack(pady=10)
-
-            # Listbox para ordenes
-            self.lista_ordenes = tk.Listbox(
-                ordenes_frame,
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel'],
-                selectbackground=self.colores['accento'],
-                selectmode=tk.SINGLE,
-                height=15
-            )
-            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-            self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
-
-            # Panel derecho: Detalles de produccion
-            detalles_frame = tk.Frame(contenido_frame, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
-            detalles_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
-            tk.Label(
-                detalles_frame,
-                text="Produccion Actual",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['fondo']
-            ).pack(pady=10)
-
-            # Informacion de la orden actual
-            info_orden = tk.Frame(detalles_frame, bg=self.colores['fondo'])
-            info_orden.pack(pady=10)
-
-            tk.Label(
-                info_orden,
-                text="Orden:",
-                font=self.fuente_normal,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['fondo']
-            ).grid(row=0, column=0, padx=10, sticky=tk.W)
-
-            tk.Label(
-                info_orden,
-                textvariable=self.orden_var,
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['fondo']
-            ).grid(row=0, column=1, padx=10, sticky=tk.W)
-
-            tk.Label(
-                info_orden,
-                text="UPC:",
-                font=self.fuente_normal,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['fondo']
-            ).grid(row=1, column=0, padx=10, sticky=tk.W)
-
-            tk.Label(
-                info_orden,
-                textvariable=self.upc_var,
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['fondo']
-            ).grid(row=1, column=1, padx=10, sticky=tk.W)
-
-            # Contador principal
-            contador_frame = tk.Frame(detalles_frame, bg=self.colores['fondo'])
-            contador_frame.pack(expand=True, pady=20)
-
-            # Contador actual
-            tk.Label(
-                contador_frame,
-                text="CONTADOR",
-                font=self.fuente_grande,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['fondo']
-            ).pack()
-
-            tk.Label(
-                contador_frame,
-                textvariable=self.contador_var,
-                font=('Arial', 48, 'bold'),
-                fg=self.colores['accento'],
-                bg=self.colores['fondo']
-            ).pack(pady=10)
-
-            # Meta y progreso
-            meta_frame = tk.Frame(detalles_frame, bg=self.colores['fondo'])
-            meta_frame.pack(pady=10)
-
-            # Meta
-            tk.Label(
-                meta_frame,
-                text="META:",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['fondo']
-            ).grid(row=0, column=0, padx=10, sticky=tk.W)
-
-            tk.Label(
-                meta_frame,
-                textvariable=self.meta_var,
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['fondo']
-            ).grid(row=0, column=1, padx=10, sticky=tk.W)
-
-            # Progreso
-            tk.Label(
-                meta_frame,
-                text="PROGRESO:",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['fondo']
-            ).grid(row=1, column=0, padx=10, sticky=tk.W)
-
-            tk.Label(
-                meta_frame,
-                textvariable=self.progreso_var,
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['fondo']
-            ).grid(row=1, column=1, padx=10, sticky=tk.W)
-
-            # Barra de progreso
-            self.progreso_barra = ttk.Progressbar(
-                detalles_frame,
-                length=400,
-                mode='determinate',
-                style='Industrial.Horizontal.TProgressbar'
-            )
-            self.progreso_barra.pack(pady=10)
-
-            # Configurar estilo de la barra de progreso
-            self.configurar_estilo_progreso()
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error creando panel central: {e}")
-
-    def crear_panel_receta(self, parent):
-        """Crear panel de receta de la orden"""
-        try:
-            self.panel_receta = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            self.panel_receta.pack(fill=tk.X, pady=(0, 10))
-
-            # Titulo del panel
-            tk.Label(
-                self.panel_receta,
-                text="MATERIALES DE LA ORDEN",
-                font=self.fuente_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).pack(pady=10)
-
-            # Frame para el texto y scrollbar
-            text_frame = tk.Frame(self.panel_receta, bg=self.colores['panel'])
-            text_frame.pack(fill=tk.X, padx=20, pady=(0, 10))
+            # Frame para el texto de la receta
+            text_frame = tk.Frame(panel, bg=self.colores['panel'])
+            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=6,  # Altura fija más pequeña
+                height=8,  # Altura fija
                 font=self.fuente_pequena,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
@@ -458,399 +292,330 @@ class InterfazIndustrial:
             self.receta_text.config(yscrollcommand=scrollbar.set)
 
         except Exception as e:
+            self.logger.error(f"ERROR: Error creando panel central: {e}")
+
+    def crear_panel_receta(self, parent):
+        """Crear panel de receta con ordenes asignadas"""
+        try:
+            self.panel_receta = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
+            self.panel_receta.pack(fill=tk.X, pady=(0, 10))
+
+            # Titulo del panel
+            tk.Label(
+                self.panel_receta,
+                text="ORDENES ASIGNADAS",
+                font=self.fuente_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=10)
+
+            # Frame para lista de ordenes
+            ordenes_frame = tk.Frame(self.panel_receta, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
+            ordenes_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+
+            # Listbox para ordenes
+            self.lista_ordenes = tk.Listbox(
+                ordenes_frame,
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel'],
+                selectbackground=self.colores['accento'],
+                selectmode=tk.SINGLE,
+                height=8
+            )
+            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
+
+            # Scrollbar para la lista
+            scrollbar_ordenes = tk.Scrollbar(ordenes_frame, orient=tk.VERTICAL, command=self.lista_ordenes.yview)
+            scrollbar_ordenes.pack(side=tk.RIGHT, fill=tk.Y)
+            self.lista_ordenes.config(yscrollcommand=scrollbar_ordenes.set)
+
+        except Exception as e:
             self.logger.error(f"ERROR: Error creando panel receta: {e}")
 
-    def crear_panel_inferior(self, parent):
-        """Crear panel inferior con botones de control"""
+    def crear_panel_estado(self, parent):
+        """Crear panel de estado con informacion de produccion"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.X, pady=(0, 10))
 
-            # Botones de control en fila
-            botones_frame = tk.Frame(panel, bg=self.colores['panel'])
-            botones_frame.pack(pady=10)
+            # Frame principal
+            main_frame = tk.Frame(panel, bg=self.colores['panel'])
+            main_frame.pack(fill=tk.X, padx=20, pady=10)
 
-            # Boton validar UPC (principal - más grande)
-            btn_upc = tk.Button(
-                botones_frame,
-                text="VALIDAR UPC",
-                font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg='#4CAF50',  # Verde pastel
-                relief=tk.RAISED,
-                bd=2,
-                command=self.validar_upc,
-                width=18,
-                height=2
-            )
-            btn_upc.grid(row=0, column=0, padx=8, pady=5)
+            # Informacion de la orden actual
+            info_orden = tk.Frame(main_frame, bg=self.colores['panel'])
+            info_orden.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-            # Boton sincronizar
-            btn_sincronizar = tk.Button(
-                botones_frame,
-                text="SINCRONIZAR",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg='#2196F3',  # Azul pastel
-                relief=tk.RAISED,
-                bd=2,
-                command=self.sincronizar_ahora,
-                width=12,
-                height=2
-            )
-            btn_sincronizar.grid(row=0, column=1, padx=8, pady=5)
-
-            # Boton salir
-            btn_salir = tk.Button(
-                botones_frame,
-                text="SALIR",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg='#F44336',  # Rojo pastel
-                relief=tk.RAISED,
-                bd=2,
-                command=self.salir,
-                width=12,
-                height=2
-            )
-            btn_salir.grid(row=0, column=2, padx=8, pady=5)
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error creando panel inferior: {e}")
-
-    def crear_panel_estado(self, parent):
-        """Crear panel de estado del Pico"""
-        try:
-            panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            panel.pack(fill=tk.X)
-
-            # Estado del Pico
-            estado_frame = tk.Frame(panel, bg=self.colores['panel'])
-            estado_frame.pack(pady=10)
-
-            # Estado Pico
             tk.Label(
-                estado_frame,
-                text="Estado Pico:",
+                info_orden,
+                text="Orden:",
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).grid(row=0, column=0, padx=10, sticky=tk.W)
+
+            tk.Label(
+                info_orden,
+                textvariable=self.orden_var,
+                font=self.fuente_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).grid(row=0, column=1, padx=10, sticky=tk.W)
+
+            tk.Label(
+                info_orden,
+                text="UPC:",
+                font=self.fuente_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).grid(row=1, column=0, padx=10, sticky=tk.W)
+
+            tk.Label(
+                info_orden,
+                textvariable=self.upc_var,
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel']
+            ).grid(row=1, column=1, padx=10, sticky=tk.W)
+
+            # Contador principal
+            contador_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            contador_frame.pack(side=tk.RIGHT, padx=20)
+
+            # Contador actual
+            tk.Label(
+                contador_frame,
+                text="CONTADOR",
+                font=self.fuente_grande,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).pack()
+
+            tk.Label(
+                contador_frame,
+                textvariable=self.contador_var,
+                font=('Arial', 36, 'bold'),
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=5)
+
+            # Meta y progreso
+            meta_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            meta_frame.pack(side=tk.RIGHT, padx=20)
+
+            # Meta
+            tk.Label(
+                meta_frame,
+                text="META:",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
             ).grid(row=0, column=0, padx=10, sticky=tk.W)
 
             tk.Label(
-                estado_frame,
-                textvariable=self.estado_pico_var,
-                font=self.fuente_normal,
+                meta_frame,
+                textvariable=self.meta_var,
+                font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).grid(row=0, column=1, padx=10, sticky=tk.W)
 
-            # Tiempo inactivo
+            # Progreso
             tk.Label(
-                estado_frame,
-                text="Tiempo inactivo:",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=2, padx=10, sticky=tk.W)
-
-            tk.Label(
-                estado_frame,
-                textvariable=self.tiempo_inactivo_var,
-                font=self.fuente_normal,
-                fg=self.colores['advertencia'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=3, padx=10, sticky=tk.W)
-
-            # Última sincronización
-            tk.Label(
-                estado_frame,
-                text="Última sincronización:",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=4, padx=10, sticky=tk.W)
-
-            tk.Label(
-                estado_frame,
-                textvariable=self.ultima_sincronizacion_var,
-                font=self.fuente_normal,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=5, padx=10, sticky=tk.W)
-
-            # Última lectura del Pico
-            tk.Label(
-                estado_frame,
-                text="Última lectura Pico:",
+                meta_frame,
+                text="PROGRESO:",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
             ).grid(row=1, column=0, padx=10, sticky=tk.W)
 
             tk.Label(
-                estado_frame,
-                textvariable=self.ultima_lectura_var,
-                font=self.fuente_normal,
+                meta_frame,
+                textvariable=self.progreso_var,
+                font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).grid(row=1, column=1, padx=10, sticky=tk.W)
 
+            # Barra de progreso
+            progreso_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            progreso_frame.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=20)
+
+            self.progreso_barra = tk.Scale(
+                progreso_frame,
+                from_=0,
+                to=100,
+                orient=tk.HORIZONTAL,
+                length=200,
+                showvalue=0,
+                bg=self.colores['panel'],
+                fg=self.colores['texto'],
+                troughcolor=self.colores['fondo'],
+                activebackground=self.colores['accento']
+            )
+            self.progreso_barra.pack(fill=tk.X, pady=5)
+
+            self.configurar_estilo_progreso()
+
         except Exception as e:
-            self.logger.error(f"ERROR: Error creando panel de estado: {e}")
+            self.logger.error(f"ERROR: Error creando panel estado: {e}")
+
+    def crear_panel_inferior(self, parent):
+        """Crear panel inferior con botones de accion"""
+        try:
+            panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
+            panel.pack(fill=tk.X, pady=(0, 10))
+
+            # Frame para botones
+            botones_frame = tk.Frame(panel, bg=self.colores['panel'])
+            botones_frame.pack(pady=20)
+
+            # Botones con tamaño uniforme
+            boton_width = 15
+            boton_height = 2
+
+            # Boton Validar UPC
+            btn_validar = tk.Button(
+                botones_frame,
+                text="VALIDAR UPC",
+                font=self.fuente_grande,
+                fg=self.colores['texto'],
+                bg=self.colores['accento'],
+                activebackground=self.colores['texto_secundario'],
+                command=self.validar_upc,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_validar.pack(side=tk.LEFT, padx=10)
+
+            # Boton Sincronizar
+            btn_sincronizar = tk.Button(
+                botones_frame,
+                text="SINCRONIZAR",
+                font=self.fuente_grande,
+                fg=self.colores['texto'],
+                bg=self.colores['info'],
+                activebackground=self.colores['texto_secundario'],
+                command=self.sincronizar,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_sincronizar.pack(side=tk.LEFT, padx=10)
+
+            # Boton Salir
+            btn_salir = tk.Button(
+                botones_frame,
+                text="SALIR",
+                font=self.fuente_grande,
+                fg=self.colores['texto'],
+                bg=self.colores['error'],
+                activebackground=self.colores['texto_secundario'],
+                command=self.salir,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_salir.pack(side=tk.LEFT, padx=10)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error creando panel inferior: {e}")
 
     def configurar_estilo_progreso(self):
         """Configurar estilo de la barra de progreso"""
         try:
-            style = ttk.Style()
-            style.theme_use('clam')
-
-            style.configure(
-                'Industrial.Horizontal.TProgressbar',
-                background=self.colores['accento'],
-                troughcolor=self.colores['borde'],
-                borderwidth=2,
-                lightcolor=self.colores['accento'],
-                darkcolor=self.colores['accento']
+            # Configurar colores de la barra de progreso
+            self.progreso_barra.config(
+                troughcolor=self.colores['fondo'],
+                activebackground=self.colores['accento']
             )
-
         except Exception as e:
-            self.logger.error(f"ERROR: Error configurando estilo progreso: {e}")
+            self.logger.error(f"ERROR: Error configurando estilo de progreso: {e}")
 
-    def iniciar_actualizaciones(self):
-        """Iniciar actualizaciones automaticas de la interfaz"""
+    def mostrar_seleccion_estacion(self, estaciones):
+        """Mostrar dialogo de seleccion de estacion"""
         try:
-            # Cargar ordenes si hay estacion seleccionada
-            if self.monitor.estacion_actual:
-                self.cargar_ordenes()
-
-            self.actualizar_interfaz()
-            self.actualizar_reloj()
-            self.actualizar_semaforo()
-            self.root.after(self.monitor.config.update_interval, self.iniciar_actualizaciones)
-        except Exception as e:
-            self.logger.error(f"ERROR: Error en actualizaciones: {e}")
-
-    def actualizar_interfaz(self):
-        """Actualizar elementos de la interfaz"""
-        try:
-            # Actualizar estado del sistema
-            estado = self.monitor.estado.estado_actual
-            if hasattr(estado, 'value'):
-                self.estado_var.set(estado.value)
-            else:
-                self.estado_var.set(str(estado))
-
-            # Actualizar información de la estación
-            if self.monitor.estacion_actual:
-                self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
-
-            # Actualizar informacion de la orden
-            if self.monitor.orden_actual:
-                self.orden_var.set(self.monitor.orden_actual.get('ordenFabricacion', 'N/A'))
-                self.upc_var.set(self.monitor.orden_actual.get('ptUPC', 'N/A'))
-
-                # Actualizar meta y progreso
-                meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
-                self.meta_var.set(str(meta))
-
-                if meta > 0:
-                    progreso = (self.monitor.lecturas_acumuladas / meta) * 100
-                    self.progreso_var.set(f"{progreso:.1f}%")
-                    self.progreso_barra['value'] = progreso
-                else:
-                    self.progreso_var.set("0%")
-                    self.progreso_barra['value'] = 0
-            else:
-                self.orden_var.set('N/A')
-                self.upc_var.set('N/A')
-                self.meta_var.set('0')
-                self.progreso_var.set("0%")
-                self.progreso_barra['value'] = 0
-
-            # Actualizar contador
-            self.contador_var.set(str(self.monitor.lecturas_acumuladas))
-
-            # Actualizar última sincronización
-            if self.monitor.ultima_sincronizacion:
-                self.ultima_sincronizacion_var.set(
-                    self.monitor.ultima_sincronizacion.strftime("%H:%M:%S")
-                )
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando interfaz: {e}")
-
-    def mostrar_receta(self, receta):
-        """Mostrar receta de la orden en el panel"""
-        try:
-            self.logger.info(f"INFO: Mostrando receta: {receta is not None}")
-            self.logger.info(f"INFO: receta_text existe: {self.receta_text is not None}")
-            self.logger.info(f"INFO: panel_receta existe: {self.panel_receta is not None}")
-
-            if not self.receta_text or not receta:
-                self.logger.warning("WARNING: No se puede mostrar receta - receta_text o receta es None")
-                return
-
-            self.logger.info(f"INFO: Receta tiene {len(receta.get('partidas', []))} partidas")
-
-            # Habilitar edicion temporalmente
-            self.receta_text.config(state=tk.NORMAL)
-            self.receta_text.delete(1.0, tk.END)
-
-            # Formatear receta
-            texto_receta = f"""
-ORDEN: {receta.get('ordenFabricacion', 'N/A')}
-PRODUCTO: {receta.get('articuloPT', 'N/A')} - {receta.get('descripcionPT', 'N/A')}
-CANTIDAD: {receta.get('cantidadPlanificada', 'N/A')}
-CAJA: {receta.get('caja', 'N/A')}
-CLIENTE: {receta.get('razonSocial', 'N/A')}
-
-MATERIALES REQUERIDOS:
-"""
-
-            # Agregar partidas
-            for partida in receta.get('partidas', []):
-                texto_receta += f"• {partida.get('articuloMP', 'N/A')} - {partida.get('descripcionMP', 'N/A')} (Cant: {partida.get('cantidad', 'N/A')})\n"
-
-            self.logger.info(f"INFO: Texto receta preparado, longitud: {len(texto_receta)}")
-            self.receta_text.insert(1.0, texto_receta)
-            self.receta_text.config(state=tk.DISABLED)
-            self.logger.info("SUCCESS: Receta mostrada correctamente")
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error mostrando receta: {e}")
-            import traceback
-            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
-
-    def actualizar_contador(self, valor: int):
-        """Actualizar contador en tiempo real"""
-        try:
-            self.contador_var.set(str(valor))
-
-            # Actualizar progreso si hay meta
-            if self.monitor.orden_actual:
-                meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
-                if meta > 0:
-                    progreso = (valor / meta) * 100
-                    self.progreso_var.set(f"{progreso:.1f}%")
-                    self.progreso_barra['value'] = progreso
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando contador: {e}")
-
-    def actualizar_avance(self, avance: Dict[str, Any]):
-        """Actualizar avance de la orden"""
-        try:
-            if avance:
-                cantidad_pendiente = avance.get('cantidadPendiente', 0)
-                avance_porcentaje = avance.get('avance', 0) * 100
-
-                self.progreso_var.set(f"{avance_porcentaje:.1f}%")
-                self.progreso_barra['value'] = avance_porcentaje
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando avance: {e}")
-
-    def actualizar_estado_pico(self, estado: Dict[str, Any]):
-        """Actualizar estado del Pico"""
-        try:
-            if estado:
-                self.estado_pico_var.set(estado.get('estado', 'DESCONECTADO'))
-                self.tiempo_inactivo_var.set(f"{estado.get('tiempo_inactivo', 0)}s")
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando estado Pico: {e}")
-
-    def mostrar_seleccion_estacion(self, estaciones: List[Dict]) -> Optional[Dict]:
-        """Mostrar diálogo de selección de estación"""
-        try:
-            # Crear ventana de selección
-            ventana = tk.Toplevel(self.root)
-            ventana.title("Seleccionar Estación")
-            ventana.configure(bg=self.colores['fondo'])
-            ventana.attributes('-topmost', True)
+            # Crear ventana modal
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Seleccionar Estacion")
+            dialog.geometry("400x300")
+            dialog.configure(bg=self.colores['fondo'])
+            dialog.transient(self.root)
+            dialog.grab_set()
 
             # Centrar ventana
-            ventana.geometry("600x400")
-            ventana.transient(self.root)
-            ventana.grab_set()
-
-            # Frame principal
-            frame = tk.Frame(ventana, bg=self.colores['fondo'])
-            frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            dialog.update_idletasks()
+            x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
+            y = (dialog.winfo_screenheight() // 2) - (300 // 2)
+            dialog.geometry(f"400x300+{x}+{y}")
 
             # Titulo
             tk.Label(
-                frame,
-                text="SELECCIONAR ESTACION DE TRABAJO",
-                font=self.fuente_grande,
+                dialog,
+                text="SELECCIONAR ESTACION",
+                font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
-            ).pack(pady=15)
+            ).pack(pady=20)
 
             # Lista de estaciones
-            lista_frame = tk.Frame(frame, bg=self.colores['fondo'])
-            lista_frame.pack(fill=tk.BOTH, expand=True, pady=20)
-
-            # Crear lista
             lista = tk.Listbox(
-                lista_frame,
+                dialog,
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel'],
                 selectbackground=self.colores['accento'],
-                height=10
+                selectmode=tk.SINGLE,
+                height=8
             )
-            lista.pack(fill=tk.BOTH, expand=True)
+            lista.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-            # Agregar estaciones a la lista
             for estacion in estaciones:
-                texto = f"{estacion['nombre']} - {estacion.get('descripcion', '')}"
-                lista.insert(tk.END, texto)
+                lista.insert(tk.END, f"{estacion['nombre']} - {estacion['descripcion']}")
 
-            # Variable para resultado
+            # Botones
+            botones_frame = tk.Frame(dialog, bg=self.colores['fondo'])
+            botones_frame.pack(pady=20)
+
             resultado = [None]
 
             def seleccionar():
                 seleccion = lista.curselection()
                 if seleccion:
                     resultado[0] = estaciones[seleccion[0]]
-                    ventana.destroy()
+                    dialog.destroy()
 
             def cancelar():
-                ventana.destroy()
-
-            # Bindings para interaccion
-            lista.bind('<Double-Button-1>', lambda e: seleccionar())
-            lista.bind('<Return>', lambda e: seleccionar())
-            ventana.bind('<Escape>', lambda e: cancelar())
-
-            # Botones
-            botones_frame = tk.Frame(frame, bg=self.colores['fondo'])
-            botones_frame.pack(pady=20)
+                dialog.destroy()
 
             tk.Button(
                 botones_frame,
-                text="SELECCIONAR",
-                font=self.fuente_grande,
+                text="Seleccionar",
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['accento'],
-                command=seleccionar,
-                width=15
+                command=seleccionar
             ).pack(side=tk.LEFT, padx=10)
 
             tk.Button(
                 botones_frame,
-                text="CANCELAR",
-                font=self.fuente_grande,
+                text="Cancelar",
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
-                command=cancelar,
-                width=15
+                command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
-            # Esperar a que se cierre la ventana
-            ventana.wait_window()
+            # Bindings
+            lista.bind('<Double-Button-1>', lambda e: seleccionar())
+            lista.bind('<Return>', lambda e: seleccionar())
+            dialog.bind('<Escape>', lambda e: cancelar())
+
+            # Enfocar lista
+            lista.focus_set()
+
+            # Esperar cierre
+            dialog.wait_window()
 
             return resultado[0]
 
@@ -858,96 +623,96 @@ MATERIALES REQUERIDOS:
             self.logger.error(f"ERROR: Error mostrando seleccion de estacion: {e}")
             return None
 
-    def mostrar_seleccion_orden(self, ordenes: List[Dict]) -> Optional[Dict]:
-        """Mostrar diálogo de selección de orden"""
+    def mostrar_seleccion_orden(self, ordenes):
+        """Mostrar dialogo de seleccion de orden"""
         try:
-            # Crear ventana de selección
-            ventana = tk.Toplevel(self.root)
-            ventana.title("Seleccionar Orden")
-            ventana.configure(bg=self.colores['fondo'])
-            ventana.attributes('-topmost', True)
+            # Crear ventana modal
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Seleccionar Orden")
+            dialog.geometry("600x400")
+            dialog.configure(bg=self.colores['fondo'])
+            dialog.transient(self.root)
+            dialog.grab_set()
 
             # Centrar ventana
-            ventana.geometry("800x500")
-            ventana.transient(self.root)
-            ventana.grab_set()
-
-            # Frame principal
-            frame = tk.Frame(ventana, bg=self.colores['fondo'])
-            frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            dialog.update_idletasks()
+            x = (dialog.winfo_screenwidth() // 2) - (600 // 2)
+            y = (dialog.winfo_screenheight() // 2) - (400 // 2)
+            dialog.geometry(f"600x400+{x}+{y}")
 
             # Titulo
             tk.Label(
-                frame,
-                text="SELECCIONAR ORDEN DE FABRICACION",
-                font=self.fuente_grande,
+                dialog,
+                text="SELECCIONAR ORDEN",
+                font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
-            ).pack(pady=15)
+            ).pack(pady=20)
 
             # Lista de ordenes
-            lista_frame = tk.Frame(frame, bg=self.colores['fondo'])
-            lista_frame.pack(fill=tk.BOTH, expand=True, pady=20)
-
-            # Crear lista
             lista = tk.Listbox(
-                lista_frame,
-                font=self.fuente_normal,
+                dialog,
+                font=self.fuente_pequena,
                 fg=self.colores['texto'],
                 bg=self.colores['panel'],
                 selectbackground=self.colores['accento'],
+                selectmode=tk.SINGLE,
                 height=12
             )
-            lista.pack(fill=tk.BOTH, expand=True)
+            lista.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-            # Agregar ordenes a la lista
             for orden in ordenes:
-                texto = f"{orden['ordenFabricacion']} - {orden.get('ptDescripcion', '')} - Cantidad: {orden.get('cantidadFabricar', 0)}"
+                pt = orden.get('pt', '')
+                desc = orden.get('ptDescripcion', '')[:40]
+                cantidad = orden.get('cantidadFabricar', 0)
+                pendiente = orden.get('cantidadPendiente', 0)
+                upc = orden.get('ptUPC', '')
+                texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({pendiente}/{cantidad} pzs)"
                 lista.insert(tk.END, texto)
 
-            # Variable para resultado
+            # Botones
+            botones_frame = tk.Frame(dialog, bg=self.colores['fondo'])
+            botones_frame.pack(pady=20)
+
             resultado = [None]
 
             def seleccionar():
                 seleccion = lista.curselection()
                 if seleccion:
                     resultado[0] = ordenes[seleccion[0]]
-                    ventana.destroy()
+                    dialog.destroy()
 
             def cancelar():
-                ventana.destroy()
-
-            # Bindings para interaccion
-            lista.bind('<Double-Button-1>', lambda e: seleccionar())
-            lista.bind('<Return>', lambda e: seleccionar())
-            ventana.bind('<Escape>', lambda e: cancelar())
-
-            # Botones
-            botones_frame = tk.Frame(frame, bg=self.colores['fondo'])
-            botones_frame.pack(pady=20)
+                dialog.destroy()
 
             tk.Button(
                 botones_frame,
-                text="SELECCIONAR",
-                font=self.fuente_grande,
+                text="Seleccionar",
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['accento'],
-                command=seleccionar,
-                width=15
+                command=seleccionar
             ).pack(side=tk.LEFT, padx=10)
 
             tk.Button(
                 botones_frame,
-                text="CANCELAR",
-                font=self.fuente_grande,
+                text="Cancelar",
+                font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
-                command=cancelar,
-                width=15
+                command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
-            # Esperar a que se cierre la ventana
-            ventana.wait_window()
+            # Bindings
+            lista.bind('<Double-Button-1>', lambda e: seleccionar())
+            lista.bind('<Return>', lambda e: seleccionar())
+            dialog.bind('<Escape>', lambda e: cancelar())
+
+            # Enfocar lista
+            lista.focus_set()
+
+            # Esperar cierre
+            dialog.wait_window()
 
             return resultado[0]
 
@@ -1042,220 +807,289 @@ MATERIALES REQUERIDOS:
     def validar_upc(self):
         """Validar codigo UPC"""
         try:
-            upc = simpledialog.askstring(
-                "Validar UPC",
-                "Ingrese el codigo UPC:",
-                parent=self.root
-            )
-
-            if upc:
-                if self.monitor.validar_upc(upc):
-                    messagebox.showinfo("Exito", "UPC valido. Produccion iniciada.")
-                else:
-                    messagebox.showerror("Error", "UPC invalido. Verifique el codigo.")
-
+            self.monitor.validar_upc()
         except Exception as e:
             self.logger.error(f"ERROR: Error validando UPC: {e}")
             messagebox.showerror("Error", f"Error validando UPC: {e}")
 
-    def cerrar_orden(self):
-        """Cerrar orden actual con proteccion por PIN"""
+    def sincronizar(self):
+        """Sincronizar lecturas"""
         try:
-            if not self.orden_actual:
+            self.monitor.sincronizar_lecturas()
+        except Exception as e:
+            self.logger.error(f"ERROR: Error sincronizando: {e}")
+            messagebox.showerror("Error", f"Error sincronizando: {e}")
+
+    def cerrar_orden(self):
+        """Cerrar orden actual"""
+        try:
+            if not self.monitor.orden_actual:
                 messagebox.showwarning("Advertencia", "No hay orden seleccionada")
                 return
 
-            # Solicitar PIN de seguridad
-            pin_dialog = tk.Toplevel(self.root)
-            pin_dialog.title("Cerrar Orden - Seguridad")
-            pin_dialog.geometry("350x200")
-            pin_dialog.resizable(False, False)
-            pin_dialog.transient(self.root)
-            pin_dialog.grab_set()
+            # Crear ventana modal para PIN
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Cerrar Orden")
+            dialog.geometry("300x150")
+            dialog.configure(bg=self.colores['fondo'])
+            dialog.transient(self.root)
+            dialog.grab_set()
 
             # Centrar ventana
-            pin_dialog.update_idletasks()
-            x = (pin_dialog.winfo_screenwidth() // 2) - (350 // 2)
-            y = (pin_dialog.winfo_screenheight() // 2) - (200 // 2)
-            pin_dialog.geometry(f"350x200+{x}+{y}")
-
-            # Configurar colores
-            pin_dialog.configure(bg=self.colores['panel'])
+            dialog.update_idletasks()
+            x = (dialog.winfo_screenwidth() // 2) - (300 // 2)
+            y = (dialog.winfo_screenheight() // 2) - (150 // 2)
+            dialog.geometry(f"300x150+{x}+{y}")
 
             # Titulo
             tk.Label(
-                pin_dialog,
+                dialog,
                 text="CERRAR ORDEN",
                 font=self.fuente_grande,
-                fg=self.colores['error'],
-                bg=self.colores['panel']
-            ).pack(pady=10)
-
-            # Advertencia
-            tk.Label(
-                pin_dialog,
-                text="Esta accion cerrara la orden de fabricacion",
-                font=self.fuente_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).pack(pady=5)
-
-            tk.Label(
-                pin_dialog,
-                text=f"Orden: {self.orden_actual['ordenFabricacion']}",
-                font=self.fuente_normal,
                 fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).pack(pady=5)
+                bg=self.colores['fondo']
+            ).pack(pady=10)
 
-            # Campo de PIN
+            # Campo PIN
             tk.Label(
-                pin_dialog,
-                text="Ingrese PIN de seguridad:",
+                dialog,
+                text="PIN:",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).pack(pady=10)
+                bg=self.colores['fondo']
+            ).pack()
 
             pin_entry = tk.Entry(
-                pin_dialog,
-                font=self.fuente_grande,
+                dialog,
+                font=self.fuente_normal,
+                fg=self.colores['texto'],
+                bg=self.colores['panel'],
                 show="*",
-                width=15,
-                justify=tk.CENTER
+                width=20
             )
-            pin_entry.pack(pady=5)
-            pin_entry.focus()
-
-            # Variable para resultado
-            resultado = {'confirmado': False}
-
-            def validar_pin():
-                pin_ingresado = pin_entry.get()
-                if pin_ingresado == "314151":
-                    resultado['confirmado'] = True
-                    pin_dialog.destroy()
-                else:
-                    messagebox.showerror("Error", "PIN incorrecto")
-                    pin_entry.delete(0, tk.END)
-                    pin_entry.focus()
-
-            def cancelar():
-                pin_dialog.destroy()
+            pin_entry.pack(pady=10)
+            pin_entry.focus_set()
 
             # Botones
-            botones_frame = tk.Frame(pin_dialog, bg=self.colores['panel'])
-            botones_frame.pack(pady=20)
+            botones_frame = tk.Frame(dialog, bg=self.colores['fondo'])
+            botones_frame.pack(pady=10)
+
+            def confirmar():
+                pin = pin_entry.get()
+                if pin == "314151":
+                    self.monitor.finalizar_orden()
+                    dialog.destroy()
+                else:
+                    messagebox.showerror("Error", "PIN incorrecto")
+
+            def cancelar():
+                dialog.destroy()
 
             tk.Button(
                 botones_frame,
-                text="CANCELAR",
+                text="Confirmar",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
-                bg=self.colores['borde'],
-                command=cancelar,
-                width=10
+                bg=self.colores['accento'],
+                command=confirmar
             ).pack(side=tk.LEFT, padx=10)
 
             tk.Button(
                 botones_frame,
-                text="CONFIRMAR",
+                text="Cancelar",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['error'],
-                command=validar_pin,
-                width=10
+                command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
-            # Bind Enter key
-            pin_entry.bind('<Return>', lambda e: validar_pin())
-            pin_dialog.bind('<Escape>', lambda e: cancelar())
-
-            # Esperar resultado
-            pin_dialog.wait_window()
-
-            # Ejecutar cierre si PIN correcto
-            if resultado['confirmado'] and self.monitor:
-                self.monitor.finalizar_orden()
-                messagebox.showinfo("Exito", "Orden cerrada correctamente.")
-                self.logger.info("SUCCESS: Orden cerrada con PIN correcto")
+            # Binding para Enter
+            pin_entry.bind('<Return>', lambda e: confirmar())
+            dialog.bind('<Escape>', lambda e: cancelar())
 
         except Exception as e:
             self.logger.error(f"ERROR: Error cerrando orden: {e}")
             messagebox.showerror("Error", f"Error cerrando orden: {e}")
 
-    def sincronizar_ahora(self):
-        """Sincronizar datos ahora"""
-        try:
-            self.monitor.sincronizar_lecturas()
-            messagebox.showinfo("Exito", "Datos sincronizados correctamente.")
-        except Exception as e:
-            self.logger.error(f"ERROR: Error sincronizando: {e}")
-            messagebox.showerror("Error", f"Error sincronizando: {e}")
-
-    def toggle_fullscreen(self, event=None):
-        """Alternar modo fullscreen"""
-        try:
-            self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
-        except Exception as e:
-            self.logger.error(f"ERROR: Error alternando fullscreen: {e}")
-
-    def salir(self, event=None):
+    def salir(self):
         """Salir de la aplicacion"""
         try:
-            if messagebox.askyesno("Confirmar", "Salir del Monitor Industrial?"):
+            if messagebox.askyesno("Confirmar", "¿Desea salir de la aplicacion?"):
                 self.monitor.detener()
                 self.root.quit()
         except Exception as e:
             self.logger.error(f"ERROR: Error saliendo: {e}")
-            self.root.quit()
+
+    def toggle_fullscreen(self, event=None):
+        """Alternar pantalla completa"""
+        try:
+            self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
+        except Exception as e:
+            self.logger.error(f"ERROR: Error alternando pantalla completa: {e}")
+
+    def iniciar_actualizaciones(self):
+        """Iniciar actualizaciones automaticas de la interfaz"""
+        try:
+            # Cargar ordenes si hay estacion seleccionada
+            if self.monitor.estacion_actual:
+                self.cargar_ordenes()
+
+            self.actualizar_interfaz()
+            self.actualizar_reloj()
+            self.actualizar_semaforo()
+
+            # Programar siguiente actualizacion
+            self.root.after(1000, self.iniciar_actualizaciones)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error en actualizaciones: {e}")
+
+    def actualizar_interfaz(self):
+        """Actualizar interfaz con estado actual"""
+        try:
+            estado_actual = self.monitor.estado.obtener_estado()
+
+            if hasattr(estado_actual, 'value'):
+                estado_texto = estado_actual.value
+            else:
+                estado_texto = str(estado_actual)
+
+            self.estado_var.set(f"Estado: {estado_texto}")
+
+            # Actualizar contador
+            if self.monitor.contador_actual is not None:
+                self.contador_var.set(str(self.monitor.contador_actual))
+            else:
+                self.contador_var.set("0")
+
+            # Actualizar progreso
+            if self.monitor.orden_actual:
+                meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
+                if meta > 0:
+                    progreso = (self.monitor.contador_actual / meta) * 100
+                    self.progreso_var.set(f"{progreso:.1f}%")
+                    self.progreso_barra.set(progreso)
+                else:
+                    self.progreso_var.set("0%")
+                    self.progreso_barra.set(0)
+            else:
+                self.progreso_var.set("0%")
+                self.progreso_barra.set(0)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando interfaz: {e}")
+
+    def mostrar_receta(self, receta):
+        """Mostrar receta de la orden en el panel"""
+        try:
+            self.logger.info(f"INFO: Mostrando receta: {receta is not None}")
+            self.logger.info(f"INFO: receta_text existe: {self.receta_text is not None}")
+            self.logger.info(f"INFO: panel_receta existe: {self.panel_receta is not None}")
+
+            if not self.receta_text or not receta:
+                self.logger.warning("WARNING: No se puede mostrar receta - receta_text o receta es None")
+                return
+
+            self.logger.info(f"INFO: Receta tiene {len(receta.get('partidas', []))} partidas")
+
+            # Habilitar edicion temporalmente
+            self.receta_text.config(state=tk.NORMAL)
+            self.receta_text.delete(1.0, tk.END)
+
+            # Formatear receta
+            texto_receta = f"""
+ORDEN: {receta.get('ordenFabricacion', 'N/A')}
+PRODUCTO: {receta.get('articuloPT', 'N/A')} - {receta.get('descripcionPT', 'N/A')}
+CANTIDAD: {receta.get('cantidadPlanificada', 'N/A')}
+CAJA: {receta.get('caja', 'N/A')}
+CLIENTE: {receta.get('razonSocial', 'N/A')}
+
+MATERIALES REQUERIDOS:
+"""
+
+            # Agregar partidas
+            for partida in receta.get('partidas', []):
+                texto_receta += f"• {partida.get('articuloMP', 'N/A')} - {partida.get('descripcionMP', 'N/A')} (Cant: {partida.get('cantidad', 'N/A')})\n"
+
+            self.logger.info(f"INFO: Texto receta preparado, longitud: {len(texto_receta)}")
+            self.receta_text.insert(1.0, texto_receta)
+            self.receta_text.config(state=tk.DISABLED)
+            self.logger.info("SUCCESS: Receta mostrada correctamente")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando receta: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
+
+    def actualizar_contador(self, valor: int):
+        """Actualizar contador en tiempo real"""
+        try:
+            self.contador_var.set(str(valor))
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando contador: {e}")
 
     def actualizar_reloj(self):
         """Actualizar reloj en tiempo real"""
         try:
-            from datetime import datetime
             ahora = datetime.now()
-            self.reloj_var.set(ahora.strftime("%H:%M:%S"))
+            tiempo_str = ahora.strftime("%H:%M:%S")
+            self.reloj_var.set(f"HORA: {tiempo_str}")
+
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando reloj: {e}")
 
     def actualizar_semaforo(self):
-        """Actualizar semáforo según tiempo desde última lectura"""
+        """Actualizar semaforo de actividad"""
         try:
-            if not self.ultima_lectura_timestamp:
-                # Sin lecturas
-                self.semaforo_label.config(fg=self.colores['error'])  # Rojo
-                return
+            if hasattr(self, 'ultima_lectura_timestamp') and self.ultima_lectura_timestamp:
+                tiempo_transcurrido = (datetime.now() - self.ultima_lectura_timestamp).total_seconds() / 60
 
-            from datetime import datetime, timedelta
-            ahora = datetime.now()
-            tiempo_transcurrido = ahora - self.ultima_lectura_timestamp
-
-            if tiempo_transcurrido > timedelta(minutes=30):
-                # Más de 30 minutos - Rojo
-                self.semaforo_label.config(fg=self.colores['error'])
-            elif tiempo_transcurrido > timedelta(minutes=15):
-                # Entre 15-30 minutos - Amarillo
-                self.semaforo_label.config(fg=self.colores['advertencia'])
+                if tiempo_transcurrido > 30:
+                    color = self.colores['error']  # Rojo
+                elif tiempo_transcurrido > 15:
+                    color = self.colores['advertencia']  # Amarillo
+                else:
+                    color = self.colores['success']  # Verde
             else:
-                # Menos de 15 minutos - Verde
-                self.semaforo_label.config(fg=self.colores['accento'])
+                color = self.colores['error']  # Rojo por defecto
+
+            self.semaforo_label.config(bg=color)
 
         except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando semáforo: {e}")
+            self.logger.error(f"ERROR: Error actualizando semaforo: {e}")
 
     def actualizar_ultima_lectura(self, timestamp):
-        """Actualizar timestamp de última lectura del Pico"""
+        """Actualizar timestamp de ultima lectura"""
         try:
             self.ultima_lectura_timestamp = timestamp
-
-            # Actualizar texto en interfaz
-            if timestamp:
-                from datetime import datetime
-                hora_lectura = timestamp.strftime("%H:%M:%S")
-                self.ultima_lectura_var.set(hora_lectura)
-            else:
-                self.ultima_lectura_var.set("N/A")
+            tiempo_str = timestamp.strftime("%H:%M:%S")
+            self.ultima_lectura_var.set(f"Ultima lectura: {tiempo_str}")
 
         except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando última lectura: {e}")
+            self.logger.error(f"ERROR: Error actualizando ultima lectura: {e}")
+
+    def mostrar(self):
+        """Mostrar interfaz"""
+        try:
+            self.root.mainloop()
+            self.logger.info("SUCCESS: Interfaz industrial mostrada")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando interfaz: {e}")
+
+    def ocultar(self):
+        """Ocultar interfaz"""
+        try:
+            self.root.withdraw()
+            self.logger.info("SUCCESS: Interfaz industrial ocultada")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error ocultando interfaz: {e}")
+
+    def cerrar(self):
+        """Cerrar interfaz"""
+        try:
+            self.root.destroy()
+            self.logger.info("SUCCESS: Interfaz industrial cerrada")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error cerrando interfaz: {e}")
+
