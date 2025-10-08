@@ -506,12 +506,14 @@ class MonitorIndustrial:
         """Finalizar orden de fabricación"""
         try:
             if self.orden_actual:
+                orden_numero = self.orden_actual['ordenFabricacion']
+                
                 # Sincronizar lecturas finales
                 self.sincronizar_lecturas()
 
                 # Cerrar orden en SISPRO
                 self.sispro.cerrar_orden(
-                    self.orden_actual['ordenFabricacion'],
+                    orden_numero,
                     self.estacion_actual['id']
                 )
 
@@ -523,8 +525,16 @@ class MonitorIndustrial:
                 self.upc_validado = None
                 self.lecturas_acumuladas = 0
                 self.ultima_cantidad_sincronizada = 0
+                self.contador_actual = 0
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.INACTIVO)
+
+                # Mostrar mensaje de finalización y limpiar interfaz
+                if self.interfaz:
+                    self.interfaz.mostrar_mensaje_exito(f"Orden {orden_numero} completada exitosamente")
+                    self.interfaz.limpiar_interfaz_orden()
+                    # Recargar órdenes para actualizar la lista
+                    self.interfaz.cargar_ordenes()
 
                 self.logger.info("SUCCESS: Orden finalizada")
 

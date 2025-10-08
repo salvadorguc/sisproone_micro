@@ -1281,3 +1281,44 @@ MATERIALES REQUERIDOS:
         except Exception as e:
             self.logger.error(f"ERROR: Error ocultando mensaje temporal: {e}")
 
+    def limpiar_interfaz_orden(self):
+        """Limpiar interfaz cuando se completa una orden"""
+        try:
+            # Limpiar variables de la orden actual
+            self.orden_actual = None
+            self.receta_actual = None
+            
+            # Limpiar campos de la interfaz
+            if hasattr(self, 'orden_var'):
+                self.orden_var.set("N/A")
+            if hasattr(self, 'upc_var'):
+                self.upc_var.set("N/A")
+            if hasattr(self, 'meta_var'):
+                self.meta_var.set("0")
+            if hasattr(self, 'progreso_var'):
+                self.progreso_var.set("0%")
+            if hasattr(self, 'contador_var'):
+                self.contador_var.set("0")
+            
+            # Limpiar panel de materiales (receta)
+            if hasattr(self, 'receta_text') and self.receta_text:
+                self.receta_text.delete(1.0, tk.END)
+                self.receta_text.insert(tk.END, "Seleccione una orden para ver los materiales")
+            
+            # Limpiar selección en la lista de órdenes
+            if hasattr(self, 'lista_ordenes') and self.lista_ordenes:
+                self.lista_ordenes.selection_clear(0, tk.END)
+            
+            # Actualizar estado
+            if hasattr(self, 'estado_var'):
+                self.estado_var.set("Estado: INACTIVO")
+            
+            # Limpiar última lectura
+            if hasattr(self, 'ultima_lectura_var'):
+                self.ultima_lectura_var.set("Ultima lectura: N/A")
+            
+            self.logger.info("SUCCESS: Interfaz limpiada para nueva orden")
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error limpiando interfaz orden: {e}")
+
