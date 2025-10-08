@@ -73,6 +73,20 @@ class InterfazIndustrial:
         self.fuente_footer_grande = ('Arial', 22)  # 18 * 1.25
         self.fuente_footer_contador = ('Arial', 45, 'bold')  # 36 * 1.25
 
+    def calcular_fuente_dinamica(self, valor_contador):
+        """Calcular tamaño de fuente dinámico basado en el valor del contador"""
+        try:
+            # Tamaño base de la fuente
+            tamaño_base = 15  # fuente_footer_normal
+            # Aumentar al 80% del valor del contador
+            incremento = int(valor_contador * 0.8)
+            # Tamaño final (mínimo 15, máximo 100)
+            tamaño_final = max(15, min(100, tamaño_base + incremento))
+            return ('Arial', tamaño_final, 'bold')
+        except Exception as e:
+            self.logger.error(f"ERROR: Error calculando fuente dinámica: {e}")
+            return self.fuente_footer_normal
+
     def mostrar(self):
         """Mostrar la interfaz industrial"""
         try:
@@ -124,10 +138,10 @@ class InterfazIndustrial:
             self.root.bind('<Escape>', self.salir)
             self.root.bind('<F11>', self.toggle_fullscreen)
             self.root.bind('<Control-q>', self.salir)
-            
+
             # Configurar redimensionamiento
             self.root.bind('<Configure>', self.on_window_configure)
-            
+
             # Forzar actualización del layout después del fullscreen
             self.root.update_idletasks()
 
@@ -156,7 +170,7 @@ class InterfazIndustrial:
             self.crear_panel_receta(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
-            
+
             # Forzar actualización del layout
             main_frame.update_idletasks()
 
@@ -425,13 +439,14 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).pack()
 
-            tk.Label(
+            self.contador_label = tk.Label(
                 contador_frame,
                 textvariable=self.contador_var,
                 font=self.fuente_footer_contador,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).pack(pady=5)
+            )
+            self.contador_label.pack(pady=5)
 
             # Meta y progreso
             meta_frame = tk.Frame(main_frame, bg=self.colores['panel'])
@@ -446,13 +461,14 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=0, column=0, padx=10, sticky=tk.W)
 
-            tk.Label(
+            self.meta_label = tk.Label(
                 meta_frame,
                 textvariable=self.meta_var,
                 font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=10, sticky=tk.W)
+            )
+            self.meta_label.grid(row=0, column=1, padx=10, sticky=tk.W)
 
             # Progreso
             tk.Label(
@@ -463,13 +479,14 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=1, column=0, padx=10, sticky=tk.W)
 
-            tk.Label(
+            self.progreso_label = tk.Label(
                 meta_frame,
                 textvariable=self.progreso_var,
                 font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=1, column=1, padx=10, sticky=tk.W)
+            )
+            self.progreso_label.grid(row=1, column=1, padx=10, sticky=tk.W)
 
 
         except Exception as e:
@@ -900,7 +917,7 @@ class InterfazIndustrial:
             # Titulo
             tk.Label(
                 dialog,
-                text="CERRAR ORDEN",
+                text="Cerrar Orden",
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
@@ -1328,6 +1345,21 @@ MATERIALES REQUERIDOS:
                     if progreso > 100:
                         progreso = 100
                     self.progreso_var.set(f"{progreso:.1f}%")
+
+            # Actualizar fuentes dinámicamente basadas en el valor del contador
+            fuente_dinamica = self.calcular_fuente_dinamica(valor)
+            
+            # Actualizar fuente del contador
+            if hasattr(self, 'contador_label'):
+                self.contador_label.config(font=fuente_dinamica)
+            
+            # Actualizar fuente de la meta
+            if hasattr(self, 'meta_label'):
+                self.meta_label.config(font=fuente_dinamica)
+            
+            # Actualizar fuente del progreso
+            if hasattr(self, 'progreso_label'):
+                self.progreso_label.config(font=fuente_dinamica)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando contador: {e}")
