@@ -34,6 +34,12 @@ class InterfazIndustrial:
         self.panel_receta = None
         self.receta_text = None
 
+        # Variables de estado del Pico
+        self.estado_pico_var = tk.StringVar()
+        self.tiempo_inactivo_var = tk.StringVar()
+        self.ultima_sincronizacion_var = tk.StringVar()
+        self.ultima_lectura_timestamp = None
+
         # Colores del tema industrial
         self.colores = {
             'fondo': '#f5f5f5',
@@ -1092,4 +1098,97 @@ MATERIALES REQUERIDOS:
             self.logger.info("SUCCESS: Interfaz industrial cerrada")
         except Exception as e:
             self.logger.error(f"ERROR: Error cerrando interfaz: {e}")
+
+    def actualizar_estado_pico(self, estado):
+        """Actualizar estado del Pico"""
+        try:
+            if estado:
+                self.estado_pico_var.set(estado.get('estado', 'DESCONECTADO'))
+                self.tiempo_inactivo_var.set(f"{estado.get('tiempo_inactivo', 0)}s")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando estado Pico: {e}")
+
+    def sincronizar_ahora(self):
+        """Sincronizar datos ahora"""
+        try:
+            self.monitor.sincronizar_lecturas()
+            messagebox.showinfo("Exito", "Datos sincronizados correctamente.")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error sincronizando: {e}")
+            messagebox.showerror("Error", f"Error sincronizando: {e}")
+
+    def validar_upc(self):
+        """Validar codigo UPC"""
+        try:
+            from tkinter import simpledialog
+            upc = simpledialog.askstring(
+                "Validar UPC",
+                "Ingrese el codigo UPC:",
+                parent=self.root
+            )
+
+            if upc:
+                if self.monitor.validar_upc(upc):
+                    messagebox.showinfo("Exito", "UPC valido. Produccion iniciada.")
+                else:
+                    messagebox.showerror("Error", "UPC invalido. Verifique el codigo.")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error validando UPC: {e}")
+            messagebox.showerror("Error", f"Error validando UPC: {e}")
+
+    def sincronizar(self):
+        """Sincronizar lecturas"""
+        try:
+            self.monitor.sincronizar_lecturas()
+        except Exception as e:
+            self.logger.error(f"ERROR: Error sincronizando: {e}")
+            messagebox.showerror("Error", f"Error sincronizando: {e}")
+
+    def salir(self):
+        """Salir de la aplicacion"""
+        try:
+            if messagebox.askyesno("Confirmar", "¿Desea salir de la aplicacion?"):
+                self.monitor.detener()
+                self.root.quit()
+        except Exception as e:
+            self.logger.error(f"ERROR: Error saliendo: {e}")
+
+    def toggle_fullscreen(self, event=None):
+        """Alternar pantalla completa"""
+        try:
+            self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
+        except Exception as e:
+            self.logger.error(f"ERROR: Error alternando pantalla completa: {e}")
+
+    def actualizar_avance(self, avance):
+        """Actualizar avance de la orden"""
+        try:
+            if avance:
+                cantidad_pendiente = avance.get('cantidadPendiente', 0)
+                avance_porcentaje = avance.get('avance', 0) * 100
+
+                self.progreso_var.set(f"{avance_porcentaje:.1f}%")
+                if hasattr(self, 'progreso_barra'):
+                    self.progreso_barra.set(avance_porcentaje)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando avance: {e}")
+
+    def actualizar_contador(self, valor: int):
+        """Actualizar contador en tiempo real"""
+        try:
+            self.contador_var.set(str(valor))
+
+            # Actualizar progreso si hay meta
+            if self.monitor.orden_actual:
+                meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
+                if meta > 0:
+                    progreso = (valor / meta) * 100
+                    self.progreso_var.set(f"{progreso:.1f}%")
+                    if hasattr(self, 'progreso_barra'):
+                        self.progreso_barra.set(progreso)
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando contador: {e}")
 

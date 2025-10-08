@@ -131,9 +131,6 @@ class MonitorIndustrial:
             # Mostrar interfaz
             self.interfaz.mostrar()
 
-            # Bucle principal
-            self.interfaz.root.mainloop()
-
         except KeyboardInterrupt:
             self.logger.info("INFO: Deteniendo monitor por interrupcion del usuario")
         except Exception as e:
