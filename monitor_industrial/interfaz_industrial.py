@@ -1281,6 +1281,105 @@ MATERIALES REQUERIDOS:
         except Exception as e:
             self.logger.error(f"ERROR: Error ocultando mensaje temporal: {e}")
 
+    def confirmar_conteo_pico(self, conteo_actual: int, salto: int) -> bool:
+        """Confirmar si el operador quiere conservar el conteo del Pico"""
+        try:
+            # Crear diálogo de confirmación
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Pico No Reiniciado")
+            dialog.geometry("500x300")
+            dialog.resizable(False, False)
+            dialog.transient(self.root)
+            dialog.grab_set()
+            
+            # Centrar el diálogo
+            dialog.geometry("+%d+%d" % (self.root.winfo_rootx() + 100, self.root.winfo_rooty() + 100))
+            
+            # Frame principal
+            main_frame = tk.Frame(dialog, bg='white')
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            # Título
+            tk.Label(
+                main_frame,
+                text="⚠️ PICO NO REINICIADO",
+                font=('Arial', 16, 'bold'),
+                fg='#cc6600',
+                bg='white'
+            ).pack(pady=(0, 20))
+            
+            # Mensaje principal
+            mensaje = f"""El Pico tiene {conteo_actual} lecturas guardadas de una sesión anterior.
+
+Salto detectado: +{salto} lecturas
+
+¿Qué desea hacer?"""
+            
+            tk.Label(
+                main_frame,
+                text=mensaje,
+                font=self.fuente_normal,
+                bg='white',
+                justify=tk.LEFT
+            ).pack(pady=(0, 30))
+            
+            # Frame para botones
+            botones_frame = tk.Frame(main_frame, bg='white')
+            botones_frame.pack()
+            
+            resultado = [False]  # Usar lista para poder modificar desde funciones internas
+            
+            def conservar_conteo():
+                resultado[0] = True
+                dialog.destroy()
+            
+            def reiniciar_pico():
+                resultado[0] = False
+                dialog.destroy()
+            
+            # Botón Conservar Conteo
+            tk.Button(
+                botones_frame,
+                text="CONSERVAR CONTEO",
+                command=conservar_conteo,
+                bg='#00cc00',
+                fg='white',
+                font=self.fuente_grande,
+                width=20,
+                height=2
+            ).pack(side=tk.LEFT, padx=(0, 10))
+            
+            # Botón Reiniciar Pico
+            tk.Button(
+                botones_frame,
+                text="REINICIAR PICO",
+                command=reiniciar_pico,
+                bg='#cc0000',
+                fg='white',
+                font=self.fuente_grande,
+                width=20,
+                height=2
+            ).pack(side=tk.LEFT)
+            
+            # Instrucciones
+            tk.Label(
+                main_frame,
+                text="• CONSERVAR: Continúa con el conteo actual\n• REINICIAR: Reinicia el Pico manualmente y vuelve a validar UPC",
+                font=('Arial', 10),
+                fg='#666666',
+                bg='white',
+                justify=tk.LEFT
+            ).pack(pady=(20, 0))
+            
+            # Esperar respuesta
+            dialog.wait_window()
+            
+            return resultado[0]
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error en confirmacion conteo Pico: {e}")
+            return False
+
     def limpiar_interfaz_orden(self):
         """Limpiar interfaz cuando se completa una orden"""
         try:

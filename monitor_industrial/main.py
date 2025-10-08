@@ -183,6 +183,22 @@ class MonitorIndustrial:
             if tag == 'CONT':
                 # Actualizar contador local
                 incremento = valor - self.lecturas_acumuladas
+                
+                # Detectar salto grande (Pico no reiniciado)
+                if incremento > 10 and self.lecturas_acumuladas == 0:
+                    self.logger.warning(f"WARNING: Salto detectado: {incremento} lecturas. Pico no reiniciado.")
+                    # Mostrar diálogo de confirmación
+                    if self.interfaz:
+                        if not self.interfaz.confirmar_conteo_pico(valor, incremento):
+                            # Usuario eligió reiniciar, cancelar producción
+                            self.logger.info("INFO: Usuario eligió reiniciar Pico. Cancelando producción.")
+                            self.desactivar_pico()
+                            from estado_manager import EstadoSistema
+                            self.estado.cambiar_estado(EstadoSistema.INACTIVO)
+                            return
+                        else:
+                            self.logger.info("INFO: Usuario eligió conservar conteo del Pico.")
+                
                 self.lecturas_acumuladas = valor
                 self.contador_actual = valor
 
