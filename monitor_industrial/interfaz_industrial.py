@@ -894,7 +894,7 @@ class InterfazIndustrial:
             # Titulo
             tk.Label(
                 dialog,
-                text="Cerrar Orden",
+                text="CERRAR ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
