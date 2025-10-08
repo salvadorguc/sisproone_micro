@@ -507,7 +507,7 @@ class MonitorIndustrial:
         try:
             if self.orden_actual:
                 orden_numero = self.orden_actual['ordenFabricacion']
-                
+
                 # Sincronizar lecturas finales
                 self.sincronizar_lecturas()
 

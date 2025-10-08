@@ -1284,6 +1284,8 @@ MATERIALES REQUERIDOS:
     def limpiar_interfaz_orden(self):
         """Limpiar interfaz cuando se completa una orden"""
         try:
+            self.logger.info("INFO: Iniciando limpieza de interfaz de orden")
+            
             # Limpiar variables de la orden actual
             self.orden_actual = None
             self.receta_actual = None
@@ -1302,8 +1304,16 @@ MATERIALES REQUERIDOS:
             
             # Limpiar panel de materiales (receta)
             if hasattr(self, 'receta_text') and self.receta_text:
+                self.logger.info("INFO: Limpiando panel de materiales")
+                # Habilitar edicion temporalmente
+                self.receta_text.config(state=tk.NORMAL)
                 self.receta_text.delete(1.0, tk.END)
                 self.receta_text.insert(tk.END, "Seleccione una orden para ver los materiales")
+                # Volver a deshabilitar
+                self.receta_text.config(state=tk.DISABLED)
+                self.logger.info("SUCCESS: Panel de materiales limpiado")
+            else:
+                self.logger.warning("WARNING: receta_text no existe o es None")
             
             # Limpiar selección en la lista de órdenes
             if hasattr(self, 'lista_ordenes') and self.lista_ordenes:
