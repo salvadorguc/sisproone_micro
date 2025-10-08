@@ -136,7 +136,7 @@ class InterfazIndustrial:
         try:
             # Frame principal
             main_frame = tk.Frame(self.root, bg=self.colores['fondo'])
-            main_frame.pack(fill=tk.BOTH, padx=5, pady=5)
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
 
             # Crear paneles
             self.crear_panel_superior(main_frame)
@@ -156,7 +156,7 @@ class InterfazIndustrial:
 
             # Frame principal horizontal
             main_frame = tk.Frame(panel, bg=self.colores['panel'])
-            main_frame.pack(fill=tk.X, pady=10, padx=20)
+            main_frame.pack(fill=tk.X, pady=10, padx=5)
 
             # Lado izquierdo: Titulo
             titulo = tk.Label(
@@ -289,7 +289,7 @@ class InterfazIndustrial:
 
             # Frame para el texto de la receta
             text_frame = tk.Frame(panel, bg=self.colores['panel'])
-            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+            text_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
 
             # Area de texto para la receta
             self.receta_text = tk.Text(
@@ -328,7 +328,7 @@ class InterfazIndustrial:
 
             # Frame para lista de ordenes
             ordenes_frame = tk.Frame(self.panel_receta, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
-            ordenes_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+            ordenes_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
 
             # Listbox para ordenes
             self.lista_ordenes = tk.Listbox(
@@ -340,7 +340,7 @@ class InterfazIndustrial:
                 selectmode=tk.SINGLE,
                 height=4  # Disminuir altura 50%
             )
-            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            self.lista_ordenes.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
             self.lista_ordenes.bind('<<ListboxSelect>>', self.on_orden_seleccionada)
 
             # Scrollbar para la lista
@@ -359,7 +359,7 @@ class InterfazIndustrial:
 
             # Frame principal
             main_frame = tk.Frame(panel, bg=self.colores['panel'])
-            main_frame.pack(fill=tk.X, padx=20, pady=10)
+            main_frame.pack(fill=tk.X, padx=5, pady=10)
 
             # Informacion de la orden actual
             info_orden = tk.Frame(main_frame, bg=self.colores['panel'])
