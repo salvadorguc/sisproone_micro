@@ -719,12 +719,12 @@ class InterfazIndustrial:
     def on_orden_seleccionada(self, event):
         """Manejar seleccion de orden desde la lista"""
         try:
-            # Verificar si hay una orden en proceso (bloquear selección)
-            if (hasattr(self.monitor, 'orden_actual') and self.monitor.orden_actual and
-                hasattr(self.monitor, 'estado') and self.monitor.estado.estado_actual != EstadoSistema.INACTIVO):
+            # Verificar si hay una lectura activa (bloquear selección solo si está produciendo)
+            if (hasattr(self.monitor, 'estado') and 
+                self.monitor.estado.estado_actual == EstadoSistema.PRODUCIENDO):
                 messagebox.showwarning(
-                    "Orden en Proceso",
-                    "Hay una orden en proceso. Use 'CAMBIAR ORDEN' para cambiar a otra orden."
+                    "Lectura Activa",
+                    "Hay una lectura en proceso. Use 'CAMBIAR ORDEN' para cambiar a otra orden."
                 )
                 return
 
