@@ -115,15 +115,12 @@ class InterfazIndustrial:
             self.ultima_recarga_ordenes = None
 
             self.configurar_ventana()
-            self.crear_interfaz()
-            self.iniciar_actualizaciones()
-            self.logger.info("SUCCESS: Interfaz industrial mostrada")
             
-            # Mostrar loading mientras se inicializa
+            # Mostrar loading ANTES de crear la interfaz completa
             self.mostrar_loading()
             
-            # Seleccionar estacion automaticamente al iniciar (después del loading)
-            self.root.after(2000, self.ocultar_loading_y_seleccionar_estacion)
+            # Crear interfaz y seleccionar estación después del loading
+            self.root.after(2000, self.inicializar_sistema_completo)
 
             # Iniciar el bucle principal
             self.root.mainloop()
@@ -136,7 +133,7 @@ class InterfazIndustrial:
             # Crear frame de loading que cubra toda la pantalla
             self.loading_frame = tk.Frame(self.root, bg=self.colores['fondo'])
             self.loading_frame.place(x=0, y=0, relwidth=1, relheight=1)
-            
+
             # Título principal
             tk.Label(
                 self.loading_frame,
@@ -145,7 +142,7 @@ class InterfazIndustrial:
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
             ).pack(expand=True)
-            
+
             # Mensaje de carga
             tk.Label(
                 self.loading_frame,
@@ -154,7 +151,7 @@ class InterfazIndustrial:
                 fg=self.colores['texto'],
                 bg=self.colores['fondo']
             ).pack()
-            
+
             # Indicador de progreso (puntos animados)
             self.loading_dots = tk.Label(
                 self.loading_frame,
@@ -164,12 +161,12 @@ class InterfazIndustrial:
                 bg=self.colores['fondo']
             )
             self.loading_dots.pack(pady=20)
-            
+
             # Iniciar animación de puntos
             self.animar_loading()
-            
+
             self.logger.info("INFO: Pantalla de carga mostrada")
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando loading: {e}")
 
@@ -179,7 +176,7 @@ class InterfazIndustrial:
             if hasattr(self, 'loading_frame') and self.loading_frame.winfo_exists():
                 # Obtener texto actual
                 texto_actual = self.loading_dots.cget('text')
-                
+
                 # Ciclar entre 1, 2, 3 puntos
                 if texto_actual == "":
                     nuevo_texto = "."
@@ -189,30 +186,35 @@ class InterfazIndustrial:
                     nuevo_texto = "..."
                 else:
                     nuevo_texto = ""
-                
+
                 self.loading_dots.config(text=nuevo_texto)
-                
+
                 # Programar siguiente animación
                 self.root.after(500, self.animar_loading)
-                
+
         except Exception as e:
             self.logger.error(f"ERROR: Error animando loading: {e}")
 
-    def ocultar_loading_y_seleccionar_estacion(self):
-        """Ocultar loading y seleccionar estación"""
+    def inicializar_sistema_completo(self):
+        """Inicializar el sistema completo después del loading"""
         try:
             # Ocultar loading
             if hasattr(self, 'loading_frame'):
                 self.loading_frame.destroy()
                 delattr(self, 'loading_frame')
             
+            # Crear la interfaz completa
+            self.crear_interfaz()
+            self.iniciar_actualizaciones()
+            self.logger.info("SUCCESS: Interfaz industrial mostrada")
+            
             # Seleccionar estación
             self.seleccionar_estacion()
             
-            self.logger.info("SUCCESS: Loading ocultado, iniciando selección de estación")
+            self.logger.info("SUCCESS: Sistema completamente inicializado")
             
         except Exception as e:
-            self.logger.error(f"ERROR: Error ocultando loading: {e}")
+            self.logger.error(f"ERROR: Error inicializando sistema completo: {e}")
 
     def configurar_ventana(self):
         """Configurar ventana principal"""
