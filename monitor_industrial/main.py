@@ -518,20 +518,47 @@ class MonitorIndustrial:
         except Exception as e:
             self.logger.error(f"ERROR: Error activando Pico: {e}")
 
-    def finalizar_orden(self):
+    def finalizar_orden(self, forzar_cierre: bool = False):
         """Finalizar orden de fabricación"""
         try:
             if self.orden_actual:
                 orden_numero = self.orden_actual['ordenFabricacion']
-
+                
                 # Sincronizar lecturas finales
                 self.sincronizar_lecturas()
 
-                # Cerrar orden en SISPRO
-                self.sispro.cerrar_orden(
-                    orden_numero,
-                    self.estacion_actual['id']
-                )
+                # Verificar si la orden está realmente completa
+                orden_completa = False
+                if forzar_cierre:
+                    # Cierre manual con PIN - siempre cerrar
+                    orden_completa = True
+                    self.logger.info(f"INFO: Cierre manual de orden {orden_numero}")
+                else:
+                    # Verificar si cantidadPendiente = 0
+                    try:
+                        # Obtener estado actual de la orden desde la base de datos
+                        if self.database and self.database.connection and self.database.connection.is_connected():
+                            query = "SELECT cantidadPendiente FROM ordenEstacion WHERE ordenFabricacion = %s AND estacionId = %s"
+                            self.database.cursor.execute(query, (orden_numero, self.estacion_actual['id']))
+                            resultado = self.database.cursor.fetchone()
+                            if resultado:
+                                cantidad_pendiente = resultado['cantidadPendiente']
+                                orden_completa = (cantidad_pendiente == 0)
+                                self.logger.info(f"INFO: Orden {orden_numero} - Pendiente: {cantidad_pendiente}, Completa: {orden_completa}")
+                    except Exception as e:
+                        self.logger.error(f"ERROR: Error verificando estado de orden: {e}")
+                        # En caso de error, asumir que no está completa
+                        orden_completa = False
+
+                # Solo cerrar la orden si está completa
+                if orden_completa:
+                    self.sispro.cerrar_orden(
+                        orden_numero,
+                        self.estacion_actual['id']
+                    )
+                    self.logger.info(f"SUCCESS: Orden {orden_numero} cerrada en SISPRO")
+                else:
+                    self.logger.info(f"INFO: Orden {orden_numero} no cerrada - aún tiene lecturas pendientes")
 
                 # Desactivar Pico
                 self.desactivar_pico()
@@ -545,9 +572,12 @@ class MonitorIndustrial:
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.INACTIVO)
 
-                # Mostrar mensaje de finalización y limpiar interfaz
+                # Mostrar mensaje apropiado
                 if self.interfaz:
-                    self.interfaz.mostrar_mensaje_exito(f"Orden {orden_numero} completada exitosamente")
+                    if orden_completa:
+                        self.interfaz.mostrar_mensaje_exito(f"Orden {orden_numero} completada exitosamente")
+                    else:
+                        self.interfaz.mostrar_mensaje_exito(f"Orden {orden_numero} pausada - lecturas guardadas")
                     self.interfaz.limpiar_interfaz_orden()
                     # Recargar órdenes para actualizar la lista
                     self.interfaz.cargar_ordenes()

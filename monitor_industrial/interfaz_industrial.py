@@ -882,7 +882,7 @@ class InterfazIndustrial:
             def confirmar():
                 pin = pin_entry.get()
                 if pin == "314151":
-                    self.monitor.finalizar_orden()
+                    self.monitor.finalizar_orden(forzar_cierre=True)
                     dialog.destroy()
                 else:
                     messagebox.showerror("Error", "PIN incorrecto")
