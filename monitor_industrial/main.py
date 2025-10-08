@@ -584,6 +584,8 @@ class MonitorIndustrial:
                     self.interfaz.limpiar_interfaz_orden()
                     # Recargar órdenes para actualizar la lista
                     self.interfaz.cargar_ordenes()
+                    # Forzar actualización del modal si está abierto
+                    self.interfaz.ultima_recarga_ordenes = None
 
                 self.logger.info("SUCCESS: Orden finalizada")
 
