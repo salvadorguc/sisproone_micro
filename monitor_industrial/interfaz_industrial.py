@@ -1088,21 +1088,87 @@ MATERIALES REQUERIDOS:
         """Validar codigo UPC"""
         try:
             from tkinter import simpledialog
-            upc = simpledialog.askstring(
-                "Validar UPC",
-                "Ingrese el codigo UPC:",
-                parent=self.root
+            
+            # Crear un dialogo personalizado para evitar problemas de layout
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Validar UPC")
+            dialog.geometry("400x150")
+            dialog.resizable(False, False)
+            dialog.transient(self.root)
+            dialog.grab_set()
+            
+            # Centrar el dialogo
+            dialog.geometry("+%d+%d" % (self.root.winfo_rootx() + 50, self.root.winfo_rooty() + 50))
+            
+            # Frame principal
+            main_frame = tk.Frame(dialog, bg='white')
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            # Etiqueta
+            tk.Label(
+                main_frame,
+                text="Ingrese el codigo UPC:",
+                font=self.fuente_normal,
+                bg='white'
+            ).pack(pady=(0, 10))
+            
+            # Campo de entrada
+            upc_var = tk.StringVar()
+            entry = tk.Entry(
+                main_frame,
+                textvariable=upc_var,
+                font=self.fuente_normal,
+                width=30
             )
-
-            if upc:
-                if self.monitor.validar_upc(upc):
-                    messagebox.showinfo("Exito", "UPC valido. Produccion iniciada.")
-                else:
-                    messagebox.showerror("Error", "UPC invalido. Verifique el codigo.")
+            entry.pack(pady=(0, 20))
+            entry.focus()
+            
+            # Frame para botones
+            botones_frame = tk.Frame(main_frame, bg='white')
+            botones_frame.pack()
+            
+            def validar():
+                upc = upc_var.get().strip()
+                if upc:
+                    if self.monitor.validar_upc(upc):
+                        # Mostrar mensaje de exito en la interfaz principal
+                        self.mostrar_mensaje_exito("UPC valido. Produccion iniciada.")
+                    else:
+                        # Mostrar mensaje de error en la interfaz principal
+                        self.mostrar_mensaje_error("UPC invalido. Verifique el codigo.")
+                dialog.destroy()
+            
+            def cancelar():
+                dialog.destroy()
+            
+            # Botones
+            tk.Button(
+                botones_frame,
+                text="Validar",
+                command=validar,
+                bg=self.colores['accento'],
+                fg='white',
+                font=self.fuente_normal,
+                width=10
+            ).pack(side=tk.LEFT, padx=(0, 10))
+            
+            tk.Button(
+                botones_frame,
+                text="Cancelar",
+                command=cancelar,
+                bg=self.colores['texto_secundario'],
+                fg='white',
+                font=self.fuente_normal,
+                width=10
+            ).pack(side=tk.LEFT)
+            
+            # Bind Enter key
+            entry.bind('<Return>', lambda e: validar())
+            entry.bind('<Escape>', lambda e: cancelar())
 
         except Exception as e:
             self.logger.error(f"ERROR: Error validando UPC: {e}")
-            messagebox.showerror("Error", f"Error validando UPC: {e}")
+            self.mostrar_mensaje_error(f"Error validando UPC: {e}")
 
     def sincronizar(self):
         """Sincronizar lecturas"""
@@ -1157,4 +1223,61 @@ MATERIALES REQUERIDOS:
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando contador: {e}")
+
+    def mostrar_mensaje_exito(self, mensaje: str):
+        """Mostrar mensaje de exito sin interferir con el layout"""
+        try:
+            # Crear un label temporal en la parte superior
+            if hasattr(self, 'mensaje_temporal'):
+                self.mensaje_temporal.destroy()
+            
+            self.mensaje_temporal = tk.Label(
+                self.root,
+                text=mensaje,
+                font=self.fuente_grande,
+                fg='white',
+                bg='#00cc00',
+                relief=tk.RAISED,
+                bd=2
+            )
+            self.mensaje_temporal.place(x=50, y=50, width=400, height=40)
+            
+            # Programar eliminacion del mensaje
+            self.root.after(3000, self.ocultar_mensaje_temporal)
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando mensaje exito: {e}")
+
+    def mostrar_mensaje_error(self, mensaje: str):
+        """Mostrar mensaje de error sin interferir con el layout"""
+        try:
+            # Crear un label temporal en la parte superior
+            if hasattr(self, 'mensaje_temporal'):
+                self.mensaje_temporal.destroy()
+            
+            self.mensaje_temporal = tk.Label(
+                self.root,
+                text=mensaje,
+                font=self.fuente_grande,
+                fg='white',
+                bg='#cc0000',
+                relief=tk.RAISED,
+                bd=2
+            )
+            self.mensaje_temporal.place(x=50, y=50, width=400, height=40)
+            
+            # Programar eliminacion del mensaje
+            self.root.after(3000, self.ocultar_mensaje_temporal)
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando mensaje error: {e}")
+
+    def ocultar_mensaje_temporal(self):
+        """Ocultar mensaje temporal"""
+        try:
+            if hasattr(self, 'mensaje_temporal'):
+                self.mensaje_temporal.destroy()
+                delattr(self, 'mensaje_temporal')
+        except Exception as e:
+            self.logger.error(f"ERROR: Error ocultando mensaje temporal: {e}")
 
