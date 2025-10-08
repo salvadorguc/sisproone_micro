@@ -417,6 +417,12 @@ class MonitorIndustrial:
             if orden:
                 self.logger.info(f"INFO: Orden seleccionada del diálogo: {orden}")
                 self.orden_actual = orden
+                
+                # Resetear contador para nueva orden
+                self.contador_actual = 0
+                self.lecturas_acumuladas = 0
+                self.ultima_cantidad_sincronizada = 0
+                
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
 
