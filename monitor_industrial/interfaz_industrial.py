@@ -118,7 +118,7 @@ class InterfazIndustrial:
             self.crear_interfaz()
             self.iniciar_actualizaciones()
             self.logger.info("SUCCESS: Interfaz industrial mostrada")
-            
+
             # Seleccionar estacion automaticamente al iniciar
             self.root.after(500, self.seleccionar_estacion)
 
@@ -684,8 +684,10 @@ class InterfazIndustrial:
                 botones_frame,
                 text="Seleccionar",
                 font=self.fuente_normal,
-                fg=self.colores['texto'],
+                fg='white',
                 bg=self.colores['accento'],
+                activebackground='#1d4ed8',
+                activeforeground='white',
                 command=seleccionar
             ).pack(side=tk.LEFT, padx=10)
 
@@ -693,8 +695,10 @@ class InterfazIndustrial:
                 botones_frame,
                 text="Cancelar",
                 font=self.fuente_normal,
-                fg=self.colores['texto'],
+                fg='white',
                 bg=self.colores['error'],
+                activebackground='#b91c1c',
+                activeforeground='white',
                 command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
