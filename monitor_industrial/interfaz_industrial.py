@@ -356,7 +356,7 @@ class InterfazIndustrial:
             # Orden
             orden_frame = tk.Frame(info_orden, bg=self.colores['panel'])
             orden_frame.pack(fill=tk.X, pady=10)
-            
+
             tk.Label(
                 orden_frame,
                 text="ORDEN:",
@@ -364,7 +364,7 @@ class InterfazIndustrial:
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).pack(side=tk.LEFT, padx=5)
-            
+
             tk.Label(
                 orden_frame,
                 textvariable=self.orden_var,
@@ -376,7 +376,7 @@ class InterfazIndustrial:
             # UPC
             upc_frame = tk.Frame(info_orden, bg=self.colores['panel'])
             upc_frame.pack(fill=tk.X, pady=10)
-            
+
             tk.Label(
                 upc_frame,
                 text="UPC:",
@@ -384,7 +384,7 @@ class InterfazIndustrial:
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).pack(side=tk.LEFT, padx=5)
-            
+
             tk.Label(
                 upc_frame,
                 textvariable=self.upc_var,
@@ -400,7 +400,7 @@ class InterfazIndustrial:
             # Meta
             meta_info_frame = tk.Frame(meta_frame, bg=self.colores['panel'])
             meta_info_frame.pack(fill=tk.X, pady=10)
-            
+
             tk.Label(
                 meta_info_frame,
                 text="META (Pendiente/Total):",
@@ -408,7 +408,7 @@ class InterfazIndustrial:
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).pack(side=tk.LEFT, padx=5)
-            
+
             self.meta_label = tk.Label(
                 meta_info_frame,
                 textvariable=self.meta_var,
@@ -421,7 +421,7 @@ class InterfazIndustrial:
             # Progreso
             progreso_info_frame = tk.Frame(meta_frame, bg=self.colores['panel'])
             progreso_info_frame.pack(fill=tk.X, pady=10)
-            
+
             tk.Label(
                 progreso_info_frame,
                 text="PROGRESO:",
@@ -429,7 +429,7 @@ class InterfazIndustrial:
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).pack(side=tk.LEFT, padx=5)
-            
+
             self.progreso_label = tk.Label(
                 progreso_info_frame,
                 textvariable=self.progreso_var,
@@ -1326,20 +1326,12 @@ MATERIALES REQUERIDOS:
                         progreso = 100
                     self.progreso_var.set(f"{progreso:.1f}%")
 
-            # Actualizar fuentes dinámicamente basadas en el valor del contador
+            # Actualizar fuente dinámica solo para el contador
             fuente_dinamica = self.calcular_fuente_dinamica(valor)
-
-            # Actualizar fuente del contador
+            
+            # Actualizar fuente del contador (solo el número)
             if hasattr(self, 'contador_label'):
                 self.contador_label.config(font=fuente_dinamica)
-
-            # Actualizar fuente de la meta
-            if hasattr(self, 'meta_label'):
-                self.meta_label.config(font=fuente_dinamica)
-
-            # Actualizar fuente del progreso
-            if hasattr(self, 'progreso_label'):
-                self.progreso_label.config(font=fuente_dinamica)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando contador: {e}")
