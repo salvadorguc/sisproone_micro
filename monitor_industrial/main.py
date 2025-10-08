@@ -206,6 +206,19 @@ class MonitorIndustrial:
                     # Actualizar última lectura del Pico
                     self.interfaz.actualizar_ultima_lectura(datetime.now())
 
+                # Verificar si se alcanzó el 100% de la meta
+                if self.orden_actual:
+                    meta = self.orden_actual.get('cantidadFabricar', 0)
+                    if meta > 0 and valor >= meta:
+                        self.logger.info(f"SUCCESS: Meta alcanzada: {valor}/{meta}")
+                        # Sincronizar inmediatamente
+                        self.sincronizar_lecturas()
+                        # Recargar ordenes para actualizar cantidades pendientes
+                        if self.interfaz:
+                            self.interfaz.cargar_ordenes()
+                        # Finalizar orden automáticamente
+                        self.finalizar_orden()
+
                 self.logger.info(f"INFO: Conteo actualizado: {valor} (+{incremento})")
 
             elif tag == 'FIN':

@@ -450,25 +450,6 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=1, column=1, padx=10, sticky=tk.W)
 
-            # Barra de progreso
-            progreso_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            progreso_frame.pack(side=tk.RIGHT, padx=20)
-
-            self.progreso_barra = tk.Scale(
-                progreso_frame,
-                from_=0,
-                to=100,
-                orient=tk.HORIZONTAL,
-                length=200,
-                showvalue=0,
-                bg=self.colores['panel'],
-                fg=self.colores['texto'],
-                troughcolor=self.colores['fondo'],
-                activebackground=self.colores['accento']
-            )
-            self.progreso_barra.pack(pady=5)
-
-            self.configurar_estilo_progreso()
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel estado: {e}")
@@ -532,16 +513,6 @@ class InterfazIndustrial:
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel inferior: {e}")
 
-    def configurar_estilo_progreso(self):
-        """Configurar estilo de la barra de progreso"""
-        try:
-            # Configurar colores de la barra de progreso
-            self.progreso_barra.config(
-                troughcolor=self.colores['fondo'],
-                activebackground=self.colores['accento']
-            )
-        except Exception as e:
-            self.logger.error(f"ERROR: Error configurando estilo de progreso: {e}")
 
     def mostrar_seleccion_estacion(self, estaciones):
         """Mostrar dialogo de seleccion de estacion"""
@@ -984,14 +955,14 @@ class InterfazIndustrial:
                 meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
                 if meta > 0:
                     progreso = (self.monitor.contador_actual / meta) * 100
+                    # Limitar progreso a 100%
+                    if progreso > 100:
+                        progreso = 100
                     self.progreso_var.set(f"{progreso:.1f}%")
-                    self.progreso_barra.set(progreso)
                 else:
                     self.progreso_var.set("0%")
-                    self.progreso_barra.set(0)
             else:
                 self.progreso_var.set("0%")
-                self.progreso_barra.set(0)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando interfaz: {e}")
@@ -1165,8 +1136,6 @@ MATERIALES REQUERIDOS:
                 avance_porcentaje = avance.get('avance', 0) * 100
 
                 self.progreso_var.set(f"{avance_porcentaje:.1f}%")
-                if hasattr(self, 'progreso_barra'):
-                    self.progreso_barra.set(avance_porcentaje)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando avance: {e}")
@@ -1181,9 +1150,10 @@ MATERIALES REQUERIDOS:
                 meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
                 if meta > 0:
                     progreso = (valor / meta) * 100
+                    # Limitar progreso a 100%
+                    if progreso > 100:
+                        progreso = 100
                     self.progreso_var.set(f"{progreso:.1f}%")
-                    if hasattr(self, 'progreso_barra'):
-                        self.progreso_barra.set(progreso)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando contador: {e}")
