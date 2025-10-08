@@ -406,7 +406,12 @@ class MonitorIndustrial:
             if not self.estacion_actual:
                 return False
 
-            ordenes = self.sispro.obtener_ordenes_asignadas(self.estacion_actual['id'])
+            # Usar las órdenes ya filtradas de la interfaz
+            if not hasattr(self.interfaz, 'ordenes_disponibles') or not self.interfaz.ordenes_disponibles:
+                # Si no hay órdenes en memoria, cargarlas
+                self.interfaz.cargar_ordenes()
+            
+            ordenes = self.interfaz.ordenes_disponibles
             if not ordenes:
                 messagebox.showwarning("Advertencia", "No hay órdenes asignadas a esta estación")
                 return False
