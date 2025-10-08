@@ -120,16 +120,28 @@ class InterfazIndustrial:
             self.root.attributes('-fullscreen', True)
             self.root.attributes('-topmost', True)
 
-            # Eliminar bordes y barra de título
-            self.root.overrideredirect(False)  # Mantener barra de título para poder cerrar
-
             # Configurar teclas de salida
             self.root.bind('<Escape>', self.salir)
             self.root.bind('<F11>', self.toggle_fullscreen)
             self.root.bind('<Control-q>', self.salir)
+            
+            # Configurar redimensionamiento
+            self.root.bind('<Configure>', self.on_window_configure)
+            
+            # Forzar actualización del layout después del fullscreen
+            self.root.update_idletasks()
 
         except Exception as e:
             self.logger.error(f"ERROR: Error configurando ventana: {e}")
+
+    def on_window_configure(self, event):
+        """Manejar redimensionamiento de ventana"""
+        try:
+            # Forzar actualización del layout cuando cambia el tamaño
+            if event.widget == self.root:
+                self.root.update_idletasks()
+        except Exception as e:
+            self.logger.error(f"ERROR: Error manejando redimensionamiento: {e}")
 
     def crear_interfaz(self):
         """Crear interfaz principal"""
@@ -144,6 +156,9 @@ class InterfazIndustrial:
             self.crear_panel_receta(main_frame)
             self.crear_panel_inferior(main_frame)
             self.crear_panel_estado(main_frame)
+            
+            # Forzar actualización del layout
+            main_frame.update_idletasks()
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando interfaz: {e}")
@@ -276,7 +291,7 @@ class InterfazIndustrial:
         """Crear panel central con materiales de la orden"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            panel.pack(fill=tk.BOTH, pady=(0, 10))
+            panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
             # Titulo del panel
             tk.Label(
@@ -315,7 +330,7 @@ class InterfazIndustrial:
         """Crear panel de receta con ordenes asignadas"""
         try:
             self.panel_receta = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            self.panel_receta.pack(fill=tk.X, pady=(0, 10))
+            self.panel_receta.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
             # Titulo del panel
             tk.Label(
@@ -1005,6 +1020,9 @@ class InterfazIndustrial:
         """Alternar pantalla completa"""
         try:
             self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
+            # Forzar actualización del layout después del cambio
+            self.root.update_idletasks()
+            self.root.update()
         except Exception as e:
             self.logger.error(f"ERROR: Error alternando pantalla completa: {e}")
 
