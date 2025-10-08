@@ -322,7 +322,7 @@ class InterfazIndustrial:
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=25,  # Altura significativamente aumentada para usar todo el espacio
+                height=12,  # Altura reducida 50% para dar más espacio al footer
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
@@ -343,11 +343,11 @@ class InterfazIndustrial:
         """Crear panel de estado con informacion de produccion"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            panel.pack(fill=tk.X, pady=(0, 10))
+            panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
             # Frame principal
             main_frame = tk.Frame(panel, bg=self.colores['panel'])
-            main_frame.pack(fill=tk.X, padx=5, pady=10)
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=20)
 
             # Informacion de la orden actual
             info_orden = tk.Frame(main_frame, bg=self.colores['panel'])
@@ -483,7 +483,7 @@ class InterfazIndustrial:
             # Boton Cambiar Orden
             btn_cambiar_orden = tk.Button(
                 botones_frame,
-                text="SELECCIONAR ORDEN",
+                text="ORDENES",
                 font=self.fuente_grande,
                 fg='white',
                 bg=self.colores['boton_verde'],
@@ -640,7 +640,7 @@ class InterfazIndustrial:
             # Titulo
             tk.Label(
                 dialog,
-                text="SELECCIONAR ORDEN",
+                text="ORDENES",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
@@ -777,11 +777,11 @@ class InterfazIndustrial:
         """Seleccionar estacion de trabajo"""
         try:
             self.monitor.seleccionar_estacion()
-            
+
             # Actualizar la variable de la estación en la interfaz
             if hasattr(self, 'estacion_var') and self.monitor.estacion_actual:
                 self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
-            
+
             # Cargar ordenes de la nueva estacion inmediatamente
             self.ultima_recarga_ordenes = None  # Forzar recarga
             self.cargar_ordenes()
@@ -794,9 +794,55 @@ class InterfazIndustrial:
         """Seleccionar orden de fabricacion"""
         try:
             self.monitor.seleccionar_orden()
+            
+            # Actualizar campos del footer con la orden seleccionada
+            if self.monitor.orden_actual:
+                self.actualizar_campos_orden()
         except Exception as e:
             self.logger.error(f"ERROR: Error seleccionando orden: {e}")
             messagebox.showerror("Error", f"Error seleccionando orden: {e}")
+
+    def actualizar_campos_orden(self):
+        """Actualizar campos del footer con la orden seleccionada"""
+        try:
+            if not self.monitor.orden_actual:
+                return
+
+            orden = self.monitor.orden_actual
+            
+            # Actualizar Orden
+            if hasattr(self, 'orden_var'):
+                self.orden_var.set(orden.get('ordenFabricacion', 'N/A'))
+            
+            # Actualizar UPC
+            if hasattr(self, 'upc_var'):
+                self.upc_var.set(orden.get('ptUPC', 'N/A'))
+            
+            # Actualizar Meta (pendiente/total)
+            if hasattr(self, 'meta_var'):
+                pendiente = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
+                total = orden.get('cantidadFabricar', 0)
+                self.meta_var.set(f"{pendiente}/{total}")
+            
+            # Actualizar Progreso
+            if hasattr(self, 'progreso_var'):
+                if total > 0:
+                    progreso = ((total - pendiente) / total) * 100
+                    self.progreso_var.set(f"{progreso:.1f}%")
+                else:
+                    self.progreso_var.set("0%")
+            
+            # Actualizar Contador
+            if hasattr(self, 'contador_var'):
+                self.contador_var.set("0")
+            
+            # Cargar receta de la orden
+            self.monitor.cargar_receta_orden()
+            
+            self.logger.info(f"SUCCESS: Campos actualizados para orden {orden.get('ordenFabricacion', 'N/A')}")
+            
+        except Exception as e:
+            self.logger.error(f"ERROR: Error actualizando campos de orden: {e}")
 
     def validar_upc(self):
         """Validar codigo UPC"""
@@ -909,10 +955,10 @@ class InterfazIndustrial:
         """Seleccionar orden - mostrar modal de selección"""
         try:
             # Si hay una orden actual y lecturas pendientes, preguntar si guardar
-            if (self.monitor.orden_actual and 
-                hasattr(self.monitor, 'lecturas_acumuladas') and 
+            if (self.monitor.orden_actual and
+                hasattr(self.monitor, 'lecturas_acumuladas') and
                 self.monitor.lecturas_acumuladas > 0):
-                
+
                 # Preguntar si desea guardar el progreso
                 respuesta = messagebox.askyesno(
                     "Guardar Progreso",
