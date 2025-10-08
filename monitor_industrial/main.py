@@ -34,7 +34,7 @@ class MonitorIndustrial:
     def __init__(self):
         """Inicializar el monitor industrial"""
         self.config = Config()
-        self.sispro = SISPROConnector(self.config.config)
+        self.sispro = SISPROConnector(self.config)
         self.rs485 = MonitorRS485(self.config)
         self.barcode = BarcodeValidator()
         self.cache = CacheManager(self.config)

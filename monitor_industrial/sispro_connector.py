@@ -12,11 +12,11 @@ from datetime import datetime
 class SISPROConnector:
     def __init__(self, config):
         self.config = config
-        self.base_url = config.sispro_base_url
-        self.username = config.sispro_username
-        self.password = config.sispro_password
-        self.empresa_id = config.empresa_id
-        self.usuario_id = config.usuario_id
+        self.base_url = config.get('sispro.base_url')
+        self.username = config.get('sispro.username')
+        self.password = config.get('sispro.password')
+        self.empresa_id = config.get('sispro.empresa_id')
+        self.usuario_id = config.get('sispro.usuario_id')
         self.token = None
         self.session = None
         self.logger = logging.getLogger(__name__)
@@ -280,13 +280,13 @@ class SISPROConnector:
             self.logger.info(f"INFO: Consultando estatus de orden {orden_fabricacion}")
             self.logger.info(f"INFO: URL: {self.base_url}/api/ordenesDeFabricacion/estatus")
             self.logger.info(f"INFO: Params: {params}")
-            
+
             result = self._make_request(
                 'GET',
                 '/api/ordenesDeFabricacion/estatus',
                 params=params
             )
-            
+
             if result and result.get('success'):
                 self.logger.info(f"SUCCESS: Receta obtenida para orden {orden_fabricacion}")
                 return result
