@@ -205,6 +205,12 @@ class MonitorIndustrial:
                     self.estado.cambiar_estado(EstadoSistema.INACTIVO)
                     return
 
+                # Limitar contador a la cantidad pendiente
+                meta_pendiente = self.orden_actual.get('cantidadPendiente', self.orden_actual.get('cantidadFabricar', 0)) if self.orden_actual else 0
+                if meta_pendiente > 0 and valor > meta_pendiente:
+                    self.logger.warning(f"WARNING: Contador excede meta pendiente: {valor} > {meta_pendiente}. Limitando a {meta_pendiente}")
+                    valor = meta_pendiente
+
                 self.lecturas_acumuladas = valor
                 self.contador_actual = valor
 
@@ -228,11 +234,11 @@ class MonitorIndustrial:
                     # Actualizar última lectura del Pico
                     self.interfaz.actualizar_ultima_lectura(datetime.now())
 
-                # Verificar si se alcanzó el 100% de la meta
+                # Verificar si se alcanzó el 100% de la meta (basada en pendiente)
                 if self.orden_actual:
-                    meta = self.orden_actual.get('cantidadFabricar', 0)
-                    if meta > 0 and valor >= meta:
-                        self.logger.info(f"SUCCESS: Meta alcanzada: {valor}/{meta}")
+                    meta_pendiente = self.orden_actual.get('cantidadPendiente', self.orden_actual.get('cantidadFabricar', 0))
+                    if meta_pendiente > 0 and valor >= meta_pendiente:
+                        self.logger.info(f"SUCCESS: Meta pendiente alcanzada: {valor}/{meta_pendiente}")
                         # Sincronizar inmediatamente
                         self.sincronizar_lecturas()
                         # Recargar ordenes para actualizar cantidades pendientes

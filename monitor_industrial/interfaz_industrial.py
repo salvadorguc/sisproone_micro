@@ -1235,11 +1235,11 @@ MATERIALES REQUERIDOS:
         try:
             self.contador_var.set(str(valor))
 
-            # Actualizar progreso si hay meta
+            # Actualizar progreso basado en cantidad pendiente
             if self.monitor.orden_actual:
-                meta = self.monitor.orden_actual.get('cantidadFabricar', 0)
-                if meta > 0:
-                    progreso = (valor / meta) * 100
+                meta_pendiente = self.monitor.orden_actual.get('cantidadPendiente', self.monitor.orden_actual.get('cantidadFabricar', 0))
+                if meta_pendiente > 0:
+                    progreso = (valor / meta_pendiente) * 100
                     # Limitar progreso a 100%
                     if progreso > 100:
                         progreso = 100
