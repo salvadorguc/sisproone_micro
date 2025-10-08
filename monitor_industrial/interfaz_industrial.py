@@ -880,16 +880,16 @@ class InterfazIndustrial:
             # Crear ventana modal para PIN
             dialog = tk.Toplevel(self.root)
             dialog.title("Cerrar Orden")
-            dialog.geometry("300x150")
+            dialog.geometry("400x200")
             dialog.configure(bg=self.colores['fondo'])
             dialog.transient(self.root)
             dialog.grab_set()
 
             # Centrar ventana
             dialog.update_idletasks()
-            x = (dialog.winfo_screenwidth() // 2) - (300 // 2)
-            y = (dialog.winfo_screenheight() // 2) - (150 // 2)
-            dialog.geometry(f"300x150+{x}+{y}")
+            x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
+            y = (dialog.winfo_screenheight() // 2) - (200 // 2)
+            dialog.geometry(f"400x200+{x}+{y}")
 
             # Titulo
             tk.Label(
@@ -938,22 +938,26 @@ class InterfazIndustrial:
             tk.Button(
                 botones_frame,
                 text="Confirmar",
-                font=self.fuente_normal,
+                font=self.fuente_grande,
                 fg='white',
                 bg=self.colores['accento'],
                 activebackground='#1d4ed8',
                 activeforeground='white',
+                width=12,
+                height=2,
                 command=confirmar
             ).pack(side=tk.LEFT, padx=10)
 
             tk.Button(
                 botones_frame,
                 text="Cancelar",
-                font=self.fuente_normal,
+                font=self.fuente_grande,
                 fg='white',
                 bg=self.colores['error'],
                 activebackground='#b91c1c',
                 activeforeground='white',
+                width=12,
+                height=2,
                 command=cancelar
             ).pack(side=tk.LEFT, padx=10)
 
