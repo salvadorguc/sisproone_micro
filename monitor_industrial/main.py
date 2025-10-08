@@ -186,18 +186,24 @@ class MonitorIndustrial:
 
                 # Detectar salto (Pico no reiniciado) - Cualquier incremento > 1 es sospechoso
                 if incremento > 1 and self.lecturas_acumuladas == 0:
-                    self.logger.warning(f"WARNING: Salto detectado: {incremento} lecturas. Pico no reiniciado.")
-                    # Mostrar diálogo de confirmación para cualquier salto
+                    self.logger.error(f"ERROR: Salto detectado: {incremento} lecturas. PRODUCCION CANCELADA.")
+                    # Forzar detención - no permitir lecturas con salto
                     if self.interfaz:
-                        if not self.interfaz.confirmar_conteo_pico(valor, incremento):
-                            # Usuario eligió reiniciar, cancelar producción
-                            self.logger.info("INFO: Usuario eligió reiniciar Pico. Cancelando producción.")
-                            self.desactivar_pico()
-                            from estado_manager import EstadoSistema
-                            self.estado.cambiar_estado(EstadoSistema.INACTIVO)
-                            return
-                        else:
-                            self.logger.info("INFO: Usuario eligió conservar conteo del Pico.")
+                        from tkinter import messagebox
+                        messagebox.showerror(
+                            "ERROR - Salto de Lecturas Detectado",
+                            f"ALERTA: Se detectó un salto de {incremento} lecturas.\n\n"
+                            f"Por control de calidad, la producción ha sido cancelada.\n\n"
+                            f"DEBE REINICIAR EL PICO:\n"
+                            f"1. Presiona tecla C (RESET) en el Pico\n"
+                            f"2. Ingresa el PIN de supervisor\n"
+                            f"3. El contador se reiniciará a 0\n"
+                            f"4. Valida el UPC nuevamente para continuar"
+                        )
+                    self.desactivar_pico()
+                    from estado_manager import EstadoSistema
+                    self.estado.cambiar_estado(EstadoSistema.INACTIVO)
+                    return
 
                 self.lecturas_acumuladas = valor
                 self.contador_actual = valor
@@ -457,61 +463,38 @@ class MonitorIndustrial:
             # Solicitar estado actual del Pico (HEARTBEAT tiene el contador)
             time.sleep(0.5)  # Esperar ultimo heartbeat
 
-            # Revisar si hay lecturas previas del Pico
+            # Revisar si hay lecturas previas del Pico (FORZAR REINICIO)
             contador_actual = self.lecturas_acumuladas
 
-            # Si hay contador existente, alertar al operador
+            # Si hay contador existente, NO permitir continuar - forzar reinicio
             if contador_actual > 0:
                 from tkinter import messagebox
-                respuesta = messagebox.askyesno(
-                    "ALERTA - Contador Existente",
-                    f"El dispositivo ya tiene {contador_actual} lecturas.\n\n"
-                    f"¿Desea usar este conteo actual?\n\n"
-                    f"SI = Continuar con {contador_actual}\n"
-                    f"NO = Cancela y reinicia manualmente en el Pico\n\n"
-                    f"(Para reiniciar: Presiona C en el teclado del Pico)",
-                    icon='warning'
+                messagebox.showerror(
+                    "ERROR - Pico No Reiniciado",
+                    f"ALERTA: El dispositivo tiene {contador_actual} lecturas acumuladas.\n\n"
+                    f"Por seguridad y control de calidad, debe reiniciar el Pico.\n\n"
+                    f"PASOS PARA REINICIAR:\n"
+                    f"1. Ve al dispositivo Pico\n"
+                    f"2. Presiona tecla C (RESET)\n"
+                    f"3. Ingresa el PIN de supervisor\n"
+                    f"4. El contador se reiniciara a 0\n"
+                    f"5. Vuelve e intenta validar el UPC de nuevo"
                 )
-
-                if respuesta:
-                    # Usar contador actual
-                    self.contador_actual = contador_actual
-                    # Actualizar interfaz con el contador existente
-                    if self.interfaz:
-                        self.interfaz.actualizar_contador(contador_actual)
-                    # Guardar lectura inicial
-                    self.cache.guardar_lectura({
-                        'orden_fabricacion': self.orden_actual['ordenFabricacion'],
-                        'upc': self.upc_validado,
-                        'cantidad': contador_actual,
-                        'timestamp': datetime.now(),
-                        'fuente': 'RS485_INICIAL'
-                    })
-                    self.logger.info(f"INFO: Usando contador existente: {contador_actual}")
-                else:
-                    # Cancelar y pedir que reinicie manualmente
-                    messagebox.showinfo(
-                        "Reinicio Manual Requerido",
-                        "Por favor:\n\n"
-                        "1. Ve al dispositivo Pico\n"
-                        "2. Presiona tecla C (RESET)\n"
-                        "3. Ingresa el PIN de supervisor\n"
-                        "4. El contador se reiniciara a 0\n"
-                        "5. Vuelve e intenta validar el UPC de nuevo"
-                    )
-                    from estado_manager import EstadoSistema
-                    self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
-                    self.upc_validado = None
-                    self.logger.info("INFO: Validacion cancelada - reinicio manual requerido")
-                    return
+                from estado_manager import EstadoSistema
+                self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+                self.upc_validado = None
+                self.logger.warning(f"WARNING: Validacion cancelada - Pico tiene {contador_actual} lecturas. Reinicio requerido.")
+                return
 
             # Enviar comando de activacion al Pico
             comando = f"{self.estacion_actual['id']}:ACTIVAR:{self.orden_actual['pt']}"
             self.rs485.enviar_comando(comando)
 
-            # Establecer meta
-            meta_comando = f"{self.estacion_actual['id']}:META:{self.orden_actual['cantidadFabricar']}"
+            # Establecer meta basada en lecturas pendientes (no en total fabricar)
+            meta_pendiente = self.orden_actual.get('cantidadPendiente', self.orden_actual['cantidadFabricar'])
+            meta_comando = f"{self.estacion_actual['id']}:META:{meta_pendiente}"
             self.rs485.enviar_comando(meta_comando)
+            self.logger.info(f"INFO: META establecida en {meta_pendiente} (lecturas pendientes)")
 
             self.logger.info("SUCCESS: Pico activado")
 

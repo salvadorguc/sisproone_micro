@@ -67,7 +67,7 @@ class InterfazIndustrial:
 
             # Inicializar variables tkinter despues de crear root
             self.contador_var = tk.StringVar(value="0")
-            self.meta_var = tk.StringVar(value="0")
+            self.meta_var = tk.StringVar(value="0/0")
             self.progreso_var = tk.StringVar(value="0%")
             self.estado_var = tk.StringVar(value="INACTIVO")
             self.orden_var = tk.StringVar(value="N/A")
@@ -419,7 +419,7 @@ class InterfazIndustrial:
             # Meta
             tk.Label(
                 meta_frame,
-                text="META:",
+                text="META (Pendiente/Total):",
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
@@ -712,7 +712,10 @@ class InterfazIndustrial:
                 self.monitor.orden_actual = orden
                 self.orden_var.set(orden['ordenFabricacion'])
                 self.upc_var.set(orden.get('ptUPC', 'N/A'))
-                self.meta_var.set(str(orden.get('cantidadFabricar', 0)))
+                # Mostrar pendiente/total
+                pendiente = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
+                total = orden.get('cantidadFabricar', 0)
+                self.meta_var.set(f"{pendiente}/{total}")
                 self.monitor.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
 
                 # Cargar receta de la orden seleccionada
@@ -754,7 +757,7 @@ class InterfazIndustrial:
             ]
 
             self.logger.info(f"INFO: Se filtraron {len(ordenes_pendientes)} ordenes pendientes")
-            
+
             # Log detallado de órdenes pendientes filtradas
             if ordenes_pendientes:
                 self.logger.info("INFO: Órdenes pendientes filtradas:")
@@ -938,7 +941,7 @@ class InterfazIndustrial:
             # Cargar ordenes solo cada 30 segundos
             ahora = datetime.now()
             if self.monitor.estacion_actual:
-                if (self.ultima_recarga_ordenes is None or 
+                if (self.ultima_recarga_ordenes is None or
                     (ahora - self.ultima_recarga_ordenes).total_seconds() >= 30):
                     self.cargar_ordenes()
                     self.ultima_recarga_ordenes = ahora
@@ -1109,7 +1112,7 @@ MATERIALES REQUERIDOS:
         """Validar codigo UPC"""
         try:
             from tkinter import simpledialog
-            
+
             # Crear un dialogo personalizado para evitar problemas de layout
             dialog = tk.Toplevel(self.root)
             dialog.title("Validar UPC")
@@ -1117,14 +1120,14 @@ MATERIALES REQUERIDOS:
             dialog.resizable(False, False)
             dialog.transient(self.root)
             dialog.grab_set()
-            
+
             # Centrar el dialogo
             dialog.geometry("+%d+%d" % (self.root.winfo_rootx() + 50, self.root.winfo_rooty() + 50))
-            
+
             # Frame principal
             main_frame = tk.Frame(dialog, bg='white')
             main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-            
+
             # Etiqueta
             tk.Label(
                 main_frame,
@@ -1132,7 +1135,7 @@ MATERIALES REQUERIDOS:
                 font=self.fuente_normal,
                 bg='white'
             ).pack(pady=(0, 10))
-            
+
             # Campo de entrada
             upc_var = tk.StringVar()
             entry = tk.Entry(
@@ -1143,11 +1146,11 @@ MATERIALES REQUERIDOS:
             )
             entry.pack(pady=(0, 20))
             entry.focus()
-            
+
             # Frame para botones
             botones_frame = tk.Frame(main_frame, bg='white')
             botones_frame.pack()
-            
+
             def validar():
                 upc = upc_var.get().strip()
                 if upc:
@@ -1158,10 +1161,10 @@ MATERIALES REQUERIDOS:
                         # Mostrar mensaje de error en la interfaz principal
                         self.mostrar_mensaje_error("UPC invalido. Verifique el codigo.")
                 dialog.destroy()
-            
+
             def cancelar():
                 dialog.destroy()
-            
+
             # Botones
             tk.Button(
                 botones_frame,
@@ -1172,7 +1175,7 @@ MATERIALES REQUERIDOS:
                 font=self.fuente_normal,
                 width=10
             ).pack(side=tk.LEFT, padx=(0, 10))
-            
+
             tk.Button(
                 botones_frame,
                 text="Cancelar",
@@ -1182,7 +1185,7 @@ MATERIALES REQUERIDOS:
                 font=self.fuente_normal,
                 width=10
             ).pack(side=tk.LEFT)
-            
+
             # Bind Enter key
             entry.bind('<Return>', lambda e: validar())
             entry.bind('<Escape>', lambda e: cancelar())
@@ -1251,7 +1254,7 @@ MATERIALES REQUERIDOS:
             # Crear un label temporal en la parte superior
             if hasattr(self, 'mensaje_temporal'):
                 self.mensaje_temporal.destroy()
-            
+
             self.mensaje_temporal = tk.Label(
                 self.root,
                 text=mensaje,
@@ -1262,10 +1265,10 @@ MATERIALES REQUERIDOS:
                 bd=2
             )
             self.mensaje_temporal.place(x=50, y=50, width=400, height=40)
-            
+
             # Programar eliminacion del mensaje
             self.root.after(3000, self.ocultar_mensaje_temporal)
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando mensaje exito: {e}")
 
@@ -1275,7 +1278,7 @@ MATERIALES REQUERIDOS:
             # Crear un label temporal en la parte superior
             if hasattr(self, 'mensaje_temporal'):
                 self.mensaje_temporal.destroy()
-            
+
             self.mensaje_temporal = tk.Label(
                 self.root,
                 text=mensaje,
@@ -1286,10 +1289,10 @@ MATERIALES REQUERIDOS:
                 bd=2
             )
             self.mensaje_temporal.place(x=50, y=50, width=400, height=40)
-            
+
             # Programar eliminacion del mensaje
             self.root.after(3000, self.ocultar_mensaje_temporal)
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando mensaje error: {e}")
 
@@ -1312,14 +1315,14 @@ MATERIALES REQUERIDOS:
             dialog.resizable(False, False)
             dialog.transient(self.root)
             dialog.grab_set()
-            
+
             # Centrar el diálogo
             dialog.geometry("+%d+%d" % (self.root.winfo_rootx() + 100, self.root.winfo_rooty() + 100))
-            
+
             # Frame principal
             main_frame = tk.Frame(dialog, bg='white')
             main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-            
+
             # Título
             tk.Label(
                 main_frame,
@@ -1328,14 +1331,14 @@ MATERIALES REQUERIDOS:
                 fg='#cc6600',
                 bg='white'
             ).pack(pady=(0, 20))
-            
+
             # Mensaje principal
             mensaje = f"""El Pico tiene {conteo_actual} lecturas guardadas de una sesión anterior.
 
 Salto detectado: +{salto} lecturas
 
 ¿Qué desea hacer?"""
-            
+
             tk.Label(
                 main_frame,
                 text=mensaje,
@@ -1343,21 +1346,21 @@ Salto detectado: +{salto} lecturas
                 bg='white',
                 justify=tk.LEFT
             ).pack(pady=(0, 30))
-            
+
             # Frame para botones
             botones_frame = tk.Frame(main_frame, bg='white')
             botones_frame.pack()
-            
+
             resultado = [False]  # Usar lista para poder modificar desde funciones internas
-            
+
             def conservar_conteo():
                 resultado[0] = True
                 dialog.destroy()
-            
+
             def reiniciar_pico():
                 resultado[0] = False
                 dialog.destroy()
-            
+
             # Botón Conservar Conteo
             tk.Button(
                 botones_frame,
@@ -1369,7 +1372,7 @@ Salto detectado: +{salto} lecturas
                 width=15,
                 height=1
             ).pack(side=tk.LEFT, padx=(0, 10))
-            
+
             # Botón Reiniciar Pico
             tk.Button(
                 botones_frame,
@@ -1381,7 +1384,7 @@ Salto detectado: +{salto} lecturas
                 width=15,
                 height=1
             ).pack(side=tk.LEFT)
-            
+
             # Instrucciones
             tk.Label(
                 main_frame,
@@ -1391,12 +1394,12 @@ Salto detectado: +{salto} lecturas
                 bg='white',
                 justify=tk.LEFT
             ).pack(pady=(20, 0))
-            
+
             # Esperar respuesta
             dialog.wait_window()
-            
+
             return resultado[0]
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error en confirmacion conteo Pico: {e}")
             return False
@@ -1405,23 +1408,23 @@ Salto detectado: +{salto} lecturas
         """Limpiar interfaz cuando se completa una orden"""
         try:
             self.logger.info("INFO: Iniciando limpieza de interfaz de orden")
-            
+
             # Limpiar variables de la orden actual
             self.orden_actual = None
             self.receta_actual = None
-            
+
             # Limpiar campos de la interfaz
             if hasattr(self, 'orden_var'):
                 self.orden_var.set("N/A")
             if hasattr(self, 'upc_var'):
                 self.upc_var.set("N/A")
             if hasattr(self, 'meta_var'):
-                self.meta_var.set("0")
+                self.meta_var.set("0/0")
             if hasattr(self, 'progreso_var'):
                 self.progreso_var.set("0%")
             if hasattr(self, 'contador_var'):
                 self.contador_var.set("0")
-            
+
             # Limpiar panel de materiales (receta)
             if hasattr(self, 'receta_text') and self.receta_text:
                 self.logger.info("INFO: Limpiando panel de materiales")
@@ -1434,21 +1437,21 @@ Salto detectado: +{salto} lecturas
                 self.logger.info("SUCCESS: Panel de materiales limpiado")
             else:
                 self.logger.warning("WARNING: receta_text no existe o es None")
-            
+
             # Limpiar selección en la lista de órdenes
             if hasattr(self, 'lista_ordenes') and self.lista_ordenes:
                 self.lista_ordenes.selection_clear(0, tk.END)
-            
+
             # Actualizar estado
             if hasattr(self, 'estado_var'):
                 self.estado_var.set("Estado: INACTIVO")
-            
+
             # Limpiar última lectura
             if hasattr(self, 'ultima_lectura_var'):
                 self.ultima_lectura_var.set("Ultima lectura: N/A")
-            
+
             self.logger.info("SUCCESS: Interfaz limpiada para nueva orden")
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error limpiando interfaz orden: {e}")
 
