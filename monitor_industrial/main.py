@@ -34,7 +34,7 @@ class MonitorIndustrial:
     def __init__(self):
         """Inicializar el monitor industrial"""
         self.config = Config()
-        self.sispro = SISPROConnector(self.config)
+        self.sispro = SISPROConnector(self.config.config)
         self.rs485 = MonitorRS485(self.config)
         self.barcode = BarcodeValidator()
         self.cache = CacheManager(self.config)
@@ -523,17 +523,17 @@ class MonitorIndustrial:
             # Verificar si hay lecturas pendientes (antes de cerrar conexiones)
             try:
                 lecturas_pendientes = self.cache.contar_lecturas_pendientes()
-                
+
                 if lecturas_pendientes > 0:
                     self.logger.warning(f"WARNING: Hay {lecturas_pendientes} lecturas pendientes de sincronizar")
-                    
+
                     # Intentar sincronizar una última vez
                     self.logger.info("INFO: Intentando sincronizar lecturas pendientes...")
                     self.sincronizar_lecturas()
-                    
+
                     # Verificar nuevamente
                     lecturas_restantes = self.cache.contar_lecturas_pendientes()
-                    
+
                     if lecturas_restantes > 0:
                         self.logger.error(f"ERROR: No se pudieron sincronizar {lecturas_restantes} lecturas")
                         self.logger.error("ERROR: Las lecturas se mantendrán en cache para la próxima ejecución")
