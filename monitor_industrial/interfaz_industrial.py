@@ -640,16 +640,16 @@ class InterfazIndustrial:
             # Crear ventana modal
             dialog = tk.Toplevel(self.root)
             dialog.title("Seleccionar Orden")
-            dialog.geometry("600x400")
+            dialog.geometry("720x400")
             dialog.configure(bg=self.colores['fondo'])
             dialog.transient(self.root)
             dialog.grab_set()
 
             # Centrar ventana
             dialog.update_idletasks()
-            x = (dialog.winfo_screenwidth() // 2) - (600 // 2)
+            x = (dialog.winfo_screenwidth() // 2) - (720 // 2)
             y = (dialog.winfo_screenheight() // 2) - (400 // 2)
-            dialog.geometry(f"600x400+{x}+{y}")
+            dialog.geometry(f"720x400+{x}+{y}")
 
             # Titulo
             tk.Label(
