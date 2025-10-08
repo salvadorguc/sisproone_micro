@@ -259,9 +259,10 @@ class InterfazIndustrial:
                 config_frame,
                 text="Cambiar Estacion",
                 font=self.fuente_pequena,
-                fg=self.colores['texto_boton'],
+                fg='white',
                 bg=self.colores['boton_cambiar'],
                 activebackground='#4b5563',
+                activeforeground='white',
                 command=self.seleccionar_estacion,
                 width=15
             )
@@ -272,9 +273,10 @@ class InterfazIndustrial:
                 config_frame,
                 text="CERRAR ORDEN",
                 font=self.fuente_pequena,
-                fg=self.colores['texto_boton'],
+                fg='white',
                 bg=self.colores['boton_cerrar'],
                 activebackground='#b91c1c',
+                activeforeground='white',
                 command=self.cerrar_orden,
                 width=12
             )
