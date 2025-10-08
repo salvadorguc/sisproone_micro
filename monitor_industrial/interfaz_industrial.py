@@ -106,10 +106,10 @@ class InterfazIndustrial:
             # Configurar ventana para pantalla completa
             self.root.attributes('-fullscreen', True)
             self.root.attributes('-topmost', True)
-            
+
             # Eliminar bordes y barra de título
             self.root.overrideredirect(False)  # Mantener barra de título para poder cerrar
-            
+
             # Configurar teclas de salida
             self.root.bind('<Escape>', self.salir)
             self.root.bind('<F11>', self.toggle_fullscreen)
@@ -279,13 +279,13 @@ class InterfazIndustrial:
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=6,  # Altura fija reducida
+                height=12,  # Altura aumentada
                 font=self.fuente_pequena,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
                 state=tk.DISABLED,
-                width=60  # Ancho fijo reducido
+                width=100  # Ancho aumentado
             )
             self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
 
@@ -473,6 +473,20 @@ class InterfazIndustrial:
                 height=boton_height
             )
             btn_validar.pack(side=tk.LEFT, padx=10)
+
+            # Boton Cambiar Orden
+            btn_cambiar_orden = tk.Button(
+                botones_frame,
+                text="CAMBIAR ORDEN",
+                font=self.fuente_grande,
+                fg=self.colores['texto'],
+                bg=self.colores['success'],
+                activebackground=self.colores['texto_secundario'],
+                command=self.cambiar_orden,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_cambiar_orden.pack(side=tk.LEFT, padx=10)
 
             # Boton Sincronizar
             btn_sincronizar = tk.Button(
@@ -697,6 +711,15 @@ class InterfazIndustrial:
     def on_orden_seleccionada(self, event):
         """Manejar seleccion de orden desde la lista"""
         try:
+            # Verificar si hay una orden en proceso (bloquear selección)
+            if (hasattr(self.monitor, 'orden_actual') and self.monitor.orden_actual and 
+                hasattr(self.monitor, 'estado') and self.monitor.estado.estado_actual != EstadoSistema.INACTIVO):
+                messagebox.showwarning(
+                    "Orden en Proceso",
+                    "Hay una orden en proceso. Use 'CAMBIAR ORDEN' para cambiar a otra orden."
+                )
+                return
+
             seleccion = self.lista_ordenes.curselection()
             if seleccion and hasattr(self, 'ordenes_disponibles'):
                 index = seleccion[0]
@@ -910,6 +933,46 @@ class InterfazIndustrial:
         except Exception as e:
             self.logger.error(f"ERROR: Error cerrando orden: {e}")
             messagebox.showerror("Error", f"Error cerrando orden: {e}")
+
+    def cambiar_orden(self):
+        """Cambiar orden actual - guardar progreso y limpiar UX"""
+        try:
+            if not self.monitor.orden_actual:
+                messagebox.showwarning("Advertencia", "No hay orden seleccionada")
+                return
+
+            # Verificar si hay lecturas pendientes
+            if hasattr(self.monitor, 'lecturas_acumuladas') and self.monitor.lecturas_acumuladas > 0:
+                # Preguntar si desea guardar el progreso
+                respuesta = messagebox.askyesno(
+                    "Guardar Progreso",
+                    f"Hay {self.monitor.lecturas_acumuladas} lecturas pendientes.\n\n"
+                    f"¿Desea sincronizar y guardar el progreso antes de cambiar de orden?",
+                    icon='question'
+                )
+                
+                if respuesta:
+                    # Sincronizar lecturas pendientes
+                    self.monitor.sincronizar_lecturas()
+                    self.mostrar_mensaje_exito("Progreso guardado correctamente")
+
+            # Limpiar interfaz actual
+            self.limpiar_interfaz_orden()
+            
+            # Desactivar Pico si está activo
+            if hasattr(self.monitor, 'rs485') and self.monitor.rs485:
+                self.monitor.desactivar_pico()
+            
+            # Cambiar estado a inactivo
+            from estado_manager import EstadoSistema
+            self.monitor.estado.cambiar_estado(EstadoSistema.INACTIVO)
+            
+            # Mostrar selección de nueva orden
+            self.monitor.seleccionar_orden()
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error cambiando orden: {e}")
+            messagebox.showerror("Error", f"Error cambiando orden: {e}")
 
     def salir(self):
         """Salir de la aplicacion"""
