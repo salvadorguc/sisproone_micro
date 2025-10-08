@@ -157,8 +157,10 @@ class DatabaseManager:
             cantidad_fabricar = orden_actual['cantidadFabricar']
             cantidad_pendiente_actual = orden_actual['cantidadPendiente']
 
+            self.logger.info(f"INFO: Orden {orden_fabricacion} - Fabricar: {cantidad_fabricar}, Leida: {cantidad_leida}, Pendiente actual: {cantidad_pendiente_actual}")
+
             # Calcular nueva cantidad pendiente (no puede ser negativa)
-            nueva_cantidad_pendiente = max(0, cantidad_pendiente_actual - cantidad_leida)
+            nueva_cantidad_pendiente = max(0, cantidad_fabricar - cantidad_leida)
 
             # Calcular nuevo avance (1 = 100%, maximo 4 decimales)
             nuevo_avance = min(1.0, round(cantidad_leida / cantidad_fabricar, 4))

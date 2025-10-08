@@ -1344,9 +1344,9 @@ Salto detectado: +{salto} lecturas
                 command=conservar_conteo,
                 bg='#00cc00',
                 fg='white',
-                font=self.fuente_grande,
-                width=20,
-                height=2
+                font=self.fuente_normal,
+                width=15,
+                height=1
             ).pack(side=tk.LEFT, padx=(0, 10))
             
             # Botón Reiniciar Pico
@@ -1356,9 +1356,9 @@ Salto detectado: +{salto} lecturas
                 command=reiniciar_pico,
                 bg='#cc0000',
                 fg='white',
-                font=self.fuente_grande,
-                width=20,
-                height=2
+                font=self.fuente_normal,
+                width=15,
+                height=1
             ).pack(side=tk.LEFT)
             
             # Instrucciones
