@@ -68,16 +68,16 @@ class InterfazIndustrial:
         self.fuente_grande = ('Arial', 18, 'bold')
         self.fuente_normal = ('Arial', 12)
         self.fuente_pequena = ('Arial', 10)
-        # Fuentes para footer (25% más grandes)
-        self.fuente_footer_normal = ('Arial', 15)  # 12 * 1.25
-        self.fuente_footer_grande = ('Arial', 22)  # 18 * 1.25
-        self.fuente_footer_contador = ('Arial', 45, 'bold')  # 36 * 1.25
+        # Fuentes para footer (más grandes para mejor visibilidad)
+        self.fuente_footer_normal = ('Arial', 20)  # Aumentado significativamente
+        self.fuente_footer_grande = ('Arial', 28)  # Aumentado significativamente
+        self.fuente_footer_contador = ('Arial', 60, 'bold')  # Aumentado significativamente
 
     def calcular_fuente_dinamica(self, valor_contador):
         """Calcular tamaño de fuente dinámico basado en el valor del contador"""
         try:
             # Tamaño base de la fuente
-            tamaño_base = 15  # fuente_footer_normal
+            tamaño_base = 20  # fuente_footer_normal
             # Aumentar al 80% del valor del contador
             incremento = int(valor_contador * 0.8)
             # Tamaño final (mínimo 15, máximo 100)
@@ -349,45 +349,99 @@ class InterfazIndustrial:
             main_frame = tk.Frame(panel, bg=self.colores['panel'])
             main_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=20)
 
-            # Informacion de la orden actual
+            # Informacion de la orden actual - Lado izquierdo
             info_orden = tk.Frame(main_frame, bg=self.colores['panel'])
-            info_orden.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            info_orden.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20)
 
+            # Orden
+            orden_frame = tk.Frame(info_orden, bg=self.colores['panel'])
+            orden_frame.pack(fill=tk.X, pady=10)
+            
             tk.Label(
-                info_orden,
-                text="Orden:",
+                orden_frame,
+                text="ORDEN:",
                 font=self.fuente_footer_normal,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=10, sticky=tk.W)
-
+            ).pack(side=tk.LEFT, padx=5)
+            
             tk.Label(
-                info_orden,
+                orden_frame,
                 textvariable=self.orden_var,
                 font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=10, sticky=tk.W)
+            ).pack(side=tk.LEFT, padx=10)
 
+            # UPC
+            upc_frame = tk.Frame(info_orden, bg=self.colores['panel'])
+            upc_frame.pack(fill=tk.X, pady=10)
+            
             tk.Label(
-                info_orden,
+                upc_frame,
                 text="UPC:",
                 font=self.fuente_footer_normal,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).grid(row=1, column=0, padx=10, sticky=tk.W)
-
+            ).pack(side=tk.LEFT, padx=5)
+            
             tk.Label(
-                info_orden,
+                upc_frame,
                 textvariable=self.upc_var,
-                font=self.fuente_footer_normal,
+                font=self.fuente_footer_grande,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
-            ).grid(row=1, column=1, padx=10, sticky=tk.W)
+            ).pack(side=tk.LEFT, padx=10)
 
-            # Contador principal
+            # Meta y progreso - Centro
+            meta_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            meta_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20)
+
+            # Meta
+            meta_info_frame = tk.Frame(meta_frame, bg=self.colores['panel'])
+            meta_info_frame.pack(fill=tk.X, pady=10)
+            
+            tk.Label(
+                meta_info_frame,
+                text="META (Pendiente/Total):",
+                font=self.fuente_footer_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).pack(side=tk.LEFT, padx=5)
+            
+            self.meta_label = tk.Label(
+                meta_info_frame,
+                textvariable=self.meta_var,
+                font=self.fuente_footer_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            )
+            self.meta_label.pack(side=tk.LEFT, padx=10)
+
+            # Progreso
+            progreso_info_frame = tk.Frame(meta_frame, bg=self.colores['panel'])
+            progreso_info_frame.pack(fill=tk.X, pady=10)
+            
+            tk.Label(
+                progreso_info_frame,
+                text="PROGRESO:",
+                font=self.fuente_footer_normal,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['panel']
+            ).pack(side=tk.LEFT, padx=5)
+            
+            self.progreso_label = tk.Label(
+                progreso_info_frame,
+                textvariable=self.progreso_var,
+                font=self.fuente_footer_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            )
+            self.progreso_label.pack(side=tk.LEFT, padx=10)
+
+            # Contador principal - Lado derecho
             contador_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            contador_frame.pack(side=tk.RIGHT, padx=20)
+            contador_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=20)
 
             # Contador actual
             tk.Label(
@@ -396,7 +450,7 @@ class InterfazIndustrial:
                 font=self.fuente_footer_grande,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).pack()
+            ).pack(pady=10)
 
             self.contador_label = tk.Label(
                 contador_frame,
@@ -405,47 +459,7 @@ class InterfazIndustrial:
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             )
-            self.contador_label.pack(pady=5)
-
-            # Meta y progreso
-            meta_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            meta_frame.pack(side=tk.RIGHT, padx=20)
-
-            # Meta
-            tk.Label(
-                meta_frame,
-                text="META (Pendiente/Total):",
-                font=self.fuente_footer_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=10, sticky=tk.W)
-
-            self.meta_label = tk.Label(
-                meta_frame,
-                textvariable=self.meta_var,
-                font=self.fuente_footer_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            )
-            self.meta_label.grid(row=0, column=1, padx=10, sticky=tk.W)
-
-            # Progreso
-            tk.Label(
-                meta_frame,
-                text="PROGRESO:",
-                font=self.fuente_footer_normal,
-                fg=self.colores['texto'],
-                bg=self.colores['panel']
-            ).grid(row=1, column=0, padx=10, sticky=tk.W)
-
-            self.progreso_label = tk.Label(
-                meta_frame,
-                textvariable=self.progreso_var,
-                font=self.fuente_footer_grande,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            )
-            self.progreso_label.grid(row=1, column=1, padx=10, sticky=tk.W)
+            self.contador_label.pack(pady=10)
 
 
         except Exception as e:
@@ -794,7 +808,7 @@ class InterfazIndustrial:
         """Seleccionar orden de fabricacion"""
         try:
             self.monitor.seleccionar_orden()
-            
+
             # Actualizar campos del footer con la orden seleccionada
             if self.monitor.orden_actual:
                 self.actualizar_campos_orden()
@@ -809,21 +823,21 @@ class InterfazIndustrial:
                 return
 
             orden = self.monitor.orden_actual
-            
+
             # Actualizar Orden
             if hasattr(self, 'orden_var'):
                 self.orden_var.set(orden.get('ordenFabricacion', 'N/A'))
-            
+
             # Actualizar UPC
             if hasattr(self, 'upc_var'):
                 self.upc_var.set(orden.get('ptUPC', 'N/A'))
-            
+
             # Actualizar Meta (pendiente/total)
             if hasattr(self, 'meta_var'):
                 pendiente = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
                 total = orden.get('cantidadFabricar', 0)
                 self.meta_var.set(f"{pendiente}/{total}")
-            
+
             # Actualizar Progreso
             if hasattr(self, 'progreso_var'):
                 if total > 0:
@@ -831,16 +845,16 @@ class InterfazIndustrial:
                     self.progreso_var.set(f"{progreso:.1f}%")
                 else:
                     self.progreso_var.set("0%")
-            
+
             # Actualizar Contador
             if hasattr(self, 'contador_var'):
                 self.contador_var.set("0")
-            
+
             # Cargar receta de la orden
             self.monitor.cargar_receta_orden()
-            
+
             self.logger.info(f"SUCCESS: Campos actualizados para orden {orden.get('ordenFabricacion', 'N/A')}")
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando campos de orden: {e}")
 

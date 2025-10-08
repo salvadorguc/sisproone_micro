@@ -420,6 +420,10 @@ class MonitorIndustrial:
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
 
+                # Actualizar interfaz con la orden seleccionada
+                if hasattr(self.interfaz, 'actualizar_campos_orden'):
+                    self.interfaz.actualizar_campos_orden()
+
                 # Cargar receta de la orden
                 self.logger.info(f"INFO: Iniciando carga de receta para orden {orden['ordenFabricacion']}")
                 self.cargar_receta_orden()
