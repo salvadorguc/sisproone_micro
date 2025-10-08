@@ -483,7 +483,7 @@ class InterfazIndustrial:
             # Boton Cambiar Orden
             btn_cambiar_orden = tk.Button(
                 botones_frame,
-                text="CAMBIAR ORDEN",
+                text="SELECCIONAR ORDEN",
                 font=self.fuente_grande,
                 fg='white',
                 bg=self.colores['boton_verde'],
@@ -777,6 +777,11 @@ class InterfazIndustrial:
         """Seleccionar estacion de trabajo"""
         try:
             self.monitor.seleccionar_estacion()
+            
+            # Actualizar la variable de la estación en la interfaz
+            if hasattr(self, 'estacion_var') and self.monitor.estacion_actual:
+                self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
+            
             # Cargar ordenes de la nueva estacion inmediatamente
             self.ultima_recarga_ordenes = None  # Forzar recarga
             self.cargar_ordenes()
@@ -901,14 +906,13 @@ class InterfazIndustrial:
             messagebox.showerror("Error", f"Error cerrando orden: {e}")
 
     def cambiar_orden(self):
-        """Cambiar orden actual - guardar progreso y limpiar UX"""
+        """Seleccionar orden - mostrar modal de selección"""
         try:
-            if not self.monitor.orden_actual:
-                messagebox.showwarning("Advertencia", "No hay orden seleccionada")
-                return
-
-            # Verificar si hay lecturas pendientes
-            if hasattr(self.monitor, 'lecturas_acumuladas') and self.monitor.lecturas_acumuladas > 0:
+            # Si hay una orden actual y lecturas pendientes, preguntar si guardar
+            if (self.monitor.orden_actual and 
+                hasattr(self.monitor, 'lecturas_acumuladas') and 
+                self.monitor.lecturas_acumuladas > 0):
+                
                 # Preguntar si desea guardar el progreso
                 respuesta = messagebox.askyesno(
                     "Guardar Progreso",
@@ -922,18 +926,18 @@ class InterfazIndustrial:
                     self.monitor.sincronizar_lecturas()
                     self.mostrar_mensaje_exito("Progreso guardado correctamente")
 
-            # Limpiar interfaz actual
-            self.limpiar_interfaz_orden()
+                # Limpiar interfaz actual
+                self.limpiar_interfaz_orden()
 
-            # Desactivar Pico si está activo
-            if hasattr(self.monitor, 'rs485') and self.monitor.rs485:
-                self.monitor.desactivar_pico()
+                # Desactivar Pico si está activo
+                if hasattr(self.monitor, 'rs485') and self.monitor.rs485:
+                    self.monitor.desactivar_pico()
 
-            # Cambiar estado a inactivo
-            from estado_manager import EstadoSistema
-            self.monitor.estado.cambiar_estado(EstadoSistema.INACTIVO)
+                # Cambiar estado a inactivo
+                from estado_manager import EstadoSistema
+                self.monitor.estado.cambiar_estado(EstadoSistema.INACTIVO)
 
-            # Mostrar selección de nueva orden
+            # Mostrar selección de orden (siempre)
             self.monitor.seleccionar_orden()
 
         except Exception as e:
