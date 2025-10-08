@@ -759,24 +759,14 @@ class InterfazIndustrial:
                     self.logger.info(f"  {i}. OF: {of} | Pendiente: {pendiente}/{fabricar}")
             else:
                 self.logger.warning("WARNING: No se encontraron órdenes pendientes después del filtrado")
+            # Guardar órdenes en memoria para el modal
             self.ordenes_disponibles = ordenes_pendientes
-            self.lista_ordenes.delete(0, tk.END)
 
             if not ordenes_pendientes:
-                self.lista_ordenes.insert(tk.END, "No hay ordenes pendientes")
                 self.logger.info("INFO: No hay ordenes pendientes para mostrar")
                 return
 
-            for orden in ordenes_pendientes:
-                pt = orden.get('pt', '')
-                desc = orden.get('ptDescripcion', '')[:40]  # Limitar descripcion
-                cantidad = orden.get('cantidadFabricar', 0)
-                pendiente = orden.get('cantidadPendiente', 0)
-                upc = orden.get('ptUPC', '')
-                texto = f"OF: {orden['ordenFabricacion']} | PT: {pt} | UPC: {upc} | {desc} ({pendiente}/{cantidad} pzs)"
-                self.lista_ordenes.insert(tk.END, texto)
-
-            self.logger.info(f"SUCCESS: Se cargaron {len(ordenes_pendientes)} ordenes en la lista")
+            self.logger.info(f"SUCCESS: {len(ordenes_pendientes)} ordenes cargadas en memoria para el modal")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error cargando ordenes: {e}")
