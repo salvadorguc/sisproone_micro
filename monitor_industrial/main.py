@@ -325,7 +325,10 @@ class MonitorIndustrial:
             try:
                 # Verificar estado del Pico
                 estado_pico = self.estado.obtener_estado_pico()
-                if self.interfaz:
+                if (self.interfaz and
+                    hasattr(self.interfaz, 'actualizar_estado_pico') and
+                    hasattr(self.interfaz, 'estado_pico_var') and
+                    self.interfaz.estado_pico_var is not None):
                     self.interfaz.actualizar_estado_pico(estado_pico)
                 time.sleep(5)
             except Exception as e:

@@ -34,10 +34,10 @@ class InterfazIndustrial:
         self.panel_receta = None
         self.receta_text = None
 
-        # Variables de estado del Pico
-        self.estado_pico_var = tk.StringVar()
-        self.tiempo_inactivo_var = tk.StringVar()
-        self.ultima_sincronizacion_var = tk.StringVar()
+        # Variables de estado del Pico (se inicializaran despues de crear root)
+        self.estado_pico_var = None
+        self.tiempo_inactivo_var = None
+        self.ultima_sincronizacion_var = None
         self.ultima_lectura_timestamp = None
 
         # Colores del tema industrial
@@ -89,6 +89,9 @@ class InterfazIndustrial:
             self.crear_interfaz()
             self.iniciar_actualizaciones()
             self.logger.info("SUCCESS: Interfaz industrial mostrada")
+
+            # Iniciar el bucle principal
+            self.root.mainloop()
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando interfaz: {e}")
 
@@ -1102,7 +1105,7 @@ MATERIALES REQUERIDOS:
     def actualizar_estado_pico(self, estado):
         """Actualizar estado del Pico"""
         try:
-            if estado:
+            if estado and hasattr(self, 'estado_pico_var') and hasattr(self, 'tiempo_inactivo_var'):
                 self.estado_pico_var.set(estado.get('estado', 'DESCONECTADO'))
                 self.tiempo_inactivo_var.set(f"{estado.get('tiempo_inactivo', 0)}s")
         except Exception as e:
