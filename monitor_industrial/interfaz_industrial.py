@@ -118,6 +118,9 @@ class InterfazIndustrial:
             self.crear_interfaz()
             self.iniciar_actualizaciones()
             self.logger.info("SUCCESS: Interfaz industrial mostrada")
+            
+            # Seleccionar estacion automaticamente al iniciar
+            self.root.after(500, self.seleccionar_estacion)
 
             # Iniciar el bucle principal
             self.root.mainloop()
@@ -254,20 +257,6 @@ class InterfazIndustrial:
                 bg=self.colores['panel']
             ).grid(row=0, column=1, padx=5, sticky=tk.W)
 
-            # Boton cambiar estacion
-            self.btn_cambiar_estacion = tk.Button(
-                config_frame,
-                text="CAMBIAR ESTACION",
-                font=self.fuente_pequena,
-                fg='white',
-                bg=self.colores['boton_cambiar'],
-                activebackground='#4b5563',
-                activeforeground='white',
-                command=self.seleccionar_estacion,
-                width=20
-            )
-            self.btn_cambiar_estacion.grid(row=0, column=2, padx=5)
-
             # Boton cerrar orden (protegido)
             self.btn_cerrar_orden = tk.Button(
                 config_frame,
@@ -281,7 +270,7 @@ class InterfazIndustrial:
                 width=15,
                 state=tk.DISABLED  # Deshabilitado hasta que se seleccione una orden
             )
-            self.btn_cerrar_orden.grid(row=0, column=3, padx=10)
+            self.btn_cerrar_orden.grid(row=0, column=2, padx=10)
 
             # Estado del sistema
             tk.Label(
@@ -290,7 +279,7 @@ class InterfazIndustrial:
                 font=self.fuente_normal,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=1, column=0, columnspan=3, padx=5, sticky=tk.W)
+            ).grid(row=1, column=0, columnspan=2, padx=5, sticky=tk.W)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
@@ -558,7 +547,7 @@ class InterfazIndustrial:
             # Titulo
             tk.Label(
                 dialog,
-                text="SELECCIONAR ESTACION",
+                text="ESTACIONES",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['fondo']
@@ -790,10 +779,6 @@ class InterfazIndustrial:
             # Actualizar la variable de la estación en la interfaz
             if hasattr(self, 'estacion_var') and self.monitor.estacion_actual:
                 self.estacion_var.set(self.monitor.estacion_actual.get('nombre', 'N/A'))
-                
-                # Deshabilitar el boton de cambiar estacion una vez seleccionada
-                if hasattr(self, 'btn_cambiar_estacion'):
-                    self.btn_cambiar_estacion.config(state=tk.DISABLED)
 
             # Cargar ordenes de la nueva estacion inmediatamente
             self.ultima_recarga_ordenes = None  # Forzar recarga
@@ -855,7 +840,7 @@ class InterfazIndustrial:
 
             # Cargar receta de la orden
             self.monitor.cargar_receta_orden()
-            
+
             # Habilitar boton de cerrar orden
             if hasattr(self, 'btn_cerrar_orden'):
                 self.btn_cerrar_orden.config(state=tk.NORMAL)
@@ -1544,7 +1529,7 @@ Salto detectado: +{salto} lecturas
             # Limpiar última lectura
             if hasattr(self, 'ultima_lectura_var'):
                 self.ultima_lectura_var.set("Ultima lectura: N/A")
-            
+
             # Deshabilitar boton de cerrar orden
             if hasattr(self, 'btn_cerrar_orden'):
                 self.btn_cerrar_orden.config(state=tk.DISABLED)
