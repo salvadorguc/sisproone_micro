@@ -51,7 +51,12 @@ class InterfazIndustrial:
             'error': '#cc0000',
             'success': '#00cc00',
             'info': '#0066cc',
-            'borde': '#cccccc'
+            'borde': '#cccccc',
+            # Colores mejorados para botones
+            'boton_azul': '#1e40af',      # Azul más oscuro
+            'boton_verde': '#059669',     # Verde más oscuro
+            'boton_rojo': '#dc2626',      # Rojo más oscuro
+            'boton_info': '#0284c7'       # Azul info más oscuro
         }
 
         # Fuentes
@@ -59,6 +64,10 @@ class InterfazIndustrial:
         self.fuente_grande = ('Arial', 18, 'bold')
         self.fuente_normal = ('Arial', 12)
         self.fuente_pequena = ('Arial', 10)
+        # Fuentes para footer (25% más grandes)
+        self.fuente_footer_normal = ('Arial', 15)  # 12 * 1.25
+        self.fuente_footer_grande = ('Arial', 22)  # 18 * 1.25
+        self.fuente_footer_contador = ('Arial', 45, 'bold')  # 36 * 1.25
 
     def mostrar(self):
         """Mostrar la interfaz industrial"""
@@ -274,7 +283,7 @@ class InterfazIndustrial:
 
             # Frame para el texto de la receta
             text_frame = tk.Frame(panel, bg=self.colores['panel'])
-            text_frame.pack(fill=tk.X, expand=False, padx=20, pady=10)
+            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
             # Area de texto para la receta
             self.receta_text = tk.Text(
@@ -284,10 +293,9 @@ class InterfazIndustrial:
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
                 wrap=tk.WORD,
-                state=tk.DISABLED,
-                width=100  # Ancho aumentado
+                state=tk.DISABLED
             )
-            self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
+            self.receta_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             # Scrollbar para el texto
             scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.receta_text.yview)
@@ -354,7 +362,7 @@ class InterfazIndustrial:
             tk.Label(
                 info_orden,
                 text="Orden:",
-                font=self.fuente_normal,
+                font=self.fuente_footer_normal,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).grid(row=0, column=0, padx=10, sticky=tk.W)
@@ -362,7 +370,7 @@ class InterfazIndustrial:
             tk.Label(
                 info_orden,
                 textvariable=self.orden_var,
-                font=self.fuente_grande,
+                font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).grid(row=0, column=1, padx=10, sticky=tk.W)
@@ -370,7 +378,7 @@ class InterfazIndustrial:
             tk.Label(
                 info_orden,
                 text="UPC:",
-                font=self.fuente_normal,
+                font=self.fuente_footer_normal,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).grid(row=1, column=0, padx=10, sticky=tk.W)
@@ -378,7 +386,7 @@ class InterfazIndustrial:
             tk.Label(
                 info_orden,
                 textvariable=self.upc_var,
-                font=self.fuente_normal,
+                font=self.fuente_footer_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
             ).grid(row=1, column=1, padx=10, sticky=tk.W)
@@ -391,7 +399,7 @@ class InterfazIndustrial:
             tk.Label(
                 contador_frame,
                 text="CONTADOR",
-                font=self.fuente_grande,
+                font=self.fuente_footer_grande,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
             ).pack()
@@ -399,7 +407,7 @@ class InterfazIndustrial:
             tk.Label(
                 contador_frame,
                 textvariable=self.contador_var,
-                font=('Arial', 36, 'bold'),
+                font=self.fuente_footer_contador,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).pack(pady=5)
@@ -412,7 +420,7 @@ class InterfazIndustrial:
             tk.Label(
                 meta_frame,
                 text="META (Pendiente/Total):",
-                font=self.fuente_normal,
+                font=self.fuente_footer_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
             ).grid(row=0, column=0, padx=10, sticky=tk.W)
@@ -420,7 +428,7 @@ class InterfazIndustrial:
             tk.Label(
                 meta_frame,
                 textvariable=self.meta_var,
-                font=self.fuente_grande,
+                font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).grid(row=0, column=1, padx=10, sticky=tk.W)
@@ -429,7 +437,7 @@ class InterfazIndustrial:
             tk.Label(
                 meta_frame,
                 text="PROGRESO:",
-                font=self.fuente_normal,
+                font=self.fuente_footer_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['panel']
             ).grid(row=1, column=0, padx=10, sticky=tk.W)
@@ -437,7 +445,7 @@ class InterfazIndustrial:
             tk.Label(
                 meta_frame,
                 textvariable=self.progreso_var,
-                font=self.fuente_grande,
+                font=self.fuente_footer_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
             ).grid(row=1, column=1, padx=10, sticky=tk.W)
@@ -465,9 +473,9 @@ class InterfazIndustrial:
                 botones_frame,
                 text="VALIDAR UPC",
                 font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['accento'],
-                activebackground=self.colores['texto_secundario'],
+                fg='white',
+                bg=self.colores['boton_azul'],
+                activebackground='#1d4ed8',
                 command=self.validar_upc,
                 width=boton_width,
                 height=boton_height
@@ -479,9 +487,9 @@ class InterfazIndustrial:
                 botones_frame,
                 text="CAMBIAR ORDEN",
                 font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['success'],
-                activebackground=self.colores['texto_secundario'],
+                fg='white',
+                bg=self.colores['boton_verde'],
+                activebackground='#047857',
                 command=self.cambiar_orden,
                 width=boton_width,
                 height=boton_height
@@ -493,9 +501,9 @@ class InterfazIndustrial:
                 botones_frame,
                 text="SINCRONIZAR",
                 font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['info'],
-                activebackground=self.colores['texto_secundario'],
+                fg='white',
+                bg=self.colores['boton_info'],
+                activebackground='#0369a1',
                 command=self.sincronizar,
                 width=boton_width,
                 height=boton_height
@@ -507,9 +515,9 @@ class InterfazIndustrial:
                 botones_frame,
                 text="SALIR",
                 font=self.fuente_grande,
-                fg=self.colores['texto'],
-                bg=self.colores['error'],
-                activebackground=self.colores['texto_secundario'],
+                fg='white',
+                bg=self.colores['boton_rojo'],
+                activebackground='#b91c1c',
                 command=self.salir,
                 width=boton_width,
                 height=boton_height
@@ -712,7 +720,7 @@ class InterfazIndustrial:
         """Manejar seleccion de orden desde la lista"""
         try:
             # Verificar si hay una orden en proceso (bloquear selección)
-            if (hasattr(self.monitor, 'orden_actual') and self.monitor.orden_actual and 
+            if (hasattr(self.monitor, 'orden_actual') and self.monitor.orden_actual and
                 hasattr(self.monitor, 'estado') and self.monitor.estado.estado_actual != EstadoSistema.INACTIVO):
                 messagebox.showwarning(
                     "Orden en Proceso",
@@ -950,7 +958,7 @@ class InterfazIndustrial:
                     f"¿Desea sincronizar y guardar el progreso antes de cambiar de orden?",
                     icon='question'
                 )
-                
+
                 if respuesta:
                     # Sincronizar lecturas pendientes
                     self.monitor.sincronizar_lecturas()
@@ -958,15 +966,15 @@ class InterfazIndustrial:
 
             # Limpiar interfaz actual
             self.limpiar_interfaz_orden()
-            
+
             # Desactivar Pico si está activo
             if hasattr(self.monitor, 'rs485') and self.monitor.rs485:
                 self.monitor.desactivar_pico()
-            
+
             # Cambiar estado a inactivo
             from estado_manager import EstadoSistema
             self.monitor.estado.cambiar_estado(EstadoSistema.INACTIVO)
-            
+
             # Mostrar selección de nueva orden
             self.monitor.seleccionar_orden()
 
