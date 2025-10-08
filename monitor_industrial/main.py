@@ -46,6 +46,7 @@ class MonitorIndustrial:
         self.estacion_actual = None
         self.orden_actual = None
         self.upc_validado = None
+        self.contador_actual = 0
         self.lecturas_acumuladas = 0
         self.ultima_cantidad_sincronizada = 0
         self.ultima_sincronizacion = None
@@ -529,7 +530,7 @@ class MonitorIndustrial:
             # Evitar doble llamada
             if hasattr(self, '_detenido') and self._detenido:
                 return
-            
+
             self._detenido = True
             self.running = False
 
