@@ -103,25 +103,17 @@ class InterfazIndustrial:
             self.root.title("Monitor sispro one 1.0")
             self.root.configure(bg=self.colores['fondo'])
 
-            # Configurar ventana para ajustarse a la pantalla
+            # Configurar ventana para pantalla completa
             self.root.attributes('-fullscreen', True)
             self.root.attributes('-topmost', True)
-
+            
+            # Eliminar bordes y barra de título
+            self.root.overrideredirect(False)  # Mantener barra de título para poder cerrar
+            
             # Configurar teclas de salida
             self.root.bind('<Escape>', self.salir)
             self.root.bind('<F11>', self.toggle_fullscreen)
             self.root.bind('<Control-q>', self.salir)
-
-            # Obtener dimensiones de pantalla y ajustar
-            self.root.update_idletasks()
-            screen_width = self.root.winfo_screenwidth()
-            screen_height = self.root.winfo_screenheight()
-
-            # Dejar un pequeño margen para asegurar que todo quepa
-            usable_width = screen_width - 20
-            usable_height = screen_height - 20
-
-            self.root.geometry(f"{usable_width}x{usable_height}+10+10")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error configurando ventana: {e}")
@@ -1210,13 +1202,6 @@ MATERIALES REQUERIDOS:
                 self.root.quit()
         except Exception as e:
             self.logger.error(f"ERROR: Error saliendo: {e}")
-
-    def toggle_fullscreen(self, event=None):
-        """Alternar pantalla completa"""
-        try:
-            self.root.attributes('-fullscreen', not self.root.attributes('-fullscreen'))
-        except Exception as e:
-            self.logger.error(f"ERROR: Error alternando pantalla completa: {e}")
 
     def actualizar_avance(self, avance):
         """Actualizar avance de la orden"""
