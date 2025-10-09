@@ -11,6 +11,9 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import logging
 from estado_manager import EstadoSistema
+from PIL import Image, ImageTk
+import requests
+from io import BytesIO
 
 class InterfazIndustrial:
     def __init__(self, monitor):
@@ -374,28 +377,36 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
 
     def crear_panel_central(self, parent):
-        """Crear panel central con materiales de la orden"""
+        """Crear panel central con materiales de la orden e imagen del producto"""
         try:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-            # Titulo del panel
+            # Contenedor principal horizontal (50% materiales, 50% imagen)
+            contenedor_principal = tk.Frame(panel, bg=self.colores['panel'])
+            contenedor_principal.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
+
+            # === LADO IZQUIERDO: MATERIALES (50%) ===
+            panel_materiales = tk.Frame(contenedor_principal, bg=self.colores['panel'])
+            panel_materiales.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+
+            # Titulo materiales
             tk.Label(
-                panel,
-                text="MATERIALES DE LA ORDEN DE FABRICACIÓN",
+                panel_materiales,
+                text="MATERIALES DE LA ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).pack(pady=10)
+            ).pack(pady=5)
 
             # Frame para el texto de la receta
-            text_frame = tk.Frame(panel, bg=self.colores['panel'])
-            text_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
+            text_frame = tk.Frame(panel_materiales, bg=self.colores['panel'])
+            text_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
             # Area de texto para la receta
             self.receta_text = tk.Text(
                 text_frame,
-                height=12,  # Altura reducida 50% para dar más espacio al footer
+                height=12,
                 font=self.fuente_normal,
                 fg=self.colores['texto'],
                 bg=self.colores['fondo'],
@@ -408,6 +419,33 @@ class InterfazIndustrial:
             scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.receta_text.yview)
             scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
             self.receta_text.config(yscrollcommand=scrollbar.set)
+
+            # === LADO DERECHO: IMAGEN DEL PRODUCTO (50%) ===
+            panel_imagen = tk.Frame(contenedor_principal, bg=self.colores['panel'])
+            panel_imagen.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+
+            # Titulo imagen
+            tk.Label(
+                panel_imagen,
+                text="IMAGEN DEL PRODUCTO",
+                font=self.fuente_grande,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(pady=5)
+
+            # Frame para la imagen
+            imagen_frame = tk.Frame(panel_imagen, bg=self.colores['fondo'], relief=tk.SUNKEN, bd=2)
+            imagen_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+
+            # Label para mostrar la imagen o texto "SIN IMAGEN"
+            self.imagen_producto_label = tk.Label(
+                imagen_frame,
+                text="SIN IMAGEN",
+                font=self.fuente_grande,
+                fg=self.colores['texto_secundario'],
+                bg=self.colores['fondo']
+            )
+            self.imagen_producto_label.pack(fill=tk.BOTH, expand=True)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel central: {e}")
@@ -1223,10 +1261,150 @@ MATERIALES REQUERIDOS:
             self.receta_text.config(state=tk.DISABLED)
             self.logger.info("SUCCESS: Receta mostrada correctamente")
 
+            # Cargar imagen del producto
+            articulo_pt = receta.get('articuloPT')
+            if articulo_pt:
+                self.logger.info(f"INFO: Cargando imagen para producto: {articulo_pt}")
+                self.cargar_imagen_producto(articulo_pt)
+            else:
+                self.logger.warning("WARNING: No hay articuloPT en la receta")
+                self._mostrar_sin_imagen()
+
         except Exception as e:
             self.logger.error(f"ERROR: Error mostrando receta: {e}")
             import traceback
             self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
+
+    def cargar_imagen_producto(self, articulo_pt: str):
+        """Cargar y mostrar imagen del producto desde la base de datos"""
+        try:
+            if not hasattr(self, 'imagen_producto_label') or not self.imagen_producto_label:
+                self.logger.warning("WARNING: imagen_producto_label no existe")
+                return
+
+            self.logger.info(f"INFO: Cargando imagen para articulo PT: {articulo_pt}")
+
+            # Obtener URL de la imagen desde la base de datos
+            url_imagen = self.monitor.database.obtener_imagen_producto(articulo_pt)
+
+            if not url_imagen:
+                # No hay imagen, mostrar texto "SIN IMAGEN"
+                self.logger.info(f"INFO: No hay imagen para articulo {articulo_pt}")
+                self.imagen_producto_label.config(
+                    image='',
+                    text="SIN IMAGEN",
+                    compound=tk.NONE
+                )
+                # Limpiar referencia de imagen anterior si existe
+                if hasattr(self, 'imagen_producto_tk'):
+                    delattr(self, 'imagen_producto_tk')
+                return
+
+            # Descargar imagen desde la URL
+            self.logger.info(f"INFO: Descargando imagen desde: {url_imagen}")
+
+            # Ejecutar descarga en un thread separado para no bloquear la UI
+            threading.Thread(
+                target=self._descargar_y_mostrar_imagen,
+                args=(url_imagen,),
+                daemon=True
+            ).start()
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error cargando imagen del producto: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
+            # Mostrar "SIN IMAGEN" en caso de error
+            if hasattr(self, 'imagen_producto_label') and self.imagen_producto_label:
+                self.imagen_producto_label.config(
+                    image='',
+                    text="SIN IMAGEN",
+                    compound=tk.NONE
+                )
+
+    def _descargar_y_mostrar_imagen(self, url: str):
+        """Descargar imagen desde URL y mostrarla (ejecutar en thread)"""
+        try:
+            # Descargar imagen con timeout
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+
+            # Abrir imagen con PIL
+            imagen_bytes = BytesIO(response.content)
+            imagen_pil = Image.open(imagen_bytes)
+
+            # Obtener dimensiones del contenedor (label)
+            # Usar after para obtener las dimensiones desde el thread principal
+            self.root.after(0, self._redimensionar_y_mostrar_imagen, imagen_pil)
+
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"ERROR: Error descargando imagen: {e}")
+            # Mostrar "SIN IMAGEN" en caso de error
+            self.root.after(0, self._mostrar_sin_imagen)
+        except Exception as e:
+            self.logger.error(f"ERROR: Error procesando imagen: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
+            self.root.after(0, self._mostrar_sin_imagen)
+
+    def _redimensionar_y_mostrar_imagen(self, imagen_pil: Image.Image):
+        """Redimensionar y mostrar imagen en el label (ejecutar en thread principal)"""
+        try:
+            # Obtener dimensiones del contenedor
+            label_width = self.imagen_producto_label.winfo_width()
+            label_height = self.imagen_producto_label.winfo_height()
+
+            # Si el label aun no tiene dimensiones, usar dimensiones predeterminadas
+            if label_width <= 1 or label_height <= 1:
+                label_width = 400
+                label_height = 300
+
+            # Calcular ratio para mantener proporcion
+            img_width, img_height = imagen_pil.size
+            ratio = min(label_width / img_width, label_height / img_height)
+
+            # Calcular nuevas dimensiones
+            new_width = int(img_width * ratio * 0.95)  # 95% para dejar margen
+            new_height = int(img_height * ratio * 0.95)
+
+            # Redimensionar imagen manteniendo proporción
+            imagen_redimensionada = imagen_pil.resize(
+                (new_width, new_height),
+                Image.Resampling.LANCZOS
+            )
+
+            # Convertir a formato Tkinter
+            self.imagen_producto_tk = ImageTk.PhotoImage(imagen_redimensionada)
+
+            # Mostrar imagen en el label
+            self.imagen_producto_label.config(
+                image=self.imagen_producto_tk,
+                text='',
+                compound=tk.NONE
+            )
+
+            self.logger.info(f"SUCCESS: Imagen mostrada correctamente ({new_width}x{new_height})")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error redimensionando imagen: {e}")
+            import traceback
+            self.logger.error(f"ERROR: Traceback: {traceback.format_exc()}")
+            self._mostrar_sin_imagen()
+
+    def _mostrar_sin_imagen(self):
+        """Mostrar texto 'SIN IMAGEN' en el label"""
+        try:
+            if hasattr(self, 'imagen_producto_label') and self.imagen_producto_label:
+                self.imagen_producto_label.config(
+                    image='',
+                    text="SIN IMAGEN",
+                    compound=tk.NONE
+                )
+                # Limpiar referencia de imagen anterior
+                if hasattr(self, 'imagen_producto_tk'):
+                    delattr(self, 'imagen_producto_tk')
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando 'SIN IMAGEN': {e}")
 
     def actualizar_reloj(self):
         """Actualizar reloj en tiempo real"""
@@ -1633,6 +1811,14 @@ Salto detectado: +{salto} lecturas
                 self.logger.info("SUCCESS: Panel de materiales limpiado")
             else:
                 self.logger.warning("WARNING: receta_text no existe o es None")
+
+            # Limpiar imagen del producto
+            if hasattr(self, 'imagen_producto_label') and self.imagen_producto_label:
+                self.logger.info("INFO: Limpiando imagen del producto")
+                self._mostrar_sin_imagen()
+                self.logger.info("SUCCESS: Imagen del producto limpiada")
+            else:
+                self.logger.warning("WARNING: imagen_producto_label no existe o es None")
 
             # Nota: La lista de órdenes ahora se maneja solo a través del modal
 

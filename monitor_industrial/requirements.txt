@@ -14,6 +14,9 @@ redis>=4.0.0
 # Base de datos MySQL
 mysql-connector-python>=9.1.0
 
+# Procesamiento de imagenes
+Pillow>=10.0.0
+
 # Base de datos SQLite (incluida en Python)
 # sqlite3
 

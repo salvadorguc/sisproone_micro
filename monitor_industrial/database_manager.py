@@ -284,3 +284,34 @@ class DatabaseManager:
         except Error as e:
             self.logger.error(f"ERROR: Error verificando lecturas pendientes: {e}")
             return 0
+
+    def obtener_imagen_producto(self, articulo_pt: str) -> Optional[str]:
+        """Obtener URL de imagen del producto desde la base de datos"""
+        try:
+            # Verificar conexion
+            if not self.connection or not self.connection.is_connected():
+                self.logger.warning("WARNING: Conexion no disponible, reconectando...")
+                if not self.conectar():
+                    return None
+
+            query = """
+            SELECT T0.url
+            FROM imagen T0
+            INNER JOIN articulo T1 ON T0.articuloId = T1.id
+            WHERE T1.articulo = %s
+            LIMIT 1
+            """
+
+            self.cursor.execute(query, (articulo_pt,))
+            resultado = self.cursor.fetchone()
+
+            if resultado and resultado.get('url'):
+                self.logger.info(f"SUCCESS: Imagen encontrada para articulo {articulo_pt}")
+                return resultado['url']
+            else:
+                self.logger.info(f"INFO: No se encontro imagen para articulo {articulo_pt}")
+                return None
+
+        except Error as e:
+            self.logger.error(f"ERROR: Error obteniendo imagen del producto: {e}")
+            return None
