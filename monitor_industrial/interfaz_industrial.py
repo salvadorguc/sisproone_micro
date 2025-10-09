@@ -424,8 +424,8 @@ class InterfazIndustrial:
             botones_frame = tk.Frame(panel_izquierdo, bg=self.colores['panel'])
             botones_frame.pack(pady=10)
 
-            # Botones con tamaño reducido
-            boton_width = 8
+            # Botones con tamaño ajustado para que quepa "SINCRONIZAR"
+            boton_width = 12
             boton_height = 1
             fuente_botones = ('Arial', 14, 'bold')
 
