@@ -162,3 +162,20 @@ class MonitorRS485:
                 self.message_queue.get_nowait()
             except:
                 break
+
+    def limpiar_buffer(self):
+        """Limpiar buffer serial y cola de mensajes"""
+        try:
+            # Limpiar cola de mensajes
+            self.limpiar_cola()
+
+            # Limpiar buffer de entrada del puerto serial
+            if self.ser and self.ser.is_open:
+                self.ser.reset_input_buffer()
+                self.ser.reset_output_buffer()
+                self.logger.info("SUCCESS: Buffer RS485 limpiado")
+                return True
+            return False
+        except Exception as e:
+            self.logger.error(f"ERROR: Error limpiando buffer RS485: {e}")
+            return False

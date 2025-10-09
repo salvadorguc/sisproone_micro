@@ -185,12 +185,29 @@ class MonitorIndustrial:
             if tag == 'CONT':
                 # Verificar si es la primera lectura después de activar
                 if hasattr(self, 'esperando_primera_lectura') and self.esperando_primera_lectura:
+                    self.logger.info(f"INFO: Verificando primera lectura del Pico. Valor recibido: {valor}")
                     self.esperando_primera_lectura = False
 
                     # La primera lectura DEBE ser 0 o muy cercana a 0 (tolerancia de 1)
                     if valor > 1:
                         self.logger.error(f"ERROR: Pico no reiniciado. Primera lectura: {valor}. PRODUCCION CANCELADA.")
-                        # Forzar detención - Pico no fue reiniciado
+
+                        # Desactivar Pico PRIMERO
+                        self.desactivar_pico()
+
+                        # Limpiar buffer RS485 para eliminar mensajes antiguos
+                        self.logger.info("INFO: Limpiando buffer RS485...")
+                        self.rs485.limpiar_buffer()
+
+                        # Resetear estado COMPLETAMENTE
+                        self.upc_validado = None
+                        self.contador_actual = 0
+                        self.lecturas_acumuladas = 0
+                        self.ultima_cantidad_sincronizada = 0
+                        from estado_manager import EstadoSistema
+                        self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+
+                        # Mostrar error al usuario DESPUÉS de limpiar el estado
                         if self.interfaz:
                             from tkinter import messagebox
                             messagebox.showerror(
@@ -204,12 +221,8 @@ class MonitorIndustrial:
                                 f"4. El contador se reiniciara a 0\n"
                                 f"5. Valida el UPC nuevamente para continuar"
                             )
-                        self.desactivar_pico()
-                        self.upc_validado = None
-                        self.contador_actual = 0
-                        self.lecturas_acumuladas = 0
-                        from estado_manager import EstadoSistema
-                        self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+
+                        self.logger.info("INFO: Estado completamente reseteado. Esperando reinicio del Pico.")
                         return
                     else:
                         self.logger.info(f"SUCCESS: Pico reiniciado correctamente. Primera lectura: {valor}")
@@ -219,8 +232,24 @@ class MonitorIndustrial:
 
                 # Detectar salto durante la produccion (incremento mayor a 1)
                 if incremento > 1 and self.lecturas_acumuladas > 0:
-                    self.logger.error(f"ERROR: Salto detectado durante produccion: +{incremento} lecturas.")
-                    # Forzar detención - salto sospechoso durante producción
+                    self.logger.error(f"ERROR: Salto detectado durante produccion: +{incremento} lecturas (valor={valor}, acumuladas={self.lecturas_acumuladas}).")
+
+                    # Desactivar Pico PRIMERO
+                    self.desactivar_pico()
+
+                    # Limpiar buffer RS485
+                    self.logger.info("INFO: Limpiando buffer RS485 por salto detectado...")
+                    self.rs485.limpiar_buffer()
+
+                    # Resetear estado COMPLETAMENTE
+                    self.upc_validado = None
+                    self.contador_actual = 0
+                    self.lecturas_acumuladas = 0
+                    self.ultima_cantidad_sincronizada = 0
+                    from estado_manager import EstadoSistema
+                    self.estado.cambiar_estado(EstadoSistema.INACTIVO)
+
+                    # Mostrar error al usuario
                     if self.interfaz:
                         from tkinter import messagebox
                         messagebox.showerror(
@@ -229,12 +258,8 @@ class MonitorIndustrial:
                             f"Por control de calidad, la producción ha sido cancelada.\n\n"
                             f"Contacte a un supervisor para revisar el equipo."
                         )
-                    self.desactivar_pico()
-                    self.upc_validado = None
-                    self.contador_actual = 0
-                    self.lecturas_acumuladas = 0
-                    from estado_manager import EstadoSistema
-                    self.estado.cambiar_estado(EstadoSistema.INACTIVO)
+
+                    self.logger.info("INFO: Estado reseteado por salto de lecturas.")
                     return
 
                 # Limitar contador a la cantidad pendiente
@@ -494,18 +519,26 @@ class MonitorIndustrial:
             # Validar UPC contra la orden
             if upc == self.orden_actual['ptUPC']:
                 self.upc_validado = upc
+
+                # Limpiar buffer RS485 antes de comenzar (eliminar mensajes antiguos)
+                self.logger.info("INFO: Limpiando buffer RS485 antes de activar Pico...")
+                self.rs485.limpiar_buffer()
+
                 # Resetear contador para nueva orden
                 self.contador_actual = 0
                 self.lecturas_acumuladas = 0
+                self.ultima_cantidad_sincronizada = 0
+
                 # Marcar que esperamos la primera lectura del Pico
                 self.esperando_primera_lectura = True
+
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.PRODUCIENDO)
 
                 # Activar comunicacion con Pico
                 self.activar_pico()
 
-                self.logger.info(f"SUCCESS: UPC validado: {upc}")
+                self.logger.info(f"SUCCESS: UPC validado: {upc} - Esperando primera lectura del Pico...")
                 return True
             else:
                 self.logger.warning(f"WARNING: UPC invalido: {upc}")
