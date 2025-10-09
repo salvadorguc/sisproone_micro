@@ -472,7 +472,7 @@ class InterfazIndustrial:
                 width=boton_width,
                 height=boton_height
             )
-            btn_sincronizar.pack(side=tk.LEFT, padx=5)
+            btn_sincronizar.pack(side=tk.LEFT, padx=10)
 
             # Boton Salir
             btn_salir = tk.Button(
