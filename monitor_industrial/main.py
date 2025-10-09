@@ -52,6 +52,7 @@ class MonitorIndustrial:
         self.ultima_sincronizacion = None
         self.receta_actual = None
         self.pendiente_inicial = 0  # Cantidad pendiente al seleccionar la orden
+        self.esperando_primera_lectura = False  # Flag para validar reinicio del Pico
 
         # Threads
         self.thread_rs485 = None
@@ -182,26 +183,56 @@ class MonitorIndustrial:
             valor = int(valor)
 
             if tag == 'CONT':
+                # Verificar si es la primera lectura después de activar
+                if hasattr(self, 'esperando_primera_lectura') and self.esperando_primera_lectura:
+                    self.esperando_primera_lectura = False
+
+                    # La primera lectura DEBE ser 0 o muy cercana a 0 (tolerancia de 1)
+                    if valor > 1:
+                        self.logger.error(f"ERROR: Pico no reiniciado. Primera lectura: {valor}. PRODUCCION CANCELADA.")
+                        # Forzar detención - Pico no fue reiniciado
+                        if self.interfaz:
+                            from tkinter import messagebox
+                            messagebox.showerror(
+                                "ERROR - Pico No Reiniciado",
+                                f"ALERTA: El Pico tiene {valor} lecturas acumuladas.\n\n"
+                                f"Por control de calidad, debe reiniciar el Pico antes de continuar.\n\n"
+                                f"PASOS PARA REINICIAR:\n"
+                                f"1. Ve al dispositivo Pico\n"
+                                f"2. Presiona tecla C (RESET)\n"
+                                f"3. Ingresa el PIN de supervisor\n"
+                                f"4. El contador se reiniciara a 0\n"
+                                f"5. Valida el UPC nuevamente para continuar"
+                            )
+                        self.desactivar_pico()
+                        self.upc_validado = None
+                        self.contador_actual = 0
+                        self.lecturas_acumuladas = 0
+                        from estado_manager import EstadoSistema
+                        self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
+                        return
+                    else:
+                        self.logger.info(f"SUCCESS: Pico reiniciado correctamente. Primera lectura: {valor}")
+
                 # Actualizar contador local
                 incremento = valor - self.lecturas_acumuladas
 
-                # Detectar salto (Pico no reiniciado) - Cualquier incremento > 1 es sospechoso
-                if incremento > 1 and self.lecturas_acumuladas == 0:
-                    self.logger.error(f"ERROR: Salto detectado: {incremento} lecturas. PRODUCCION CANCELADA.")
-                    # Forzar detención - no permitir lecturas con salto
+                # Detectar salto durante la produccion (incremento mayor a 1)
+                if incremento > 1 and self.lecturas_acumuladas > 0:
+                    self.logger.error(f"ERROR: Salto detectado durante produccion: +{incremento} lecturas.")
+                    # Forzar detención - salto sospechoso durante producción
                     if self.interfaz:
                         from tkinter import messagebox
                         messagebox.showerror(
                             "ERROR - Salto de Lecturas Detectado",
                             f"ALERTA: Se detectó un salto de {incremento} lecturas.\n\n"
                             f"Por control de calidad, la producción ha sido cancelada.\n\n"
-                            f"DEBE REINICIAR EL PICO:\n"
-                            f"1. Presiona tecla C (RESET) en el Pico\n"
-                            f"2. Ingresa el PIN de supervisor\n"
-                            f"3. El contador se reiniciará a 0\n"
-                            f"4. Valida el UPC nuevamente para continuar"
+                            f"Contacte a un supervisor para revisar el equipo."
                         )
                     self.desactivar_pico()
+                    self.upc_validado = None
+                    self.contador_actual = 0
+                    self.lecturas_acumuladas = 0
                     from estado_manager import EstadoSistema
                     self.estado.cambiar_estado(EstadoSistema.INACTIVO)
                     return
@@ -410,7 +441,7 @@ class MonitorIndustrial:
             if not hasattr(self.interfaz, 'ordenes_disponibles') or not self.interfaz.ordenes_disponibles:
                 # Si no hay órdenes en memoria, cargarlas
                 self.interfaz.cargar_ordenes()
-            
+
             ordenes = self.interfaz.ordenes_disponibles
             if not ordenes:
                 messagebox.showwarning("Advertencia", "No hay órdenes asignadas a esta estación")
@@ -423,15 +454,15 @@ class MonitorIndustrial:
             if orden:
                 self.logger.info(f"INFO: Orden seleccionada del diálogo: {orden}")
                 self.orden_actual = orden
-                
+
                 # Guardar cantidad pendiente inicial para cálculo de progreso
                 self.pendiente_inicial = orden.get('cantidadPendiente', orden.get('cantidadFabricar', 0))
-                
+
                 # Resetear contador para nueva orden
                 self.contador_actual = 0
                 self.lecturas_acumuladas = 0
                 self.ultima_cantidad_sincronizada = 0
-                
+
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
 
@@ -466,6 +497,8 @@ class MonitorIndustrial:
                 # Resetear contador para nueva orden
                 self.contador_actual = 0
                 self.lecturas_acumuladas = 0
+                # Marcar que esperamos la primera lectura del Pico
+                self.esperando_primera_lectura = True
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.PRODUCIENDO)
 
@@ -485,32 +518,6 @@ class MonitorIndustrial:
     def activar_pico(self):
         """Activar comunicacion con el Pico"""
         try:
-            # Solicitar estado actual del Pico (HEARTBEAT tiene el contador)
-            time.sleep(0.5)  # Esperar ultimo heartbeat
-
-            # Revisar si hay lecturas previas del Pico (FORZAR REINICIO)
-            contador_actual = self.lecturas_acumuladas
-
-            # Si hay contador existente, NO permitir continuar - forzar reinicio
-            if contador_actual > 0:
-                from tkinter import messagebox
-                messagebox.showerror(
-                    "ERROR - Pico No Reiniciado",
-                    f"ALERTA: El dispositivo tiene {contador_actual} lecturas acumuladas.\n\n"
-                    f"Por seguridad y control de calidad, debe reiniciar el Pico.\n\n"
-                    f"PASOS PARA REINICIAR:\n"
-                    f"1. Ve al dispositivo Pico\n"
-                    f"2. Presiona tecla C (RESET)\n"
-                    f"3. Ingresa el PIN de supervisor\n"
-                    f"4. El contador se reiniciara a 0\n"
-                    f"5. Vuelve e intenta validar el UPC de nuevo"
-                )
-                from estado_manager import EstadoSistema
-                self.estado.cambiar_estado(EstadoSistema.ESPERANDO_UPC)
-                self.upc_validado = None
-                self.logger.warning(f"WARNING: Validacion cancelada - Pico tiene {contador_actual} lecturas. Reinicio requerido.")
-                return
-
             # Enviar comando de activacion al Pico
             comando = f"{self.estacion_actual['id']}:ACTIVAR:{self.orden_actual['pt']}"
             self.rs485.enviar_comando(comando)
@@ -521,7 +528,7 @@ class MonitorIndustrial:
             self.rs485.enviar_comando(meta_comando)
             self.logger.info(f"INFO: META establecida en {meta_pendiente} (lecturas pendientes)")
 
-            self.logger.info("SUCCESS: Pico activado")
+            self.logger.info("SUCCESS: Pico activado - esperando primera lectura para validar reinicio")
 
         except Exception as e:
             self.logger.error(f"ERROR: Error activando Pico: {e}")
@@ -577,6 +584,7 @@ class MonitorIndustrial:
                 self.lecturas_acumuladas = 0
                 self.ultima_cantidad_sincronizada = 0
                 self.contador_actual = 0
+                self.esperando_primera_lectura = False  # Resetear flag de primera lectura
                 from estado_manager import EstadoSistema
                 self.estado.cambiar_estado(EstadoSistema.INACTIVO)
 
@@ -646,6 +654,9 @@ class MonitorIndustrial:
 
             # Desactivar Pico
             self.desactivar_pico()
+
+            # Resetear estados
+            self.esperando_primera_lectura = False
 
             # Cerrar conexiones
             self.rs485.desconectar()
