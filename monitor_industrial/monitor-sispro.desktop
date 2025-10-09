@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Monitor SISPRO ONE
+Comment=Sistema de Monitoreo Industrial SISPRO
+Exec=/home/pi/Projects/sisproone_micro/monitor_industrial/venv/bin/python3 /home/pi/Projects/sisproone_micro/monitor_industrial/main.py
+Icon=/home/pi/Projects/sisproone_micro/monitor_industrial/logo.png
+Path=/home/pi/Projects/sisproone_micro/monitor_industrial
+Terminal=false
+Categories=Application;
+StartupNotify=true
+
