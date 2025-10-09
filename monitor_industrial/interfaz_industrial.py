@@ -382,17 +382,17 @@ class InterfazIndustrial:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-            # Contenedor principal horizontal (50% materiales, 50% imagen)
+            # Contenedor principal horizontal (50% izquierda: materiales+botones, 50% derecha: imagen)
             contenedor_principal = tk.Frame(panel, bg=self.colores['panel'])
             contenedor_principal.pack(fill=tk.BOTH, expand=True, padx=5, pady=10)
 
-            # === LADO IZQUIERDO: MATERIALES (50%) ===
-            panel_materiales = tk.Frame(contenedor_principal, bg=self.colores['panel'])
-            panel_materiales.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+            # === LADO IZQUIERDO: MATERIALES + BOTONES (50%) ===
+            panel_izquierdo = tk.Frame(contenedor_principal, bg=self.colores['panel'])
+            panel_izquierdo.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
 
             # Titulo materiales
             tk.Label(
-                panel_materiales,
+                panel_izquierdo,
                 text="MATERIALES DE LA ORDEN",
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
@@ -400,7 +400,7 @@ class InterfazIndustrial:
             ).pack(pady=5)
 
             # Frame para el texto de la receta
-            text_frame = tk.Frame(panel_materiales, bg=self.colores['panel'])
+            text_frame = tk.Frame(panel_izquierdo, bg=self.colores['panel'])
             text_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
             # Area de texto para la receta
@@ -419,6 +419,75 @@ class InterfazIndustrial:
             scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.receta_text.yview)
             scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
             self.receta_text.config(yscrollcommand=scrollbar.set)
+
+            # === BOTONES DEBAJO DE MATERIALES ===
+            botones_frame = tk.Frame(panel_izquierdo, bg=self.colores['panel'])
+            botones_frame.pack(pady=10)
+
+            # Botones con tamaño reducido
+            boton_width = 8
+            boton_height = 1
+            fuente_botones = ('Arial', 14, 'bold')
+
+            # Boton Validar UPC
+            btn_validar = tk.Button(
+                botones_frame,
+                text="VALIDAR",
+                font=fuente_botones,
+                fg='white',
+                bg=self.colores['boton_azul'],
+                activebackground='#1d4ed8',
+                activeforeground='white',
+                command=self.validar_upc,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_validar.pack(side=tk.LEFT, padx=5)
+
+            # Boton Cambiar Orden
+            btn_cambiar_orden = tk.Button(
+                botones_frame,
+                text="ORDENES",
+                font=fuente_botones,
+                fg='white',
+                bg=self.colores['boton_verde'],
+                activebackground='#047857',
+                activeforeground='white',
+                command=self.cambiar_orden,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_cambiar_orden.pack(side=tk.LEFT, padx=5)
+
+            # Boton Sincronizar
+            btn_sincronizar = tk.Button(
+                botones_frame,
+                text="SINCRONIZAR",
+                font=fuente_botones,
+                fg='white',
+                bg=self.colores['boton_info'],
+                activebackground='#0369a1',
+                activeforeground='white',
+                command=self.sincronizar,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_sincronizar.pack(side=tk.LEFT, padx=5)
+
+            # Boton Salir
+            btn_salir = tk.Button(
+                botones_frame,
+                text="SALIR",
+                font=fuente_botones,
+                fg='white',
+                bg=self.colores['boton_rojo'],
+                activebackground='#b91c1c',
+                activeforeground='white',
+                command=self.salir,
+                width=boton_width,
+                height=boton_height
+            )
+            btn_salir.pack(side=tk.LEFT, padx=5)
 
             # === LADO DERECHO: IMAGEN DEL PRODUCTO (50%) ===
             panel_imagen = tk.Frame(contenedor_principal, bg=self.colores['panel'])
@@ -577,82 +646,10 @@ class InterfazIndustrial:
             self.logger.error(f"ERROR: Error creando panel estado: {e}")
 
     def crear_panel_inferior(self, parent):
-        """Crear panel inferior con botones de accion"""
-        try:
-            panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
-            panel.pack(fill=tk.X, pady=(0, 10))
-
-            # Frame para botones
-            botones_frame = tk.Frame(panel, bg=self.colores['panel'])
-            botones_frame.pack(pady=10)
-
-            # Botones con tamaño reducido (mitad del ancho original)
-            boton_width = 8
-            boton_height = 1
-            fuente_botones = ('Arial', 14, 'bold')  # Fuente más compacta
-
-            # Boton Validar UPC
-            btn_validar = tk.Button(
-                botones_frame,
-                text="VALIDAR",
-                font=fuente_botones,
-                fg='white',
-                bg=self.colores['boton_azul'],
-                activebackground='#1d4ed8',
-                activeforeground='white',
-                command=self.validar_upc,
-                width=boton_width,
-                height=boton_height
-            )
-            btn_validar.pack(side=tk.LEFT, padx=5)
-
-            # Boton Cambiar Orden
-            btn_cambiar_orden = tk.Button(
-                botones_frame,
-                text="ORDENES",
-                font=fuente_botones,
-                fg='white',
-                bg=self.colores['boton_verde'],
-                activebackground='#047857',
-                activeforeground='white',
-                command=self.cambiar_orden,
-                width=boton_width,
-                height=boton_height
-            )
-            btn_cambiar_orden.pack(side=tk.LEFT, padx=5)
-
-            # Boton Sincronizar
-            btn_sincronizar = tk.Button(
-                botones_frame,
-                text="SINCRONIZAR",
-                font=fuente_botones,
-                fg='white',
-                bg=self.colores['boton_info'],
-                activebackground='#0369a1',
-                activeforeground='white',
-                command=self.sincronizar,
-                width=boton_width,
-                height=boton_height
-            )
-            btn_sincronizar.pack(side=tk.LEFT, padx=5)
-
-            # Boton Salir
-            btn_salir = tk.Button(
-                botones_frame,
-                text="SALIR",
-                font=fuente_botones,
-                fg='white',
-                bg=self.colores['boton_rojo'],
-                activebackground='#b91c1c',
-                activeforeground='white',
-                command=self.salir,
-                width=boton_width,
-                height=boton_height
-            )
-            btn_salir.pack(side=tk.LEFT, padx=5)
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error creando panel inferior: {e}")
+        """Panel inferior (ahora los botones están en el panel central)"""
+        # Los botones ahora están integrados en el panel central (lado izquierdo)
+        # Este método se mantiene por compatibilidad pero no crea nada
+        pass
 
 
     def mostrar_seleccion_estacion(self, estaciones):
