@@ -115,10 +115,10 @@ class InterfazIndustrial:
             self.ultima_recarga_ordenes = None
 
             self.configurar_ventana()
-            
+
             # Mostrar loading ANTES de crear la interfaz completa
             self.mostrar_loading()
-            
+
             # Crear interfaz y seleccionar estación después del loading
             self.root.after(2000, self.inicializar_sistema_completo)
 
@@ -202,17 +202,17 @@ class InterfazIndustrial:
             if hasattr(self, 'loading_frame'):
                 self.loading_frame.destroy()
                 delattr(self, 'loading_frame')
-            
+
             # Crear la interfaz completa
             self.crear_interfaz()
             self.iniciar_actualizaciones()
             self.logger.info("SUCCESS: Interfaz industrial mostrada")
-            
+
             # Seleccionar estación
             self.seleccionar_estacion()
-            
+
             self.logger.info("SUCCESS: Sistema completamente inicializado")
-            
+
         except Exception as e:
             self.logger.error(f"ERROR: Error inicializando sistema completo: {e}")
 
