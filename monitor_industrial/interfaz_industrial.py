@@ -584,17 +584,18 @@ class InterfazIndustrial:
 
             # Frame para botones
             botones_frame = tk.Frame(panel, bg=self.colores['panel'])
-            botones_frame.pack(pady=20)
+            botones_frame.pack(pady=10)
 
-            # Botones con tamaño uniforme
-            boton_width = 15
-            boton_height = 2
+            # Botones con tamaño reducido (mitad del ancho original)
+            boton_width = 8
+            boton_height = 1
+            fuente_botones = ('Arial', 14, 'bold')  # Fuente más compacta
 
             # Boton Validar UPC
             btn_validar = tk.Button(
                 botones_frame,
-                text="VALIDAR UPC",
-                font=self.fuente_grande,
+                text="VALIDAR",
+                font=fuente_botones,
                 fg='white',
                 bg=self.colores['boton_azul'],
                 activebackground='#1d4ed8',
@@ -603,13 +604,13 @@ class InterfazIndustrial:
                 width=boton_width,
                 height=boton_height
             )
-            btn_validar.pack(side=tk.LEFT, padx=10)
+            btn_validar.pack(side=tk.LEFT, padx=5)
 
             # Boton Cambiar Orden
             btn_cambiar_orden = tk.Button(
                 botones_frame,
                 text="ORDENES",
-                font=self.fuente_grande,
+                font=fuente_botones,
                 fg='white',
                 bg=self.colores['boton_verde'],
                 activebackground='#047857',
@@ -618,13 +619,13 @@ class InterfazIndustrial:
                 width=boton_width,
                 height=boton_height
             )
-            btn_cambiar_orden.pack(side=tk.LEFT, padx=10)
+            btn_cambiar_orden.pack(side=tk.LEFT, padx=5)
 
             # Boton Sincronizar
             btn_sincronizar = tk.Button(
                 botones_frame,
                 text="SINCRONIZAR",
-                font=self.fuente_grande,
+                font=fuente_botones,
                 fg='white',
                 bg=self.colores['boton_info'],
                 activebackground='#0369a1',
@@ -633,13 +634,13 @@ class InterfazIndustrial:
                 width=boton_width,
                 height=boton_height
             )
-            btn_sincronizar.pack(side=tk.LEFT, padx=10)
+            btn_sincronizar.pack(side=tk.LEFT, padx=5)
 
             # Boton Salir
             btn_salir = tk.Button(
                 botones_frame,
                 text="SALIR",
-                font=self.fuente_grande,
+                font=fuente_botones,
                 fg='white',
                 bg=self.colores['boton_rojo'],
                 activebackground='#b91c1c',
@@ -648,7 +649,7 @@ class InterfazIndustrial:
                 width=boton_width,
                 height=boton_height
             )
-            btn_salir.pack(side=tk.LEFT, padx=10)
+            btn_salir.pack(side=tk.LEFT, padx=5)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel inferior: {e}")
