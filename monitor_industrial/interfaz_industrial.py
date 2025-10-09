@@ -107,10 +107,9 @@ class InterfazIndustrial:
             self.estado_pico_var = tk.StringVar(value="DESCONECTADO")
             self.tiempo_inactivo_var = tk.StringVar(value="0s")
 
-            # Variables para reloj y semáforo
-            self.reloj_var = tk.StringVar(value="00:00:00")
+            # Variables para reloj
+            self.reloj_var = tk.StringVar(value="00:00:00 AM")
             self.ultima_lectura_var = tk.StringVar(value="N/A")
-            self.semaforo_color = tk.StringVar(value="red")
 
             # Variables internas
             self.orden_actual = None
@@ -277,81 +276,76 @@ class InterfazIndustrial:
             panel = tk.Frame(parent, bg=self.colores['panel'], relief=tk.RAISED, bd=2)
             panel.pack(fill=tk.X, pady=(0, 10))
 
-            # Frame principal horizontal
+            # Frame principal horizontal dividido en 3 columnas (33% cada una)
             main_frame = tk.Frame(panel, bg=self.colores['panel'])
             main_frame.pack(fill=tk.X, pady=10, padx=5)
 
-            # Lado izquierdo: Titulo
-            titulo = tk.Label(
-                main_frame,
+            # === COLUMNA IZQUIERDA (33%): TITULO ===
+            left_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            tk.Label(
+                left_frame,
                 text="MONITOR SISPRO ONE 1.0",
                 font=self.fuente_titulo,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            )
-            titulo.pack(side=tk.LEFT)
+            ).pack(anchor=tk.W)
 
-            # Lado derecho: Reloj y configuracion
-            right_frame = tk.Frame(main_frame, bg=self.colores['panel'])
-            right_frame.pack(side=tk.RIGHT)
-
-            # Reloj en la parte superior derecha
-            clock_frame = tk.Frame(right_frame, bg=self.colores['panel'])
-            clock_frame.pack(side=tk.TOP, pady=(0, 10))
+            # === COLUMNA CENTRO (33%): RELOJ ===
+            center_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            center_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             tk.Label(
-                clock_frame,
-                text="HORA:",
-                font=self.fuente_pequena,
-                fg=self.colores['texto_secundario'],
-                bg=self.colores['panel']
-            ).pack(side=tk.LEFT)
-
-            tk.Label(
-                clock_frame,
+                center_frame,
                 textvariable=self.reloj_var,
-                font=self.fuente_grande,
+                font=('Arial', 36, 'bold'),
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).pack(side=tk.LEFT, padx=5)
+            ).pack(anchor=tk.CENTER)
 
-            # Semáforo de estado de lecturas
-            semaforo_frame = tk.Frame(clock_frame, bg=self.colores['panel'])
-            semaforo_frame.pack(side=tk.LEFT, padx=20)
+            # === COLUMNA DERECHA (33%): ESTACION, ESTADO Y CERRAR ORDEN ===
+            right_frame = tk.Frame(main_frame, bg=self.colores['panel'])
+            right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-            self.semaforo_label = tk.Label(
-                semaforo_frame,
-                text="●",
-                font=self.fuente_titulo,
-                fg=self.colores['error'],
-                bg=self.colores['panel']
-            )
-            self.semaforo_label.pack()
+            # Estacion
+            estacion_frame = tk.Frame(right_frame, bg=self.colores['panel'])
+            estacion_frame.pack(anchor=tk.E, pady=2)
 
-            # Configuracion de estacion
-            config_frame = tk.Frame(right_frame, bg=self.colores['panel'])
-            config_frame.pack(side=tk.BOTTOM)
-
-            # Estacion actual
             tk.Label(
-                config_frame,
+                estacion_frame,
                 text="Estacion:",
                 font=self.fuente_normal,
                 fg=self.colores['texto_secundario'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=0, padx=5, sticky=tk.E)
+            ).pack(side=tk.LEFT, padx=5)
 
             tk.Label(
-                config_frame,
+                estacion_frame,
                 textvariable=self.estacion_var,
                 font=self.fuente_grande,
                 fg=self.colores['accento'],
                 bg=self.colores['panel']
-            ).grid(row=0, column=1, padx=5, sticky=tk.W)
+            ).pack(side=tk.LEFT)
 
-            # Boton cerrar orden (protegido)
+            # Estado del sistema
+            estado_frame = tk.Frame(right_frame, bg=self.colores['panel'])
+            estado_frame.pack(anchor=tk.E, pady=2)
+
+            tk.Label(
+                estado_frame,
+                textvariable=self.estado_var,
+                font=self.fuente_normal,
+                fg=self.colores['accento'],
+                bg=self.colores['panel']
+            ).pack(side=tk.LEFT)
+
+            # Boton cerrar orden
+            boton_frame = tk.Frame(right_frame, bg=self.colores['panel'])
+            boton_frame.pack(anchor=tk.E, pady=2)
+
             self.btn_cerrar_orden = tk.Button(
-                config_frame,
+                boton_frame,
                 text="CERRAR ORDEN",
                 font=self.fuente_pequena,
                 fg='white',
@@ -360,18 +354,9 @@ class InterfazIndustrial:
                 activeforeground='white',
                 command=self.cerrar_orden,
                 width=15,
-                state=tk.DISABLED  # Deshabilitado hasta que se seleccione una orden
+                state=tk.DISABLED
             )
-            self.btn_cerrar_orden.grid(row=0, column=2, padx=10)
-
-            # Estado del sistema
-            tk.Label(
-                config_frame,
-                textvariable=self.estado_var,
-                font=self.fuente_normal,
-                fg=self.colores['accento'],
-                bg=self.colores['panel']
-            ).grid(row=1, column=0, columnspan=2, padx=5, sticky=tk.W)
+            self.btn_cerrar_orden.pack()
 
         except Exception as e:
             self.logger.error(f"ERROR: Error creando panel superior: {e}")
@@ -1178,7 +1163,6 @@ class InterfazIndustrial:
 
             self.actualizar_interfaz()
             self.actualizar_reloj()
-            self.actualizar_semaforo()
 
             # Programar siguiente actualizacion
             self.root.after(1000, self.iniciar_actualizaciones)
@@ -1408,31 +1392,12 @@ MATERIALES REQUERIDOS:
         """Actualizar reloj en tiempo real"""
         try:
             ahora = datetime.now()
-            tiempo_str = ahora.strftime("%H:%M:%S")
+            tiempo_str = ahora.strftime("%I:%M:%S %p")  # Formato 12 horas con AM/PM
             self.reloj_var.set(tiempo_str)
 
         except Exception as e:
             self.logger.error(f"ERROR: Error actualizando reloj: {e}")
 
-    def actualizar_semaforo(self):
-        """Actualizar semaforo de actividad"""
-        try:
-            if hasattr(self, 'ultima_lectura_timestamp') and self.ultima_lectura_timestamp:
-                tiempo_transcurrido = (datetime.now() - self.ultima_lectura_timestamp).total_seconds() / 60
-
-                if tiempo_transcurrido > 30:
-                    color = self.colores['error']  # Rojo
-                elif tiempo_transcurrido > 15:
-                    color = self.colores['advertencia']  # Amarillo
-                else:
-                    color = self.colores['success']  # Verde
-            else:
-                color = self.colores['error']  # Rojo por defecto
-
-            self.semaforo_label.config(bg=color)
-
-        except Exception as e:
-            self.logger.error(f"ERROR: Error actualizando semaforo: {e}")
 
     def actualizar_ultima_lectura(self, timestamp):
         """Actualizar timestamp de ultima lectura"""
