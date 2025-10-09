@@ -952,6 +952,15 @@ class InterfazIndustrial:
             if hasattr(self, 'contador_var'):
                 self.contador_var.set("0")
 
+            # Cargar imagen del producto inmediatamente (no esperar a la receta)
+            articulo_pt = orden.get('pt')
+            if articulo_pt:
+                self.logger.info(f"INFO: Cargando imagen para producto {articulo_pt} al cambiar de orden")
+                self.cargar_imagen_producto(articulo_pt)
+            else:
+                self.logger.warning("WARNING: No hay articuloPT en la orden actual")
+                self._mostrar_sin_imagen()
+
             # Cargar receta de la orden
             self.monitor.cargar_receta_orden()
 
@@ -1265,6 +1274,9 @@ MATERIALES REQUERIDOS:
                 return
 
             self.logger.info(f"INFO: Cargando imagen para articulo PT: {articulo_pt}")
+
+            # Limpiar imagen anterior primero
+            self._mostrar_sin_imagen()
 
             # Obtener URL de la imagen desde la base de datos
             url_imagen = self.monitor.database.obtener_imagen_producto(articulo_pt)
