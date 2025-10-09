@@ -1079,6 +1079,19 @@ class InterfazIndustrial:
                     self.monitor.sincronizar_lecturas()
                     self.mostrar_mensaje_exito("Progreso guardado correctamente")
 
+                    # Mostrar loading mientras se recargan las ordenes
+                    self.mostrar_loading_recarga_ordenes()
+
+                    # Limpiar ordenes en memoria y forzar recarga desde servidor
+                    self.ordenes_disponibles = []
+                    self.ultima_recarga_ordenes = None
+
+                    # Recargar ordenes actualizadas desde el servidor
+                    self.cargar_ordenes()
+
+                    # Ocultar loading
+                    self.ocultar_loading_recarga_ordenes()
+
                 # Limpiar interfaz actual
                 self.limpiar_interfaz_orden()
 
@@ -1639,4 +1652,53 @@ Salto detectado: +{salto} lecturas
 
         except Exception as e:
             self.logger.error(f"ERROR: Error limpiando interfaz orden: {e}")
+
+    def mostrar_loading_recarga_ordenes(self):
+        """Mostrar mensaje de loading al recargar ordenes"""
+        try:
+            # Crear un label temporal en el centro de la pantalla
+            if hasattr(self, 'loading_recarga'):
+                self.loading_recarga.destroy()
+
+            # Obtener dimensiones de la ventana
+            ancho_ventana = self.root.winfo_width()
+            alto_ventana = self.root.winfo_height()
+
+            # Dimensiones del loading
+            ancho_loading = 400
+            alto_loading = 100
+
+            # Calcular posición centrada
+            x = (ancho_ventana - ancho_loading) // 2
+            y = (alto_ventana - alto_loading) // 2
+
+            self.loading_recarga = tk.Label(
+                self.root,
+                text="Actualizando ordenes...",
+                font=self.fuente_grande,
+                fg='white',
+                bg=self.colores['accento'],
+                relief=tk.RAISED,
+                bd=3
+            )
+            self.loading_recarga.place(x=x, y=y, width=ancho_loading, height=alto_loading)
+
+            # Forzar actualización de la interfaz para mostrar el loading
+            self.root.update_idletasks()
+            self.root.update()
+
+            self.logger.info("INFO: Loading de recarga de ordenes mostrado")
+
+        except Exception as e:
+            self.logger.error(f"ERROR: Error mostrando loading recarga ordenes: {e}")
+
+    def ocultar_loading_recarga_ordenes(self):
+        """Ocultar mensaje de loading de recarga de ordenes"""
+        try:
+            if hasattr(self, 'loading_recarga'):
+                self.loading_recarga.destroy()
+                delattr(self, 'loading_recarga')
+                self.logger.info("SUCCESS: Loading de recarga de ordenes ocultado")
+        except Exception as e:
+            self.logger.error(f"ERROR: Error ocultando loading recarga ordenes: {e}")
 
