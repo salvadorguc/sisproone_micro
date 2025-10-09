@@ -67,7 +67,7 @@ class InterfazIndustrial:
         }
 
         # Fuentes
-        self.fuente_titulo = ('Arial', 24, 'bold')
+        self.fuente_titulo = ('Arial', 24)
         self.fuente_grande = ('Arial', 18, 'bold')
         self.fuente_normal = ('Arial', 12)
         self.fuente_pequena = ('Arial', 10)
